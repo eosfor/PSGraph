@@ -5,10 +5,12 @@ This README would normally document whatever steps are necessary to get your app
 ### What is this repository for? ###
 
 * Quick summary
+
 Creation of PS module wrapper for QuickGraph. 
 The idea is to have a tool to analyze dependencies of objects in a scripted way
 
 I do not on using QuickGraph. This is just what o googled for this purpose
+
 * Version
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
