@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSGraph", "PSGraph\PSGraph.csproj", "{BA26715E-9112-438F-AB7A-95CF35B299A5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{012D6D1C-1DF2-456B-BA61-8F4D3DFB98CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSGraph.Tests", "PSGraph.Tests\PSGraph.Tests.csproj", "{DCDAB731-4A5D-4078-A01E-EB8AEF660436}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +19,15 @@ Global
 		{BA26715E-9112-438F-AB7A-95CF35B299A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA26715E-9112-438F-AB7A-95CF35B299A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA26715E-9112-438F-AB7A-95CF35B299A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCDAB731-4A5D-4078-A01E-EB8AEF660436}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCDAB731-4A5D-4078-A01E-EB8AEF660436}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCDAB731-4A5D-4078-A01E-EB8AEF660436}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCDAB731-4A5D-4078-A01E-EB8AEF660436}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DCDAB731-4A5D-4078-A01E-EB8AEF660436} = {012D6D1C-1DF2-456B-BA61-8F4D3DFB98CD}
 	EndGlobalSection
 EndGlobal
