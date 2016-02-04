@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+using QuickGraph;
 
 
 namespace PSGraph
@@ -9,19 +10,55 @@ namespace PSGraph
 	[Cmdlet(VerbsCommon.New, "Graph")]
 	public class PsGraph : PSCmdlet
 	{
-		private string _grapthType;
+		private PsGraphType _grapthType;
 
 		[Parameter(Mandatory = true, HelpMessage= "no one is supported")]
-		public string Type
+		public PsGraphType Type
 		{
 			get { return _grapthType; }
-			set { _grapthType = value; }
+		    set
+		    {
+		        if (!Enum.IsDefined(typeof (PsGraphType), value))
+		            throw new System.ArgumentException();
+
+		        if (value == PsGraphType.BidirectionalMatrixGraph)
+		            throw new NotSupportedException();
+
+                _grapthType = value;
+		    }
 		}
+
 
 		protected override void ProcessRecord()
 		{
 			WriteVerbose("New PsGraph: " + _grapthType);
-			//WriteObject("New PsGraph: " + _grapthType);
+
+		    Object newGraph = null;
+
+			switch (_grapthType)
+			{
+				case PsGraphType.AdjacencyGraph:
+			        newGraph = new AdjacencyGraph<Object, Edge<Object>>();
+                    break;
+
+				case PsGraphType.BidirectionalGraph:
+                    newGraph = new BidirectionalGraph<Object, Edge<Object>>();
+                    break;
+
+				case PsGraphType.BidirectionalMatrixGraph:
+                    //newGraph = new BidirectionalMatrixGraph<Edge<int>();
+                    break;
+
+				case PsGraphType.UndirectedGraph:
+			        newGraph = new UndirectedGraph<Object, Edge<Object>>();
+                    break;
+			}
+
+			WriteObject(newGraph);
 		}
 	}
 }
+
+
+
+
