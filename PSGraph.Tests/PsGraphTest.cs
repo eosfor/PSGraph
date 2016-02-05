@@ -35,6 +35,14 @@ namespace PSGraph.Tests
 		}
 
 		[TestMethod]
+		[ExpectedException(typeof(ArgumentException), "Unsupported graph.")]
+		public void TestExistingGraphTypeNoProcessing_Unsuccess()
+		{
+			PSGraph.PsGraph psGraph = new PSGraph.PsGraph() { Type = (PsGraphType)0xC0FEE};
+			Assert.IsTrue(String.Equals(psGraph.Type, (PsGraphType)0xC0FEE));
+		}
+
+		[TestMethod]
 		public void TestAllGraphTypeProcessing_Success()
 		{
 			try
