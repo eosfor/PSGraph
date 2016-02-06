@@ -71,6 +71,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AddEdgeCmdLetTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PsGraphTest.cs" />
     <Compile Include="PSHelpers.cs" />

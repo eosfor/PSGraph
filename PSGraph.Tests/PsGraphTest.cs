@@ -31,7 +31,7 @@ namespace PSGraph.Tests
 		public void TestExistingGraphTypeNoProcessing_Success()
 		{
 			PSGraph.PsGraph psGraph = new PSGraph.PsGraph() {Type = PsGraphType.AdjacencyGraph};
-			Assert.IsTrue(String.Equals(psGraph.Type, PsGraphType.AdjacencyGraph));
+			Assert.IsTrue(Enum.Equals(psGraph.Type, PsGraphType.AdjacencyGraph));
 		}
 
 		[TestMethod]
@@ -39,7 +39,7 @@ namespace PSGraph.Tests
 		public void TestExistingGraphTypeNoProcessing_Unsuccess()
 		{
 			PSGraph.PsGraph psGraph = new PSGraph.PsGraph() { Type = (PsGraphType)0xC0FEE};
-			Assert.IsTrue(String.Equals(psGraph.Type, (PsGraphType)0xC0FEE));
+			Assert.IsTrue(Enum.Equals(psGraph.Type, (PsGraphType)0xC0FEE));
 		}
 
 		[TestMethod]
@@ -51,21 +51,21 @@ namespace PSGraph.Tests
 				Collection<PSObject> result = _powershell.Invoke();
 				Assert.IsTrue(result != null);
 				Assert.IsTrue(result.Count == 1);
-				Assert.IsTrue(result[0].ImmediateBaseObject.GetType() == typeof (AdjacencyGraph<Object, Edge<Object>>));
+				Assert.IsTrue(result[0].ImmediateBaseObject.GetType() == typeof (AdjacencyGraph<Object, STaggedEdge<Object, Object>>));
 				_powershell.Commands.Clear();
 
 				_powershell.AddCommand("New-Graph").AddParameter("Type", PsGraphType.BidirectionalGraph);
 				result = _powershell.Invoke();
 				Assert.IsTrue(result != null);
 				Assert.IsTrue(result.Count == 1);
-				Assert.IsTrue(result[0].ImmediateBaseObject.GetType() == typeof (BidirectionalGraph<Object, Edge<Object>>));
+				Assert.IsTrue(result[0].ImmediateBaseObject.GetType() == typeof (BidirectionalGraph<Object, STaggedEdge<Object, Object>>));
 				_powershell.Commands.Clear();
 
 				_powershell.AddCommand("New-Graph").AddParameter("Type", PsGraphType.UndirectedGraph);
 				result = _powershell.Invoke();
 				Assert.IsTrue(result != null);
 				Assert.IsTrue(result.Count == 1);
-				Assert.IsTrue(result[0].ImmediateBaseObject.GetType() == typeof (UndirectedGraph<Object, Edge<Object>>));
+				Assert.IsTrue(result[0].ImmediateBaseObject.GetType() == typeof (UndirectedGraph<Object, STaggedEdge<Object, Object>>));
 				_powershell.Commands.Clear();
 			}
 			finally
