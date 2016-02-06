@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddEdgeCmdLet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PsGraph.cs" />
     <Compile Include="PsGraphType.cs" />

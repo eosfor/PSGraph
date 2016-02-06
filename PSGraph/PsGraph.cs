@@ -12,7 +12,7 @@ namespace PSGraph
 	{
 		private PsGraphType _grapthType;
 
-		[Parameter(Mandatory = true, HelpMessage= "no one is supported")]
+		[Parameter(Mandatory = true, HelpMessage= "BidirectionalMatrixGraph is not supported")]
 		public PsGraphType Type
 		{
 			get { return _grapthType; }
@@ -38,11 +38,11 @@ namespace PSGraph
 			switch (_grapthType)
 			{
 				case PsGraphType.AdjacencyGraph:
-			        newGraph = new AdjacencyGraph<Object, Edge<Object>>();
+			        newGraph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
                     break;
 
 				case PsGraphType.BidirectionalGraph:
-                    newGraph = new BidirectionalGraph<Object, Edge<Object>>();
+                    newGraph = new BidirectionalGraph<Object, STaggedEdge<Object, Object>>();
                     break;
 
 				case PsGraphType.BidirectionalMatrixGraph:
@@ -50,7 +50,7 @@ namespace PSGraph
                     break;
 
 				case PsGraphType.UndirectedGraph:
-			        newGraph = new UndirectedGraph<Object, Edge<Object>>();
+			        newGraph = new UndirectedGraph<Object, STaggedEdge<Object, Object>>();
                     break;
 			}
 
