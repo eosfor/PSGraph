@@ -206,7 +206,6 @@ namespace PSGraph.Tests
                 var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
                 Object to = new Object();
                 Object from = new Object();
-                Object attr = null;
                 _powershell.AddCommand("Add-Edge");
                 _powershell.AddParameters(new Dictionary<String, Object>
                     {

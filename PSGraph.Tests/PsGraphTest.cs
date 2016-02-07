@@ -78,13 +78,12 @@ namespace PSGraph.Tests
 
 		[TestMethod]
 		[ExpectedException(typeof(ParameterBindingException), "Unsupported graph.")]
-		public void TestAllGraphTypeProcessing_Unsuccess()
+		public void TestUnsupportedGraphTypeProcessing_Unsuccess()
 		{
 			try
 			{ 
 				_powershell.AddCommand("New-Graph").AddParameter("Type", PsGraphType.BidirectionalMatrixGraph);
 				Collection<PSObject> result = _powershell.Invoke();
-				
 			}
 			finally
 			{
