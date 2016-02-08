@@ -52,6 +52,7 @@ namespace PSGraph
             }
 
             var graphviz = new GraphvizAlgorithm<Object, STaggedEdge<Object, Object>>(edgeList);
+            graphviz.FormatVertex += new FormatVertexEventHandler<Object>((sender, vertexFormat) => { });
             string result = graphviz.Generate();
 
             String path = Path;
