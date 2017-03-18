@@ -2,7 +2,8 @@
 using System.Management.Automation;
 using QuickGraph;
 using QuickGraph.Graphviz;
-
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace PSGraph
 {
@@ -52,7 +53,8 @@ namespace PSGraph
             }
 
             var graphviz = new GraphvizAlgorithm<Object, STaggedEdge<Object, Object>>(edgeList);
-            graphviz.FormatVertex += new FormatVertexEventHandler<Object>((sender, vertexFormat) => { });
+            //graphviz.FormatVertex += new FormatVertexEventHandler<Object>((sender, vertexFormat) => { });
+            graphviz.FormatVertex += FormatVertexEventHandler;
             string result = graphviz.Generate();
 
             String path = Path;
@@ -65,5 +67,15 @@ namespace PSGraph
                 WriteObject(result);
             }
         }
+
+        public static void FormatVertexEventHandler(object sender, FormatVertexEventArgs<object> e)
+        {
+            PropertyInfo labelProp = e.Vertex.GetType().GetProperty("Label");
+
+            if (labelProp != null) {
+                e.VertexFormatter.Label = (string)(labelProp.GetValue(e.Vertex, null));
+            }
+        }
+
     }
 }
