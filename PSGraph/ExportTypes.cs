@@ -10,4 +10,9 @@ namespace PSGraph
     {
         Graphviz
     }
+
+    public class  PSGraphVertex  : QuickGraph.Graphviz.Dot.GraphvizVertex
+    {
+
+    }
 }
