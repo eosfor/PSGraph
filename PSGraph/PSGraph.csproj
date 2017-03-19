@@ -64,11 +64,13 @@
     <Compile Include="AddEdgeCmdLet.cs" />
     <Compile Include="ExportGraphCmdLet.cs" />
     <Compile Include="ExportTypes.cs" />
+    <Compile Include="GetGraphPath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PsGraph.cs" />
     <Compile Include="PsGraphType.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="graphtest.ps1" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

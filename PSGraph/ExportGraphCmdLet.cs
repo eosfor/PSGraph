@@ -4,6 +4,7 @@ using QuickGraph;
 using QuickGraph.Graphviz;
 using System.Collections.Generic;
 using System.Reflection;
+using QuickGraph.Graphviz.Dot;
 
 namespace PSGraph
 {
@@ -53,7 +54,6 @@ namespace PSGraph
             }
 
             var graphviz = new GraphvizAlgorithm<Object, STaggedEdge<Object, Object>>(edgeList);
-            //graphviz.FormatVertex += new FormatVertexEventHandler<Object>((sender, vertexFormat) => { });
             graphviz.FormatVertex += FormatVertexEventHandler;
             string result = graphviz.Generate();
 
@@ -70,10 +70,15 @@ namespace PSGraph
 
         public static void FormatVertexEventHandler(object sender, FormatVertexEventArgs<object> e)
         {
-            PropertyInfo labelProp = e.Vertex.GetType().GetProperty("Label");
-
-            if (labelProp != null) {
-                e.VertexFormatter.Label = (string)(labelProp.GetValue(e.Vertex, null));
+            if (e.Vertex is PSGraphVertex)
+            {
+                foreach(PropertyInfo p in e.Vertex.GetType().GetProperties())
+                {
+                    var destProperty = e.VertexFormatter.GetType().GetProperty(p.Name);
+                    if (destProperty != null) {
+                        destProperty.SetValue(e.VertexFormatter, p.GetValue(e.Vertex));
+                    }
+                }
             }
         }
 
