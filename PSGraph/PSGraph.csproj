@@ -72,6 +72,9 @@
   <ItemGroup>
     <None Include="graphtest.ps1" />
     <None Include="packages.config" />
+    <None Include="PSGraph.psd1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
