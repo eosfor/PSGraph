@@ -38,7 +38,7 @@ namespace PSGraph
 			switch (_grapthType)
 			{
 				case PsGraphType.AdjacencyGraph:
-			        newGraph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
+			        newGraph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>(false);
                     break;
 
 				case PsGraphType.BidirectionalGraph:

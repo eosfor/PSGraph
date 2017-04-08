@@ -4,11 +4,17 @@ $g = New-Graph -Type AdjacencyGraph
 class vnet : Psgraph.PSGraphVertex {
     [string]$iprange;
     [string]$type = "vnet"
+        [bool]Equals([object]$value){
+        return ($this.Label  -eq $value.Label)
+    }
 }
 
 class ER : Psgraph.PSGraphVertex {
     [string]$ipaddress;
     [string]$type = "ER"
+    [bool]Equals([object]$value){
+        return ($this.ipaddress  -eq $value.ipaddress)
+    }
 }
 
 [ER]$er  = @{Label = "yyy";  ipaddress = "192.168.3.1"}
