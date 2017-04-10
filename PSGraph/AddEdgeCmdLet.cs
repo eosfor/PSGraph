@@ -31,7 +31,7 @@ namespace PSGraph
 
         void ProcesRecordDefault()
         {
-            Object graph = Graph;
+            object graph = Graph;
             if (graph is PSObject)
                 graph = ((PSObject)graph).ImmediateBaseObject;
             if (graph == null)
@@ -68,7 +68,11 @@ namespace PSGraph
             Object attribute = Attribute;
             if (attribute is PSObject)
                 attribute = ((PSObject)attribute).ImmediateBaseObject;
-            STaggedEdge<Object, Object> edge = new STaggedEdge<object, object>(from, to, Attribute);
+
+            Type[] elType = graph.GetType().GetGenericArguments();
+            Type edgeType = typeof(STaggedEdge<,>).MakeGenericType(new Type[] { elType[0], typeof(object) });
+            var edge = Activator.CreateInstance(edgeType, new object[] { from, to, Attribute});
+
             Object result = mi.Invoke(graph, new object[] { edge });
             WriteObject(result);
         }
