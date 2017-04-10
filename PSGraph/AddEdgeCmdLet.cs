@@ -25,9 +25,15 @@ namespace PSGraph
 
         protected override void ProcessRecord()
         {
+
+            ProcesRecordDefault();
+        }
+
+        void ProcesRecordDefault()
+        {
             Object graph = Graph;
             if (graph is PSObject)
-                graph = ((PSObject) graph).ImmediateBaseObject;
+                graph = ((PSObject)graph).ImmediateBaseObject;
             if (graph == null)
             {
                 throw new System.ArgumentException("'Graph' mustn't be equal to null");
@@ -63,7 +69,7 @@ namespace PSGraph
             if (attribute is PSObject)
                 attribute = ((PSObject)attribute).ImmediateBaseObject;
             STaggedEdge<Object, Object> edge = new STaggedEdge<object, object>(from, to, Attribute);
-            Object result = mi.Invoke(graph, new object[]{edge});
+            Object result = mi.Invoke(graph, new object[] { edge });
             WriteObject(result);
         }
     }
