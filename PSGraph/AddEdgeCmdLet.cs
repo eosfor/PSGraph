@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Management.Automation;
 using System.Reflection;
 using QuickGraph;
@@ -12,16 +11,16 @@ namespace PSGraph
     public class AddEdgeCmdLet : PSCmdlet
     {
         [Parameter(Mandatory = true)]
-        public Object From { get; set; }
+        public object From { get; set; }
 
         [Parameter(Mandatory = true)]
-        public Object To { get; set; }
+        public object To { get; set; }
 
         [Parameter(Mandatory = true)]
-        public Object Graph { get; set; }
+        public object Graph { get; set; }
 
         [Parameter]
-        public Object Attribute { get; set; }
+        public object Attribute { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -31,49 +30,64 @@ namespace PSGraph
 
         void ProcesRecordDefault()
         {
-            object graph = Graph;
+            dynamic graph = Graph;
+
             if (graph is PSObject)
+            {
                 graph = ((PSObject)graph).ImmediateBaseObject;
+            }
+
             if (graph == null)
             {
-                throw new System.ArgumentException("'Graph' mustn't be equal to null");
+                throw new ArgumentException($"'Graph' mustn't be equal to null");
             }
 
-            Object from = From;
+            object from = From;
             if (from is PSObject)
+            {
                 from = ((PSObject)from).ImmediateBaseObject;
+            }
+
             if (from == null)
             {
-                throw new System.ArgumentException("'From' mustn't be equal to null");
+                throw new ArgumentException("'From' mustn't be equal to null");
             }
 
-            Object to = To;
+            object to = To;
             if (to is PSObject)
+            {
                 to = ((PSObject)to).ImmediateBaseObject;
+            }
+
             if (to == null)
             {
-                throw new System.ArgumentException("'To' mustn't be equal to null");
+                throw new ArgumentException("'To' mustn't be equal to null");
             }
 
-            WriteVerbose("Add-Edge: Graph type is: " + Graph.GetType().ToString());
-            WriteVerbose("Add-Edge: From type is: " + From.GetType().ToString());
-            WriteVerbose("Add-Edge: To type is: " + To.GetType().ToString());
+            WriteVerbose("Add-Edge: Graph type is: " + Graph.GetType());
+            WriteVerbose("Add-Edge: From type is: " + From.GetType());
+            WriteVerbose("Add-Edge: To type is: " + To.GetType());
 
-            MethodInfo mi = graph.GetType().GetMethod("AddVerticesAndEdge");
-            if (mi == null)
-            {
-                throw new System.ArgumentException("'Graph' is an object of an unknown type");
-            }
-
-            Object attribute = Attribute;
+            object attribute = Attribute;
             if (attribute is PSObject)
+            {
                 attribute = ((PSObject)attribute).ImmediateBaseObject;
+            }
 
             Type[] elType = graph.GetType().GetGenericArguments();
-            Type edgeType = typeof(STaggedEdge<,>).MakeGenericType(new Type[] { elType[0], typeof(object) });
-            var edge = Activator.CreateInstance(edgeType, new object[] { from, to, Attribute});
+            Type edgeType = typeof(STaggedEdge<,>).MakeGenericType(elType[0], typeof(object));
+            dynamic edge = Activator.CreateInstance(edgeType, from, to, attribute);
 
-            Object result = mi.Invoke(graph, new object[] { edge });
+            //MethodInfo addVerticesAndEdge = graph.GetType().GetMethod("AddVerticesAndEdge");
+            //if (addVerticesAndEdge == null)
+            //{
+            //    throw new ArgumentException("'Graph' is an object of an unknown type");
+            //}
+            //object result = addVerticesAndEdge.Invoke(graph, new[] { edge });
+
+            // graph and edge must be dynamic
+            bool result = graph.AddVerticesAndEdge(edge);
+
             WriteObject(result);
         }
     }
