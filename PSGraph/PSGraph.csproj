@@ -71,10 +71,10 @@
     <Compile Include="PsGraphType.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="graphtest.ps1" />
-    <None Include="graphtest2_purePS.ps1" />
     <None Include="packages.config" />
-    <None Include="psgraph.pester.test.ps1" />
+    <None Include="PSGraph.psd1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
