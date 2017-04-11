@@ -2,9 +2,7 @@
 using System.Management.Automation;
 using QuickGraph;
 using QuickGraph.Graphviz;
-using System.Collections.Generic;
 using System.Reflection;
-using QuickGraph.Graphviz.Dot;
 
 namespace PSGraph
 {
@@ -14,7 +12,7 @@ namespace PSGraph
         private ExportTypes _exportType;
 
         [Parameter(Mandatory = true)]
-        public Object Graph { get; set; }
+        public object Graph { get; set; }
 
         [Parameter(Mandatory = true)]
         public ExportTypes Format
@@ -25,39 +23,41 @@ namespace PSGraph
                 if (_exportType != value)
                 {
                     if (!Enum.IsDefined(typeof(ExportTypes), value))
-                        throw new System.ArgumentException();
+                        throw new ArgumentException();
                     _exportType = value;
                 }
             }
         }
 
         [Parameter]
-        public String Path { get; set; }
+        public string Path { get; set; }
 
 
         protected override void ProcessRecord()
         {
-            Object graph = Graph;
+            object graph = Graph;
             if (graph is PSObject)
+            {
                 graph = ((PSObject)graph).ImmediateBaseObject;
+            }
             if (graph == null)
             {
-                throw new System.ArgumentException("'Graph' mustn't be equal to null");
+                throw new ArgumentException("'Graph' mustn't be equal to null");
             }
 
             WriteVerbose("Add-Edge: Graph type is: " + Graph.GetType().ToString());
 
-            var edgeList = graph as IEdgeListGraph<Object, STaggedEdge<Object, Object>>;
+            var edgeList = graph as IEdgeListGraph<object, STaggedEdge<object, object>>;
             if (edgeList == null)
             {
-                throw new System.ArgumentException("'Graph' is an object of an unknown type");
+                throw new ArgumentException("'Graph' is an object of an unknown type");
             }
 
-            var graphviz = new GraphvizAlgorithm<Object, STaggedEdge<Object, Object>>(edgeList);
+            var graphviz = new GraphvizAlgorithm<object, STaggedEdge<object, object>>(edgeList);
             graphviz.FormatVertex += FormatVertexEventHandler;
             string result = graphviz.Generate();
 
-            String path = Path;
+            string path = Path;
             if (path != null)
             {
                 System.IO.File.WriteAllText(path, result);
@@ -72,15 +72,15 @@ namespace PSGraph
         {
             if (e.Vertex is PSGraphVertex)
             {
-                foreach(PropertyInfo p in e.Vertex.GetType().GetProperties())
+                foreach (PropertyInfo p in e.Vertex.GetType().GetProperties())
                 {
                     var destProperty = e.VertexFormatter.GetType().GetProperty(p.Name);
-                    if (destProperty != null) {
+                    if (destProperty != null)
+                    {
                         destProperty.SetValue(e.VertexFormatter, p.GetValue(e.Vertex));
                     }
                 }
             }
         }
-
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Management.Automation;
-using System.Reflection;
 using QuickGraph;
 
 //add-edge -from $nodeFrom -to $nodeTo -attributes $attr -graph $g

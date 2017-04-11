@@ -1,9 +1,5 @@
 ﻿using QuickGraph.Graphviz.Dot;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PSGraph
 {
@@ -12,7 +8,7 @@ namespace PSGraph
         Graphviz
     }
 
-    public class  PSGraphVertex  : GraphvizVertex
+    public class PSGraphVertex : GraphvizVertex
     {
 
     }
@@ -21,13 +17,12 @@ namespace PSGraph
     {
         public override bool Equals(GraphvizVertex x, GraphvizVertex y)
         {
-            return (x.Label == y.Label);
+            return x.Label == y.Label;
         }
 
         public override int GetHashCode(GraphvizVertex x)
         {
-            return x.Label.Length;
+            return x.Label.GetHashCode();
         }
     }
-
 }
