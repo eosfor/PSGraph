@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Management.Automation;
 using QuickGraph;
 using QuickGraph.Graphviz;
 using System.Reflection;
+using System.Runtime.Remoting.Channels;
 
 namespace PSGraph
 {
@@ -47,14 +49,18 @@ namespace PSGraph
 
             WriteVerbose("Add-Edge: Graph type is: " + Graph.GetType().ToString());
 
-            var edgeList = graph as IEdgeListGraph<object, STaggedEdge<object, object>>;
-            if (edgeList == null)
-            {
-                throw new ArgumentException("'Graph' is an object of an unknown type");
-            }
+            Type vertexType = graph.GetType().GetGenericArguments()[0];
+            Type edgeType = typeof(STaggedEdge<,>).MakeGenericType(vertexType, typeof(object));
+            Type graphvizAlgType = typeof(GraphvizAlgorithm<,>).MakeGenericType(vertexType, edgeType);
 
-            var graphviz = new GraphvizAlgorithm<object, STaggedEdge<object, object>>(edgeList);
-            graphviz.FormatVertex += FormatVertexEventHandler;
+            dynamic graphviz = Activator.CreateInstance(graphvizAlgType, graph);
+
+            Type eventHandlerType = typeof(FormatVertexEventHandler<>).MakeGenericType(vertexType);
+            var methodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatVertexEventHandler)).MakeGenericMethod(vertexType);
+            dynamic formatVertexEventHandler = Delegate.CreateDelegate(eventHandlerType, methodInfo);
+
+            graphviz.FormatVertex += formatVertexEventHandler;
+
             string result = graphviz.Generate();
 
             string path = Path;
@@ -68,7 +74,7 @@ namespace PSGraph
             }
         }
 
-        public static void FormatVertexEventHandler(object sender, FormatVertexEventArgs<object> e)
+        public static void FormatVertexEventHandler<TVertex>(object sender, FormatVertexEventArgs<TVertex> e)
         {
             if (e.Vertex is PSGraphVertex)
             {
