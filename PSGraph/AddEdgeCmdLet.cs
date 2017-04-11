@@ -73,8 +73,8 @@ namespace PSGraph
                 attribute = ((PSObject)attribute).ImmediateBaseObject;
             }
 
-            Type[] elType = graph.GetType().GetGenericArguments();
-            Type edgeType = typeof(STaggedEdge<,>).MakeGenericType(elType[0], typeof(object));
+            Type vertexType = graph.GetType().GetGenericArguments()[0];
+            Type edgeType = typeof(STaggedEdge<,>).MakeGenericType(vertexType, typeof(object));
             dynamic edge = Activator.CreateInstance(edgeType, from, to, attribute);
 
             //MethodInfo addVerticesAndEdge = graph.GetType().GetMethod("AddVerticesAndEdge");
