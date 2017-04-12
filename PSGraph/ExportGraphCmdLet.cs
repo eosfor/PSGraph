@@ -49,8 +49,9 @@ namespace PSGraph
 
             WriteVerbose("Add-Edge: Graph type is: " + Graph.GetType().ToString());
 
-            Type vertexType = graph.GetType().GetGenericArguments()[0];
-            Type edgeType = typeof(STaggedEdge<,>).MakeGenericType(vertexType, typeof(object));
+            Type[] graphGenericArgs = graph.GetType().GetGenericArguments();
+            Type vertexType = graphGenericArgs[0];
+            Type edgeType = graphGenericArgs[1];
             Type graphvizAlgType = typeof(GraphvizAlgorithm<,>).MakeGenericType(vertexType, edgeType);
 
             dynamic graphviz = Activator.CreateInstance(graphvizAlgType, graph);
