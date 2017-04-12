@@ -73,18 +73,10 @@ namespace PSGraph
                 attribute = ((PSObject)attribute).ImmediateBaseObject;
             }
 
-            Type vertexType = graph.GetType().GetGenericArguments()[0];
-            Type edgeType = typeof(STaggedEdge<,>).MakeGenericType(vertexType, typeof(object));
+            Type[] graphGenericArgs = graph.GetType().GetGenericArguments();
+            Type edgeType = graphGenericArgs[1];
             dynamic edge = Activator.CreateInstance(edgeType, from, to, attribute);
 
-            //MethodInfo addVerticesAndEdge = graph.GetType().GetMethod("AddVerticesAndEdge");
-            //if (addVerticesAndEdge == null)
-            //{
-            //    throw new ArgumentException("'Graph' is an object of an unknown type");
-            //}
-            //object result = addVerticesAndEdge.Invoke(graph, new[] { edge });
-
-            // graph and edge must be dynamic
             bool result = graph.AddVerticesAndEdge(edge);
 
             WriteObject(result);
