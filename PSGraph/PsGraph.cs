@@ -50,7 +50,8 @@ namespace PSGraph
                     {
                         WriteVerbose("Creating a Graph object with Vertex Comparer");
                         var eqComparer = new PSGraphVertexComparer();
-                        newGraph = new AdjacencyGraph<PSGraphVertex, STaggedEdge<PSGraphVertex, object>>(false, -1, -1, (IEqualityComparer<PSGraphVertex>)eqComparer);
+                        //newGraph = new AdjacencyGraph<PSGraphVertex, STaggedEdge<PSGraphVertex, object>>(false, -1, -1, (IEqualityComparer<PSGraphVertex>)eqComparer);
+                        newGraph = new AdjacencyGraph<object, STaggedEdge<object, object>>(false);
                     }
 
                     break;
