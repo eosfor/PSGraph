@@ -53,7 +53,7 @@ class Connection : Psgraph.PSGraphVertex {
     [string]$SubscriptionID
     [array] $Properties
     [string]$ResourceID
-    Connection([string]$n, [string]$rID, [string]$rName, [string]$rType, [string]$loc, [string]$sID, [array]$p){
+    Connection([string]$n, [string]$rID, [string]$rName, [string]$rType, [string]$loc, [string]$sID, [array]$p, [string]$s = "Diamond"){
         $this.name = $n
         $this.ResourceID = $rID
         $this.Resourcename = $rName
@@ -62,7 +62,7 @@ class Connection : Psgraph.PSGraphVertex {
         $this.SubscriptionID = $sID
         $this.Properties = $p
         $this.Label = $n
-        $this.Shape = "Diamond"
+        $this.Shape = $s
     }
     [bool]Equals([Connection]$x, [Connection]$y)  { return ($x.Label -eq $y.Label) -AND ($x.ResourceID -eq $y.ResourceID)}
 }
@@ -150,7 +150,6 @@ foreach ($vnet in $allVnets) {
 #add subscriptions
 foreach ($s  in $subs){
     $subObj = [Subscription]::new($s.SubscriptionId, $s.SubscriptionName)
-
     Add-Vertex -Vertex $subObj -Graph $g
 }
 
@@ -162,7 +161,14 @@ foreach ($gw in $allGWs) {
 
 #add connections
 foreach ($conn in $allConections) {
-    $connObject = [Connection]::new($conn.Name, $conn.ResourceID, $conn.Resourcename, $conn.ResourceType, $conn.Location, $conn.SubscriptionID, $conn.Properties)
+    if ($conn.Properties.connectionType   -eq "ExpressRoute") {
+        $connObject = [Connection]::new($conn.Name, $conn.ResourceID, $conn.Resourcename, $conn.ResourceType, $conn.Location, $conn.SubscriptionID, $conn.Properties, "Diamond")
+    }
+    elseif ($conn.Properties.connectionType   -eq "IPsec") {
+        $connObject = [Connection]::new($conn.Name, $conn.ResourceID, $conn.Resourcename, $conn.ResourceType, $conn.Location, $conn.SubscriptionID, $conn.Properties, "Parallelogram")
+    } elseif ($conn.Properties.connectionType   -eq "Vnet2Vnet") {
+        $connObject = [Connection]::new($conn.Name, $conn.ResourceID, $conn.Resourcename, $conn.ResourceType, $conn.Location, $conn.SubscriptionID, $conn.Properties, "Box")
+    }
     Add-Vertex -Vertex $connObject -Graph $g
 }
 
