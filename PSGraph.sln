@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PSScripts", "PSScripts", "{
 	ProjectSection(SolutionItems) = preProject
 		PSGraph\graphtest.ps1 = PSGraph\graphtest.ps1
 		PSGraph\graphtest2_purePS.ps1 = PSGraph\graphtest2_purePS.ps1
+		PSGraph\graphtest4.ps1 = PSGraph\graphtest4.ps1
 	EndProjectSection
 EndProject
 Global

@@ -10,19 +10,23 @@ namespace PSGraph
 
     public class PSGraphVertex : GraphvizVertex
     {
-
     }
 
-    public class PSGraphVertexComparer : EqualityComparer<GraphvizVertex>
+    public class PSGraphVertexComparer : EqualityComparer<PSGraphVertex>
     {
-        public override bool Equals(GraphvizVertex x, GraphvizVertex y)
+        public override bool Equals(PSGraphVertex left, PSGraphVertex right)
         {
-            return x.Label == y.Label;
+            if (left.GetType() != right.GetType())
+            {
+                return false;
+            }
+
+            return left.Equals(right);
         }
 
-        public override int GetHashCode(GraphvizVertex x)
+        public override int GetHashCode(PSGraphVertex x)
         {
-            return x.Label.GetHashCode();
+            return x.GetHashCode();
         }
     }
 }
