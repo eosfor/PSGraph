@@ -11,7 +11,7 @@ class VNET : Psgraph.PSGraphVertex {
     [string]$PeeredNetwork
     [string]$VNETType = "ARM"
     [string]$ResourceID
-    [bool]Equals([VNET]$x, [VNET]$y)  { return ($x.Label -eq $y.Label) -AND ($x.ResourceID -eq $y.ResourceID)}
+    [bool]Equals([Object]$y)  { return ($this.Label -eq ([VNET]$y).Label) -AND ($this.ResourceID -eq ([VNET]$y).ResourceID)}
 }
 
 class Subscription : Psgraph.PSGraphVertex {
@@ -25,7 +25,7 @@ class Subscription : Psgraph.PSGraphVertex {
         $this.Label = $SubName
         $this.Shape =  "Rectangle"
     }
-    [bool]Equals([Subscription]$x, [Subscription]$y)  { return ($x.Label -eq $y.Label)}
+    [bool]Equals([Object]$y)  { return ($this.Label -eq ([Subscription]$y).Label)}
 }
 
 class Gateway : Psgraph.PSGraphVertex{
@@ -42,7 +42,7 @@ class Gateway : Psgraph.PSGraphVertex{
         $this.Properties = $Prop
         $this.Label = $name
     }
-    [bool]Equals([Gateway]$x, [Gateway]$y)  { return ($x.Label -eq $y.Label) -AND ($x.ResourceID -eq $y.ResourceID)}
+    [bool]Equals([Object]$y)  { return ($this.Label -eq ([Gateway]$y).Label) -AND ($this.ResourceID -eq ([Gateway]$y).ResourceID)}
 }
 
 class Connection : Psgraph.PSGraphVertex {
@@ -64,7 +64,7 @@ class Connection : Psgraph.PSGraphVertex {
         $this.Label = $n
         $this.Shape = $s
     }
-    [bool]Equals([Connection]$x, [Connection]$y)  { return ($x.Label -eq $y.Label) -AND ($x.ResourceID -eq $y.ResourceID)}
+    [bool]Equals([Object]$y)  { return ($this.Label -eq ([Connection]$y).Label) -AND ($this.ResourceID -eq ([Connection]$y).ResourceID)}
 }
 
 class Circuit : Psgraph.PSGraphVertex {
@@ -86,7 +86,7 @@ class Circuit : Psgraph.PSGraphVertex {
         $this.Label = $n
         $this.Shape =  "Circle"
     }
-    [bool]Equals([Circuit]$x, [Circuit]$y)  { return ($x.Label -eq $y.Label) -AND ($x.ResourceID -eq $y.ResourceID)}
+    [bool]Equals([Object]$y)  { return ($this.Label -eq ([Circuit]$y).Label) -AND ($this.ResourceID -eq ([Circuit]$y).ResourceID)}
 
 }
 #endregion declaring classes
