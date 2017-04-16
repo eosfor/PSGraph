@@ -11,7 +11,8 @@ class VNET : Psgraph.PSGraphVertex {
     [string]$PeeredNetwork
     [string]$VNETType = "ARM"
     [string]$ResourceID
-    [bool]Equals([Object]$y)  { return ($this.Label -eq ([VNET]$y).Label) -AND ($this.ResourceID -eq ([VNET]$y).ResourceID)}
+    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([VNET]$y).Label) -AND ($this.ResourceID -eq ([VNET]$y).ResourceID)}
+    [int]GetHashCode() {return $this.label.gethashcode()}
 }
 
 class Subscription : Psgraph.PSGraphVertex {
@@ -25,7 +26,8 @@ class Subscription : Psgraph.PSGraphVertex {
         $this.Label = $SubName
         $this.Shape =  "Rectangle"
     }
-    [bool]Equals([Object]$y)  { return ($this.Label -eq ([Subscription]$y).Label)}
+    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([Subscription]$y).Label)}
+    [int]GetHashCode() {return $this.label.gethashcode()}
 }
 
 class Gateway : Psgraph.PSGraphVertex{
@@ -42,7 +44,8 @@ class Gateway : Psgraph.PSGraphVertex{
         $this.Properties = $Prop
         $this.Label = $name
     }
-    [bool]Equals([Object]$y)  { return ($this.Label -eq ([Gateway]$y).Label) -AND ($this.ResourceID -eq ([Gateway]$y).ResourceID)}
+    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([Gateway]$y).Label) -AND ($this.ResourceID -eq ([Gateway]$y).ResourceID)}
+    [int]GetHashCode() {return $this.Label.GetHashCode() -xor $this.ResourceID.GetHashCode()}
 }
 
 class Connection : Psgraph.PSGraphVertex {
@@ -64,7 +67,8 @@ class Connection : Psgraph.PSGraphVertex {
         $this.Label = $n
         $this.Shape = $s
     }
-    [bool]Equals([Object]$y)  { return ($this.Label -eq ([Connection]$y).Label) -AND ($this.ResourceID -eq ([Connection]$y).ResourceID)}
+    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([Connection]$y).Label) -AND ($this.ResourceID -eq ([Connection]$y).ResourceID)}
+    [int]GetHashCode() {return $this.Label.GetHashCode() -xor $this.ResourceID.GetHashCode()}
 }
 
 class Circuit : Psgraph.PSGraphVertex {
@@ -86,8 +90,55 @@ class Circuit : Psgraph.PSGraphVertex {
         $this.Label = $n
         $this.Shape =  "Circle"
     }
-    [bool]Equals([Object]$y)  { return ($this.Label -eq ([Circuit]$y).Label) -AND ($this.ResourceID -eq ([Circuit]$y).ResourceID)}
+    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([Circuit]$y).Label) -AND ($this.ResourceID -eq ([Circuit]$y).ResourceID)}
+    [int]GetHashCode() {return $this.Label.GetHashCode() -xor $this.ResourceID.GetHashCode()}
 
+}
+
+class ClassicVNET : Psgraph.PSGraphVertex {
+    [string]$SubscriptionID
+    [string]$Name
+    [string]$ResourceType
+    [string]$ResourceGroupName
+    [string]$Location
+    [array]$Subnets
+    [string]$AddressSpace
+    [string]$DHCPOptions
+    [string]$PeeredNetwork
+    [string]$VNETType = "ARM"
+    [string]$ResourceID
+    [string]$MPLSGWConnection 
+    [bool]Equals([System.Object]$y)  { return $this.IsTypeEqual($y) -AND  ($this.Label -eq ([ClassicVNET]$y).Label)}
+    [int]GetHashCode() {return $this.label.gethashcode()}
+    ClassicVNET($sID, $n, $rType, $loc, $sub, $as, $dhcp, $mpls){
+            $this.Label = $n
+            $this.SubscriptionId = $sID
+            $this.Name  =  $n
+            $this.ResourceType = "ClassicNetwork"
+            $this.Location = $loc
+            $this.Subnets = $sub
+            $this.AddressSpace = $as
+            $this.DHCPOptions = $dhcp
+            $this.PeeredNetwork = "NA"
+            $this.ResourceID = "NA"
+            $this.MPLSGWConnection = $mpls
+            $this.Shape = "DoubleCircle"
+    }
+}
+
+class ClassicCircuit : Psgraph.PSGraphVertex {
+    [string]$Name
+    [string]$ResourceType
+    [string]$SubscriptionID
+    ClassicCircuit([string]$n, [string]$loc, [string]$sID){
+        $this.name = $n
+        $this.ResourceType = "ClassicMPLS"
+        $this.SubscriptionID = $sID
+        $this.Label = $n
+        $this.Shape =  "Circle"
+    }
+    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND  ($this.Label -eq ([ClassicCircuit]$y).Label)}
+    [int]GetHashCode() {return $this.label.gethashcode()}
 }
 #endregion declaring classes
 
@@ -127,7 +178,7 @@ function getAllConnections($subscription) {
 #endregion helper functions
 
 
-$g = New-Graph -Type AdjacencyGraph -EnableVertexComparer
+$g = New-Graph -Type AdjacencyGraph # -EnableVertexComparer
 
 #region fill in the graph
 #add vnets
@@ -177,6 +228,47 @@ foreach ($er in $allCircuits) {
     $circuitObject = [Circuit]::new($er.Name, $er.ResourceID, $er.Resourcename, $er.ResourceType, $conn.Location, $conn.SubscriptionID, $conn.Properties)
     Add-Vertex -Vertex $circuitObject -Graph $g
 }
+
+#add classic VNETS
+foreach ($vnet in $classicVnets) {
+    $vnetSite = $vnet.Netconfig.NetworkConfigXML.NetworkConfiguration.VirtualNetworkConfiguration.VirtualNetworkSites.VirtualNetworkSite
+    if ($vnetSite) {
+        $vnetSite | % {
+            $gwConnection = $vnetSite.Gateway.ConnectionsToLocalNetwork.LocalNetworkSiteRef
+            if ($gwConnection) {
+                $mplsConnection =
+                    $gwConnection | select -ExpandProperty Name
+            }
+
+            $vnetHash = [ClassicVNET]::new( $vnet.SubscriptionId,
+                                            $_.Name,
+                                            "ClassicNetwork",
+                                            $_.Location,
+                                            $_.subnets,
+                                            $_.addressSpace.addressPrefixes,
+                                            $_.Dns.DnsServers.DnsServer,
+                                            $mplsConnection)
+            Add-Vertex -Vertex $vnetHash -Graph $g
+        }
+    }
+}
+
+
+#add classic circuits
+foreach ($er in $classicVnets) {
+    $vnetSite = $er.Netconfig.NetworkConfigXML.NetworkConfiguration.VirtualNetworkConfiguration.VirtualNetworkSites.VirtualNetworkSite
+    if ($vnetSite) {
+        $gwConnection = $vnetSite.Gateway.ConnectionsToLocalNetwork.LocalNetworkSiteRef
+        if ($gwConnection) {
+            $gwConnection | % {
+                $circuitObject = [ClassicCircuit]::new($_.Name, $er.Location, $er.SubscriptionId)
+                Add-Vertex -Vertex $circuitObject -Graph $g
+                #$g.AddVertex($circuitObject)
+            }
+        }
+    }
+}
+
 #endregion fill in the graph
 
 #region build default indexes
@@ -187,7 +279,7 @@ $connByER = @{}
 $vnetBySubscription = @{}
 
 #vnet by subscription
-foreach ($element in ($g.Vertices  | ? {$_ -is [VNET]})){
+foreach ($element in ($g.Vertices  | ? {($_ -is [VNET]) -or ($_ -is [ClassicVNET])})){
     $vnetBySubscription[$element.SubscriptionID] = $vnetBySubscription[$element.SubscriptionID]  + (,$element)
 }
 
@@ -260,6 +352,15 @@ foreach ($element in ($g.Vertices  | ? {$_ -is [Connection]})){
         }
     }
 }
+
+foreach ($cv in  ($g.vertices  | where {$_ -is [ClassicVNET]})){
+    foreach ($ce in ($g.vertices  | where {$_ -is [ClassicCircuit]})){
+        if ($cv.MPLSGWConnection -eq $ce.Name) {
+            add-edge -from $cv -to $ce -graph $g
+        }
+    }
+}
+
 #endregion adding edges
 
 

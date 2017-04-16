@@ -19,7 +19,7 @@ namespace quickGraphTests
 
             public override int GetHashCode(GraphvizVertex x)
             {
-                return x.Label.Length;
+                return x.Label.GetHashCode();
             }
         }
         static void Main(string[] args)

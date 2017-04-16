@@ -34,7 +34,9 @@ namespace PSGraph
                 throw new ArgumentException("'Graph' is an object of an unknown type");
             }
 
-            mi.Invoke(graph, new[] { Vertex });
+            bool result = (bool) mi.Invoke(graph, new[] { Vertex });
+
+            WriteObject(result);
         }
     }
 }
