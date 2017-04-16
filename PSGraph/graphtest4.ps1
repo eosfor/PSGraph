@@ -65,7 +65,7 @@ class Connection : Psgraph.PSGraphVertex {
         $this.SubscriptionID = $sID
         $this.Properties = $p
         $this.Label = $n
-        $this.Shape = $s
+        $this.Fillcolor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(125,63,191,65)
     }
     [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([Connection]$y).Label) -AND ($this.ResourceID -eq ([Connection]$y).ResourceID)}
     [int]GetHashCode() {return $this.Label.GetHashCode() -xor $this.ResourceID.GetHashCode()}
