@@ -10,19 +10,10 @@ namespace PSGraph
 
     public class PSGraphVertex : GraphvizVertex
     {
-        public string ResourceID = null;
-    }
-
-    public class PSGraphVertexComparer : EqualityComparer<PSGraphVertex>
-    {
-        public override bool Equals(PSGraphVertex x, PSGraphVertex y)
+        //requredt to avoid cross-type comparisons in mixed dictionary
+        public bool IsTypeEqual(PSGraphVertex left)
         {
-            return (x.Label == y.Label) && (x.ResourceID == y.ResourceID);
-        }
-
-        public override int GetHashCode(PSGraphVertex x)
-        {
-            return x.Label.GetHashCode();
+            return this.GetType() == left.GetType();
         }
     }
 }
