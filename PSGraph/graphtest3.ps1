@@ -3,6 +3,7 @@ $allVnets =  Import-Clixml -Path C:\tests\objects\vnets.xml #| ? subscriptionid 
 $allGWs =  Import-Clixml -Path C:\tests\objects\gws.xml #| ? subscriptionid -eq 'b37b6a13-1f1c-48e7-8f89-d5859181c926'
 $allConections =  Import-Clixml -Path C:\tests\objects\connections.xml #| ? subscriptionid -eq 'b37b6a13-1f1c-48e7-8f89-d5859181c926'
 $allCircuits =  Import-Clixml -Path C:\tests\objects\circuits.xml #| ? subscriptionid -eq 'b37b6a13-1f1c-48e7-8f89-d5859181c926'
+$classicVnets = Import-Clixml "C:\tests\objects\classicNets.xml"
 
 #region declaring classes
 class VNET : Psgraph.PSGraphVertex {
