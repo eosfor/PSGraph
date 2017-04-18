@@ -65,7 +65,6 @@ class Connection : Psgraph.PSGraphVertex {
         $this.SubscriptionID = $sID
         $this.Properties = $p
         $this.Label = $n
-        $this.Fillcolor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(125,63,191,65)
     }
     [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([Connection]$y).Label) -AND ($this.ResourceID -eq ([Connection]$y).ResourceID)}
     [int]GetHashCode() {return $this.Label.GetHashCode() -xor $this.ResourceID.GetHashCode()}
@@ -107,7 +106,7 @@ class ClassicVNET : Psgraph.PSGraphVertex {
     [string]$PeeredNetwork
     [string]$VNETType = "ARM"
     [string]$ResourceID
-    [string]$MPLSGWConnection 
+    [array]$MPLSGWConnection 
     [bool]Equals([System.Object]$y)  { return $this.IsTypeEqual($y) -AND  ($this.Label -eq ([ClassicVNET]$y).Label)}
     [int]GetHashCode() {return $this.label.gethashcode()}
     ClassicVNET($sID, $n, $rType, $loc, $sub, $as, $dhcp, $mpls){
@@ -122,7 +121,8 @@ class ClassicVNET : Psgraph.PSGraphVertex {
             $this.PeeredNetwork = "NA"
             $this.ResourceID = "NA"
             $this.MPLSGWConnection = $mpls
-            $this.Shape = "DoubleCircle"
+            $this.Fillcolor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
+            $this.Style = "Filled"
     }
 }
 
@@ -236,8 +236,7 @@ foreach ($vnet in $classicVnets) {
         $vnetSite | % {
             $gwConnection = $vnetSite.Gateway.ConnectionsToLocalNetwork.LocalNetworkSiteRef
             if ($gwConnection) {
-                $mplsConnection =
-                    $gwConnection | select -ExpandProperty Name
+                $mplsConnection = $gwConnection 
             }
 
             $vnetHash = [ClassicVNET]::new( $vnet.SubscriptionId,
@@ -353,15 +352,34 @@ foreach ($element in ($g.Vertices  | ? {$_ -is [Connection]})){
     }
 }
 
+
+# classic VNET to classic  MPLS
 foreach ($cv in  ($g.vertices  | where {$_ -is [ClassicVNET]})){
-    foreach ($ce in ($g.vertices  | where {$_ -is [ClassicCircuit]})){
-        if ($cv.MPLSGWConnection -eq $ce.Name) {
-            add-edge -from $cv -to $ce -graph $g
-        }
+    $localConns = $cv.MPLSGWConnection | select -expand name -Unique
+    $classicMPLS  = $g.vertices.where({$_ -is [ClassicCircuit] -AND ($_.label -in $localConns)})
+    
+    $classicMPLS | % {
+        add-edge -from $cv -to $_ -graph $g
     }
+
 }
 
 #endregion adding edges
+
+
+#colorizing classic vnets
+foreach ($v in ($g.Vertices  | ? {$_ -is [VNET]})){
+    $v.Style = "Filled"
+    $v.Fillcolor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(77,70,216,7)
+}
+
+#colorizing inbound classic MPLS edges 
+$v = $g.vertices.where({$_ -is [ClassicCircuit]})
+$toColorize = $g.Edges.where({$_.target -in $v})
+$toColorize | % {
+    #$_.strokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
+    $_ | Add-Member -MemberType NoteProperty -Name strokeGraphvizColor -Value ([QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44))
+}
 
 
 #Export graph

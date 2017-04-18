@@ -5,6 +5,7 @@ using QuickGraph;
 using QuickGraph.Graphviz;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
+using QuickGraph.Graphviz.Dot;
 
 namespace PSGraph
 {
@@ -60,7 +61,13 @@ namespace PSGraph
             var methodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatVertexEventHandler)).MakeGenericMethod(vertexType);
             dynamic formatVertexEventHandler = Delegate.CreateDelegate(eventHandlerType, methodInfo);
 
+            Type formatEdgeEventHandlerType = typeof(FormatEdgeAction<,>).MakeGenericType(vertexType, edgeType);
+            var formatEdgeMethodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatEdgeAction)).MakeGenericMethod(vertexType, edgeType);
+            dynamic formatEdgeEventHandler = Delegate.CreateDelegate(formatEdgeEventHandlerType, formatEdgeMethodInfo);
+
+
             graphviz.FormatVertex += formatVertexEventHandler;
+            graphviz.FormatEdge += formatEdgeEventHandler;
 
             string result = graphviz.Generate();
 
@@ -88,6 +95,18 @@ namespace PSGraph
                     }
                 }
             }
+        }
+
+
+        public static void FormatEdgeAction<TVertex, TEdge>(object sender, FormatEdgeEventArgs<TVertex, TEdge> e) where TEdge : IEdge<TVertex>
+        {
+            dynamic x = e.Edge;
+            try
+            {
+                //dynamic color = x.strokeGraphvizColor;
+                e.EdgeFormatter.StrokeGraphvizColor = x.strokeGraphvizColor;
+            }
+            catch { }
         }
     }
 }
