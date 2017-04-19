@@ -11,8 +11,8 @@ class VNET : Psgraph.PSGraphVertex {
     [string]$PeeredNetwork
     [string]$VNETType = "ARM"
     [string]$ResourceID
-    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([VNET]$y).Label) -AND ($this.ResourceID -eq ([VNET]$y).ResourceID)}
-    [int]GetHashCode() {return $this.label.gethashcode()}
+
+    [string]get_UniqueKey() { return  $this.Label + $this.ResourceID }
 }
 
 class Subscription : Psgraph.PSGraphVertex {
@@ -26,8 +26,8 @@ class Subscription : Psgraph.PSGraphVertex {
         $this.Label = $SubName
         $this.Shape =  "Rectangle"
     }
-    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([Subscription]$y).Label)}
-    [int]GetHashCode() {return $this.label.gethashcode()}
+
+    [string]get_UniqueKey() { return $this.Label }
 }
 
 class Gateway : Psgraph.PSGraphVertex{
@@ -44,8 +44,8 @@ class Gateway : Psgraph.PSGraphVertex{
         $this.Properties = $Prop
         $this.Label = $name
     }
-    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([Gateway]$y).Label) -AND ($this.ResourceID -eq ([Gateway]$y).ResourceID)}
-    [int]GetHashCode() {return $this.Label.GetHashCode() -xor $this.ResourceID.GetHashCode()}
+
+    [string]get_UniqueKey() { return $this.Label + $this.ResourceID }
 }
 
 class Connection : Psgraph.PSGraphVertex {
@@ -66,8 +66,9 @@ class Connection : Psgraph.PSGraphVertex {
         $this.Properties = $p
         $this.Label = $n
     }
-    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([Connection]$y).Label) -AND ($this.ResourceID -eq ([Connection]$y).ResourceID)}
-    [int]GetHashCode() {return $this.Label.GetHashCode() -xor $this.ResourceID.GetHashCode()}
+
+    [string]get_UniqueKey() { return $this.Label + $this.ResourceID }
+
 }
 
 class Circuit : Psgraph.PSGraphVertex {
@@ -89,9 +90,8 @@ class Circuit : Psgraph.PSGraphVertex {
         $this.Label = $n
         $this.Shape =  "Circle"
     }
-    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND ($this.Label -eq ([Circuit]$y).Label) -AND ($this.ResourceID -eq ([Circuit]$y).ResourceID)}
-    [int]GetHashCode() {return $this.Label.GetHashCode() -xor $this.ResourceID.GetHashCode()}
 
+    [string]get_UniqueKey() { return $this.Label + $this.ResourceID }
 }
 
 class ClassicVNET : Psgraph.PSGraphVertex {
@@ -107,8 +107,7 @@ class ClassicVNET : Psgraph.PSGraphVertex {
     [string]$VNETType = "ARM"
     [string]$ResourceID
     [array]$MPLSGWConnection 
-    [bool]Equals([System.Object]$y)  { return $this.IsTypeEqual($y) -AND  ($this.Label -eq ([ClassicVNET]$y).Label)}
-    [int]GetHashCode() {return $this.label.gethashcode()}
+
     ClassicVNET($sID, $n, $rType, $loc, $sub, $as, $dhcp, $mpls){
             $this.Label = $n
             $this.SubscriptionId = $sID
@@ -124,6 +123,8 @@ class ClassicVNET : Psgraph.PSGraphVertex {
             $this.Fillcolor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
             $this.Style = "Filled"
     }
+
+    [string]get_UniqueKey() { return $this.Label }
 }
 
 class ClassicCircuit : Psgraph.PSGraphVertex {
@@ -137,8 +138,8 @@ class ClassicCircuit : Psgraph.PSGraphVertex {
         $this.Label = $n
         $this.Shape =  "Circle"
     }
-    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND  ($this.Label -eq ([ClassicCircuit]$y).Label)}
-    [int]GetHashCode() {return $this.label.gethashcode()}
+
+    [string]get_UniqueKey() { return $this.Label }
 }
 #endregion declaring classes
 
