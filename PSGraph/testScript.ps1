@@ -1,4 +1,6 @@
-﻿$subs = Import-Clixml "C:\tests\objects\subs.xml" #| ? subscriptionid -eq 'b37b6a13-1f1c-48e7-8f89-d5859181c926'
+﻿Import-Module  "C:\Projects\Repos\Public\PSGraph\PSGraph\bin\Debug\PSGraph.psd1"
+
+$subs = Import-Clixml "C:\tests\objects\subs.xml" #| ? subscriptionid -eq 'b37b6a13-1f1c-48e7-8f89-d5859181c926'
 $allVnets =  Import-Clixml -Path C:\tests\objects\vnets.xml #| ? subscriptionid -eq 'b37b6a13-1f1c-48e7-8f89-d5859181c926'
 $allGWs =  Import-Clixml -Path C:\tests\objects\gws.xml #| ? subscriptionid -eq 'b37b6a13-1f1c-48e7-8f89-d5859181c926'
 $allConections =  Import-Clixml -Path C:\tests\objects\connections.xml #| ? subscriptionid -eq 'b37b6a13-1f1c-48e7-8f89-d5859181c926'
