@@ -20,8 +20,8 @@ class ClassicVNET : Psgraph.PSGraphVertex {
     [string]$VNETType = "ARM"
     [string]$ResourceID
     [string]$MPLSGWConnection
-    [bool]Equals([System.Object]$y)  { return $this.IsTypeEqual($y) -AND  ($this.Label -eq ([ClassicVNET]$y).Label)}
-    [int]GetHashCode() {return $this.label.gethashcode()}
+
+    [string]get_UniqueKey() { return $this.Label }
 }
 
 class ClassicCircuit : Psgraph.PSGraphVertex {
@@ -35,8 +35,8 @@ class ClassicCircuit : Psgraph.PSGraphVertex {
         $this.Label = $n
         $this.Shape =  "Circle"
     }
-    [bool]Equals([Object]$y)  { return $this.IsTypeEqual($y) -AND  ($this.Label -eq ([ClassicCircuit]$y).Label)}
-    [int]GetHashCode() {return $this.label.gethashcode()}
+
+    [string]get_UniqueKey() { return $this.Label }
 }
 
 $g = New-Graph -Type AdjacencyGraph

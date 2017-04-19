@@ -8,12 +8,25 @@ namespace PSGraph
         Graphviz
     }
 
-    public class PSGraphVertex : GraphvizVertex
+    public abstract class PSGraphVertex : GraphvizVertex
     {
-        //requredt to avoid cross-type comparisons in mixed dictionary
-        public bool IsTypeEqual(PSGraphVertex left)
+        public override int GetHashCode()
         {
-            return this.GetType() == left.GetType();
+            return UniqueKey.GetHashCode();
         }
+
+        public override bool Equals(object obj)
+        {
+            if (GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return UniqueKey == ((PSGraphVertex)obj).UniqueKey;
+        }
+
+        /// <summary>
+        /// Vertex unique key, eg Label + ResourceId
+        /// </summary>
+        public abstract string UniqueKey { get; }
     }
 }
