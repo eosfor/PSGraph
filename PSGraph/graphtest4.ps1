@@ -367,21 +367,6 @@ foreach ($cv in  ($g.vertices  | where {$_ -is [ClassicVNET]})){
 #endregion adding edges
 
 
-#colorizing classic vnets
-foreach ($v in ($g.Vertices  | ? {$_ -is [VNET]})){
-    $v.Style = "Filled"
-    $v.Fillcolor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(77,70,216,7)
-}
-
-#colorizing inbound classic MPLS edges 
-$v = $g.vertices.where({$_ -is [ClassicCircuit]})
-$toColorize = $g.Edges.where({$_.target -in $v})
-$toColorize | % {
-    #$_.strokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
-    $_ | Add-Member -MemberType NoteProperty -Name strokeGraphvizColor -Value ([QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44))
-}
-
-
 #Export graph
 $graphFile = "c:\temp\testGraph.gv"
 $svgOutFile = "c:\temp\testGraph.svg"

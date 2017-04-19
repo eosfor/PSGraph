@@ -50,6 +50,7 @@
     <Compile Include="ExportGraphCmdLet.cs" />
     <Compile Include="ExportTypes.cs" />
     <Compile Include="GetGraphPath.cs" />
+    <Compile Include="NewGraphvizAlgorithmCmdlet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PsGraph.cs" />
     <Compile Include="PsGraphType.cs" />
