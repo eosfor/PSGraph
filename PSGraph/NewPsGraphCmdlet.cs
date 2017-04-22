@@ -6,7 +6,7 @@ using QuickGraph;
 namespace PSGraph
 {
     [Cmdlet(VerbsCommon.New, "Graph")]
-    public class PsGraph : PSCmdlet
+    public class NewPsGraphCmdlet : PSCmdlet
     {
         private PsGraphType _grapthType;
 

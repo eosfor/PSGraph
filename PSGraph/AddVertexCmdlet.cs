@@ -13,9 +13,6 @@ namespace PSGraph
         [Parameter(Mandatory = true)]
         public object Graph { get; set; }
 
-        [Parameter(Mandatory = false)]
-        public bool Unique = true;
-
         protected override void ProcessRecord()
         {
             object graph = Graph;
