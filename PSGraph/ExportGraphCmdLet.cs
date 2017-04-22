@@ -110,10 +110,7 @@ namespace PSGraph
                 colorizer = ((PSObject)colorizer).ImmediateBaseObject;
             }
 
-            string sourceType = e.Edge.Source.GetType().Name;
-            string targetType = e.Edge.Target.GetType().Name;
-
-            e.EdgeFormatter.StrokeGraphvizColor = colorizer.GetColor(sourceType, targetType);
+            colorizer.FormatEdge(e.Edge, e.EdgeFormatter);
         }
     }
 }
