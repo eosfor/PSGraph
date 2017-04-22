@@ -56,7 +56,7 @@
     <Compile Include="PsGraphType.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="PSGraph.psd1">
+    <None Include="PSQuickGraph.psd1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
