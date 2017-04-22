@@ -367,55 +367,22 @@ foreach ($cv in  ($g.vertices  | where {$_ -is [ClassicVNET]})){
 
 #endregion adding edges
 
-$EdgeColorizerDef = @'
-using System;
-using QuickGraph.Graphviz.Dot;
-
-public class EdgeColorizer
-{
-    public GraphvizColor GetColor(string sourceType, string targetType)
-    {
-        if(sourceType == "VNET")
-        {
-            return new GraphvizColor(200, 255, 0, 0);
+class PSEdgeColoriser{
+    [void] Format($edge, [QuickGraph.Graphviz.Dot.GraphvizEdge]$edgeFormatter){
+        If ($edge.Target -is [ClassicCircuit]) {
+            $edgeFormatter.StrokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
         }
-
-        if(sourceType == "Subscription")
-        {
-            return new GraphvizColor(200, 0, 255, 0);
-        }
-
-        if(sourceType == "Connection")
-        {
-            return new GraphvizColor(200, 0, 0, 255);
-        }
-
-        return GraphvizColor.Black;
     }
 }
-'@
 
-$ref =  ".\QuickGraph.dll",
-        ".\QuickGraph.Graphviz.dll"
-
-Add-Type -TypeDefinition $EdgeColorizerDef -Language CSharp -ReferencedAssemblies $ref
-
-class PSEdgeColoriser{
-	[void] FormatEdge($edge, [QuickGraph.Graphviz.Dot.GraphvizEdge]$formattedEdge){
-		If ($edge.Target -is [ClassicCircuit]) {
-			$formattedEdge.StrokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
-		}
-	}
-}
-
-$colorizer = [PSEdgeColoriser]::new()
+$formatter = [PSEdgeColoriser]::new()
 
 #Export graph
 $graphFile = "c:\temp\testGraph.gv"
 $svgOutFile = "c:\temp\testGraph.svg"
 $pngOutFile = "c:\temp\testGraph.png"
 
-Export-Graph -Graph $g -Format Graphviz -Path $graphFile -EdgeColorizer $colorizer -Verbose
+Export-Graph -Graph $g -Format Graphviz -Path $graphFile -EdgeFormatter $formatter -Verbose
 $tempFile = Get-Content $graphFile
 $tempFile[0] += "`r`n" + "rankdir = LR"
 $tempFile | Out-File $graphFile -Encoding ascii
