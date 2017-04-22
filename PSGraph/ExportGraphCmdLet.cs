@@ -3,7 +3,6 @@ using System.Management.Automation;
 using QuickGraph;
 using QuickGraph.Graphviz;
 using System.Reflection;
-using QuickGraph.Graphviz.Dot;
 
 namespace PSGraph
 {
@@ -34,7 +33,7 @@ namespace PSGraph
         public string Path { get; set; }
 
         [Parameter]
-        public object EdgeColorizer { get; set; }
+        public object EdgeFormatter { get; set; }
 
 
         protected override void ProcessRecord()
@@ -63,7 +62,7 @@ namespace PSGraph
             dynamic formatVertexEventHandler = Delegate.CreateDelegate(eventHandlerType, methodInfo);
             graphviz.FormatVertex += formatVertexEventHandler;
 
-            if (EdgeColorizer != null)
+            if (EdgeFormatter != null)
             {
                 Type formatEdgeEventHandlerType = typeof(FormatEdgeAction<,>).MakeGenericType(vertexType, edgeType);
                 var formatEdgeMethodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatEdgeAction))
@@ -101,16 +100,15 @@ namespace PSGraph
             }
         }
 
-
         public void FormatEdgeAction<TVertex, TEdge>(object sender, FormatEdgeEventArgs<TVertex, TEdge> e) where TEdge : IEdge<TVertex>
         {
-            dynamic colorizer = EdgeColorizer;
-            if (colorizer is PSObject)
+            dynamic formatter = EdgeFormatter;
+            if (formatter is PSObject)
             {
-                colorizer = ((PSObject)colorizer).ImmediateBaseObject;
+                formatter = ((PSObject)formatter).ImmediateBaseObject;
             }
 
-            colorizer.FormatEdge(e.Edge, e.EdgeFormatter);
+            formatter.Format(e.Edge, e.EdgeFormatter);
         }
     }
 }
