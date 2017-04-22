@@ -141,43 +141,16 @@ class ClassicCircuit : Psgraph.PSGraphVertex {
 
     [string]get_UniqueKey() { return $this.Label }
 }
+
+#class used as callback to decorate/colorize edges on export
+class PSEdgeColoriser{
+    [void] Format($edge, [QuickGraph.Graphviz.Dot.GraphvizEdge]$edgeFormatter){
+        If ($edge.Target -is [ClassicCircuit]) {
+            $edgeFormatter.StrokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
+        }
+    }
+}
 #endregion declaring classes
-
-#region helper functions
-function getAllVNETS($subscription) {
-    [array]$ret = $null
-    foreach ($sub in $subscription) {
-        $ret += Get-AzureRmResource -ResourceId "https://management.azure.com/subscriptions/$($sub.SubscriptionId)/providers/Microsoft.Network/virtualNetworks"
-    }
-
-    $ret
-}
-
-function getAllGWs($subscription) {
-    [array]$ret = $null
-    foreach ($sub in $subscription) {
-        $ret += Get-AzureRmResource -ResourceId "https://management.azure.com/subscriptions/$($sub.SubscriptionId)/providers/Microsoft.Network/virtualNetworkGateways"
-    }
-
-    $ret
-}
-
-function getAllConnections($subscription) {
-    [array]$ret = $null
-    foreach ($sub in $subscription) {
-        $ret += Get-AzureRmResource -ResourceId "https://management.azure.com/subscriptions/$($sub.SubscriptionId)/providers/Microsoft.Network/connections"
-    }
-
-    $ret
-}
-
-#$subs  =  Get-AzureRmSubscription
-
-#$allVnets = getAllVNETS -subscription $subs
-#$allGWs  = getAllGWs -subscription $subs
-#$allConections = getAllConnections -subscription $subs
-#endregion helper functions
-
 
 $g = New-Graph -Type AdjacencyGraph # -EnableVertexComparer
 
@@ -252,7 +225,6 @@ foreach ($vnet in $classicVnets) {
         }
     }
 }
-
 
 #add classic circuits
 foreach ($er in $classicVnets) {
@@ -366,14 +338,6 @@ foreach ($cv in  ($g.vertices  | where {$_ -is [ClassicVNET]})){
 }
 
 #endregion adding edges
-
-class PSEdgeColoriser{
-    [void] Format($edge, [QuickGraph.Graphviz.Dot.GraphvizEdge]$edgeFormatter){
-        If ($edge.Target -is [ClassicCircuit]) {
-            $edgeFormatter.StrokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
-        }
-    }
-}
 
 $formatter = [PSEdgeColoriser]::new()
 
