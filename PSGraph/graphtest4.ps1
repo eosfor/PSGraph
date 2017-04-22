@@ -400,7 +400,15 @@ $ref =  ".\QuickGraph.dll",
 
 Add-Type -TypeDefinition $EdgeColorizerDef -Language CSharp -ReferencedAssemblies $ref
 
-$colorizer = [EdgeColorizer]::new()
+class PSEdgeColoriser{
+	[void] FormatEdge($edge, [QuickGraph.Graphviz.Dot.GraphvizEdge]$formattedEdge){
+		If ($edge.Target -is [ClassicCircuit]) {
+			$formattedEdge.StrokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
+		}
+	}
+}
+
+$colorizer = [PSEdgeColoriser]::new()
 
 #Export graph
 $graphFile = "c:\temp\testGraph.gv"
