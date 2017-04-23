@@ -28,6 +28,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickGraph.Graphviz", "quic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickGraph.Serialization", "quickgraph\3.0\sources\QuickGraph.Serialization\QuickGraph.Serialization.csproj", "{4D96C520-8EDA-49F0-9201-ED8BEE69B1FC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B846169E-1562-4F67-9E91-8C164CD86489}"
+	ProjectSection(SolutionItems) = preProject
+		docs\Add-Edge.md = docs\Add-Edge.md
+		docs\Add-Vertex.md = docs\Add-Vertex.md
+		docs\Export-Graph.md = docs\Export-Graph.md
+		docs\Get-GraphPath.md = docs\Get-GraphPath.md
+		docs\New-Graph.md = docs\New-Graph.md
+		docs\New-GraphvizAlgorithm.md = docs\New-GraphvizAlgorithm.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
