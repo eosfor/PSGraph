@@ -7,7 +7,7 @@ schema: 2.0.0
 # Export-Graph
 
 ## SYNOPSIS
-{{Fill in the Synopsis}}
+Exports graph to an external format. Only DOT format is currently supported
 
 ## SYNTAX
 
@@ -17,7 +17,7 @@ Export-Graph -Graph <Object> -Format <ExportTypes> [-Path <String>] [-EdgeFormat
 ```
 
 ## DESCRIPTION
-{{Fill in the Description}}
+Exports graph to an external format. Only DOT format is currently supported
 
 ## EXAMPLES
 

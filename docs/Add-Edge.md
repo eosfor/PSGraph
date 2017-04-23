@@ -21,12 +21,12 @@ Adds an edge between two vertexes into a graph
 ## EXAMPLES
 
 ### Example 1
-```
+In this example new graph is created and stored in $g variable. Next line adds an edge from A to B into it. Vertexes A and B are automatically added to the graph. If vertexes are already in the graph they are used as source and target vertexes. In order for this to work vertex types has to be comparable.
+
+```powershell code
 PS C:\> $g = New-Graph -Type AdjacencyGraph
 PS C:\> Add-Edge -From A -To B -Graph $g
 ```
-
-In this example new graph is created and stored in $g variable. Next line adds an edge from A to B into it. Vertexes A and B are automatically added to the graph. If vertexes are already in the graph they are used as source and target vertexes. In order for this to work vertex types has to be comparable.
 
 ## PARAMETERS
 
