@@ -21,11 +21,10 @@ Command creates an instance onf a graph object. In order to do that it takse a g
 ## EXAMPLES
 
 ### Example 1
+Returns an instance of a graph of type AdjacencyGraph
 ```
 PS C:\> New-Graph -Type AdjacencyGraph
 ```
-
-Returns an instance of a graph of type AdjacencyGraph
 
 ## PARAMETERS
 

@@ -21,6 +21,10 @@ Command takes an object and adds it as a vertex to a graph. You must specify the
 ## EXAMPLES
 
 ### Example 1
+
+In this example $ps variable contains a list of processes.
+This list is then converted into a set of  Psgraph.PSGraphVertex objects and each of these objects then added to a graph $g as a vertex
+
 ```powershell code
 $ps = gwmi win32_process
 
@@ -43,10 +47,11 @@ $ps | % {
     Add-Vertex -Vertex $p -Graph $g
 }
 ```
-In this example $ps variable contains a list of processes.
-This list is then converted into a set of  Psgraph.PSGraphVertex objects and each of these objects then added to a graph $g as a vertex
 
 ### Example 2
+
+In this example new graph class is derived from Psgraph.PSGraphVertex exported from the module. This type is used as a base type because it contains all neccessary metadata which is needed to export graph into the DOT language format. Exported file then can be used by graphviz utility to visualize the graph.
+
 ```powershell code
 class process : Psgraph.PSGraphVertex {
     [string]$ProcessName
@@ -55,7 +60,6 @@ class process : Psgraph.PSGraphVertex {
     [string]get_UniqueKey() { return  $this.ProcessID }
 }
 ```
-In this example new graph class is derived from Psgraph.PSGraphVertex exported from the module. This type is used as a base type because it contains all neccessary metadata which is needed to export graph into the DOT language format. Exported file then can be used by graphviz utility to visualize the graph.
 
 ## PARAMETERS
 
@@ -104,4 +108,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 When adding new vertecies, library checks to see if they are alreagy in the graph. In case they are a new vertex is not added. For the basic .NET types this type of comparison works by default. However if you use your custom type which stores some additional metadata you need to provide a special method to compare them, see Example 2 for reference.
 
 ## RELATED LINKS
+https://github.com/eosfor/PSGraph/wiki/New-Graph
 
