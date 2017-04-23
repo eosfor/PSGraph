@@ -43,7 +43,7 @@ namespace PSGraph
                     break;
 
                 case PsGraphType.BidirectionalGraph:
-                    newGraph = new BidirectionalGraph<object, STaggedEdge<object, object>>();
+                    newGraph = new BidirectionalGraph<object, STaggedEdge<object, object>>(false);
                     break;
 
                 case PsGraphType.BidirectionalMatrixGraph:
@@ -51,7 +51,7 @@ namespace PSGraph
                     break;
 
                 case PsGraphType.UndirectedGraph:
-                    newGraph = new UndirectedGraph<object, STaggedEdge<object, object>>();
+                    newGraph = new UndirectedGraph<object, STaggedEdge<object, object>>(false);
                     break;
             }
 
