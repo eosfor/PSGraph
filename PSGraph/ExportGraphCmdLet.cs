@@ -35,7 +35,6 @@ namespace PSGraph
         [Parameter]
         public object EdgeFormatter { get; set; }
 
-
         protected override void ProcessRecord()
         {
             object graph = Graph;
@@ -108,7 +107,7 @@ namespace PSGraph
                 formatter = ((PSObject)formatter).ImmediateBaseObject;
             }
 
-            formatter.Format(e.Edge, e.EdgeFormatter);
+            formatter.Invoke(e.Edge, e.EdgeFormatter);
         }
     }
 }
