@@ -22,16 +22,29 @@ Exports graph to an external format. Only DOT format is currently supported
 ## EXAMPLES
 
 ### Example 1
-```
-PS C:\> {{ Add example code here }}
+Exports graph $g to a file $graphFile
+```powershell code
+PS C:\> Export-Graph -Graph $g -Format Graphviz -Path $graphFile
 ```
 
-{{ Add example description here }}
+### Example 2
+Exports the gaph $g to a dot file. If an edge leads to a vertex of ClassicCircuit type it becomes of a (200,215,0,44)RGBA color.
+```powershell code
+$fmt2 = {
+    param($edge, $edgeFormatter)
+    If ($edge.Target -is [ClassicCircuit]) {
+            $edgeFormatter.StrokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
+    }
+}
+
+Export-Graph -Graph $g -Format Graphviz -Path $graphFile -EdgeFormatter $fmt2 -Verbose
+
+```
 
 ## PARAMETERS
 
 ### -EdgeFormatter
-{{Fill EdgeFormatter Description}}
+A callback scriptblock used to customize layout of the graph edges
 
 ```yaml
 Type: Object
