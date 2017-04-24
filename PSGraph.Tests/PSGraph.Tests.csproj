@@ -74,6 +74,10 @@
     <Compile Include="PSHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\exportTypes\exportTypesLib.csproj">
+      <Project>{0592a111-c079-40c2-a5d1-c5a68a825f5a}</Project>
+      <Name>exportTypesLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PSGraph\PSGraph.csproj">
       <Project>{ba26715e-9112-438f-ab7a-95cf35b299a5}</Project>
       <Name>PSGraph</Name>
