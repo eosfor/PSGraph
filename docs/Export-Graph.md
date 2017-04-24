@@ -22,7 +22,7 @@ Exports graph to an external format. Only DOT format is currently supported
 ## EXAMPLES
 
 ### Example 1
-Exports graph $g to a file $graphFile
+Exports graph $g to a dot file $graphFile
 ```powershell code
 PS C:\> Export-Graph -Graph $g -Format Graphviz -Path $graphFile
 ```
@@ -44,7 +44,7 @@ Export-Graph -Graph $g -Format Graphviz -Path $graphFile -EdgeFormatter $fmt2 -V
 ## PARAMETERS
 
 ### -EdgeFormatter
-A callback scriptblock used to customize layout of the graph edges
+A callback scriptblock used to customize layout of an edges of a graph
 
 ```yaml
 Type: Object
@@ -59,7 +59,7 @@ Accept wildcard characters: False
 ```
 
 ### -Format
-{{Fill Format Description}}
+Format to use for export. Only Graphviz format is currently supported
 
 ```yaml
 Type: ExportTypes
@@ -75,7 +75,7 @@ Accept wildcard characters: False
 ```
 
 ### -Graph
-{{Fill Graph Description}}
+A grapg to be exported
 
 ```yaml
 Type: Object
@@ -90,7 +90,7 @@ Accept wildcard characters: False
 ```
 
 ### -Path
-{{Fill Path Description}}
+Path to put the exported frile
 
 ```yaml
 Type: String
@@ -116,6 +116,13 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ### System.Object
 
 ## NOTES
+The export procesure is pretty complex. It relies on the export capabilityes provided by QuickGraph library. When the graph is filled up with vertexes and edges it can be exported to a various formats. Most common formati is a dot format which can be used by graphviz utility. 
+If you use standard built-in .NET types for vertexes, and you don't need to customize the output of the graph with a different colors or layout options you can use this cmdlet as is, tyou dont need to put addtional effors. On the other hand if you need to add colors or change some other parameters of vertexes and edges some additional code is required.
+
+Changing the layout options for vertexes
+Layout configuration of vertexes is based on the class, exposed by this module
+
+Changing layout options for edges
 
 ## RELATED LINKS
 
