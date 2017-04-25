@@ -39,8 +39,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B846169E-1
 		docs\New-GraphvizAlgorithm.md = docs\New-GraphvizAlgorithm.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "exportTypesLib", "exportTypes\exportTypesLib.csproj", "{0592A111-C079-40C2-A5D1-C5A68A825F5A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -90,12 +88,6 @@ Global
 		{4D96C520-8EDA-49F0-9201-ED8BEE69B1FC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4D96C520-8EDA-49F0-9201-ED8BEE69B1FC}.Release20|Any CPU.ActiveCfg = Release|Any CPU
 		{4D96C520-8EDA-49F0-9201-ED8BEE69B1FC}.Release20|Any CPU.Build.0 = Release|Any CPU
-		{0592A111-C079-40C2-A5D1-C5A68A825F5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0592A111-C079-40C2-A5D1-C5A68A825F5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0592A111-C079-40C2-A5D1-C5A68A825F5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0592A111-C079-40C2-A5D1-C5A68A825F5A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0592A111-C079-40C2-A5D1-C5A68A825F5A}.Release20|Any CPU.ActiveCfg = Release|Any CPU
-		{0592A111-C079-40C2-A5D1-C5A68A825F5A}.Release20|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

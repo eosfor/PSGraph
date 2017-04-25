@@ -48,6 +48,7 @@
     <Compile Include="AddEdgeCmdLet.cs" />
     <Compile Include="AddVertexCmdlet.cs" />
     <Compile Include="ExportGraphCmdLet.cs" />
+    <Compile Include="ExportTypes.cs" />
     <Compile Include="GetGraphPath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NewPsGraphCmdlet.cs" />
@@ -59,10 +60,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\exportTypes\exportTypesLib.csproj">
-      <Project>{0592a111-c079-40c2-a5d1-c5a68a825f5a}</Project>
-      <Name>exportTypesLib</Name>
-    </ProjectReference>
     <ProjectReference Include="..\quickgraph\3.0\sources\QuickGraph.Data\QuickGraph.Data.csproj">
       <Project>{960c14d1-edbd-40e5-8ae6-25e311551b87}</Project>
       <Name>QuickGraph.Data</Name>
