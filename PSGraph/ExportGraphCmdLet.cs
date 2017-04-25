@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Management.Automation;
 using QuickGraph;
 using QuickGraph.Graphviz;
 using System.Reflection;
-using System.Runtime.Remoting.Channels;
 
 namespace PSGraph
 {
@@ -34,6 +32,8 @@ namespace PSGraph
         [Parameter]
         public string Path { get; set; }
 
+        [Parameter]
+        public object EdgeFormatter { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -59,8 +59,17 @@ namespace PSGraph
             Type eventHandlerType = typeof(FormatVertexEventHandler<>).MakeGenericType(vertexType);
             var methodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatVertexEventHandler)).MakeGenericMethod(vertexType);
             dynamic formatVertexEventHandler = Delegate.CreateDelegate(eventHandlerType, methodInfo);
-
             graphviz.FormatVertex += formatVertexEventHandler;
+
+            if (EdgeFormatter != null)
+            {
+                Type formatEdgeEventHandlerType = typeof(FormatEdgeAction<,>).MakeGenericType(vertexType, edgeType);
+                var formatEdgeMethodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatEdgeAction))
+                    .MakeGenericMethod(vertexType, edgeType);
+                dynamic formatEdgeEventHandler =
+                    Delegate.CreateDelegate(formatEdgeEventHandlerType, this, formatEdgeMethodInfo);
+                graphviz.FormatEdge += formatEdgeEventHandler;
+            }
 
             string result = graphviz.Generate();
 
@@ -88,6 +97,17 @@ namespace PSGraph
                     }
                 }
             }
+        }
+
+        public void FormatEdgeAction<TVertex, TEdge>(object sender, FormatEdgeEventArgs<TVertex, TEdge> e) where TEdge : IEdge<TVertex>
+        {
+            dynamic formatter = EdgeFormatter;
+            if (formatter is PSObject)
+            {
+                formatter = ((PSObject)formatter).ImmediateBaseObject;
+            }
+
+            formatter.Invoke(e.Edge, e.EdgeFormatter);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿#region declaring classes
+#region declaring classes
 class VNET : Psgraph.PSGraphVertex {
     [string]$SubscriptionID
     [string]$Name
@@ -11,7 +11,8 @@ class VNET : Psgraph.PSGraphVertex {
     [string]$PeeredNetwork
     [string]$VNETType = "ARM"
     [string]$ResourceID
-    [bool]Equals([VNET]$x, [VNET]$y)  { return ($x.Label -eq $y.Label) -AND ($x.ResourceID -eq $y.ResourceID)}
+
+    [string]get_UniqueKey() { return  $this.Label + $this.ResourceID }
 }
 
 class Subscription : Psgraph.PSGraphVertex {
@@ -25,7 +26,8 @@ class Subscription : Psgraph.PSGraphVertex {
         $this.Label = $SubName
         $this.Shape =  "Rectangle"
     }
-    [bool]Equals([Subscription]$x, [Subscription]$y)  { return ($x.Label -eq $y.Label)}
+
+    [string]get_UniqueKey() { return $this.Label }
 }
 
 class Gateway : Psgraph.PSGraphVertex{
@@ -42,7 +44,8 @@ class Gateway : Psgraph.PSGraphVertex{
         $this.Properties = $Prop
         $this.Label = $name
     }
-    [bool]Equals([Gateway]$x, [Gateway]$y)  { return ($x.Label -eq $y.Label) -AND ($x.ResourceID -eq $y.ResourceID)}
+
+    [string]get_UniqueKey() { return $this.Label + $this.ResourceID }
 }
 
 class Connection : Psgraph.PSGraphVertex {
@@ -62,9 +65,10 @@ class Connection : Psgraph.PSGraphVertex {
         $this.SubscriptionID = $sID
         $this.Properties = $p
         $this.Label = $n
-        $this.Shape = $s
     }
-    [bool]Equals([Connection]$x, [Connection]$y)  { return ($x.Label -eq $y.Label) -AND ($x.ResourceID -eq $y.ResourceID)}
+
+    [string]get_UniqueKey() { return $this.Label + $this.ResourceID }
+
 }
 
 class Circuit : Psgraph.PSGraphVertex {
@@ -86,48 +90,69 @@ class Circuit : Psgraph.PSGraphVertex {
         $this.Label = $n
         $this.Shape =  "Circle"
     }
-    [bool]Equals([Circuit]$x, [Circuit]$y)  { return ($x.Label -eq $y.Label) -AND ($x.ResourceID -eq $y.ResourceID)}
 
+    [string]get_UniqueKey() { return $this.Label + $this.ResourceID }
+}
+
+class ClassicVNET : Psgraph.PSGraphVertex {
+    [string]$SubscriptionID
+    [string]$Name
+    [string]$ResourceType
+    [string]$ResourceGroupName
+    [string]$Location
+    [array]$Subnets
+    [string]$AddressSpace
+    [string]$DHCPOptions
+    [string]$PeeredNetwork
+    [string]$VNETType = "ARM"
+    [string]$ResourceID
+    [array]$MPLSGWConnection 
+
+    ClassicVNET($sID, $n, $rType, $loc, $sub, $as, $dhcp, $mpls){
+            $this.Label = $n
+            $this.SubscriptionId = $sID
+            $this.Name  =  $n
+            $this.ResourceType = "ClassicNetwork"
+            $this.Location = $loc
+            $this.Subnets = $sub
+            $this.AddressSpace = $as
+            $this.DHCPOptions = $dhcp
+            $this.PeeredNetwork = "NA"
+            $this.ResourceID = "NA"
+            $this.MPLSGWConnection = $mpls
+            $this.Fillcolor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
+            $this.Style = "Filled"
+    }
+
+    [string]get_UniqueKey() { return $this.Label }
+}
+
+class ClassicCircuit : Psgraph.PSGraphVertex {
+    [string]$Name
+    [string]$ResourceType
+    [string]$SubscriptionID
+    ClassicCircuit([string]$n, [string]$loc, [string]$sID){
+        $this.name = $n
+        $this.ResourceType = "ClassicMPLS"
+        $this.SubscriptionID = $sID
+        $this.Label = $n
+        $this.Shape =  "Circle"
+    }
+
+    [string]get_UniqueKey() { return $this.Label }
+}
+
+#class used as callback to decorate/colorize edges on export
+class PSEdgeColoriser{
+    [void] Format($edge, [QuickGraph.Graphviz.Dot.GraphvizEdge]$edgeFormatter){
+        If ($edge.Target -is [ClassicCircuit]) {
+            $edgeFormatter.StrokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
+        }
+    }
 }
 #endregion declaring classes
 
-#region helper functions
-function getAllVNETS($subscription) {
-    [array]$ret = $null
-    foreach ($sub in $subscription) {
-        $ret += Get-AzureRmResource -ResourceId "https://management.azure.com/subscriptions/$($sub.SubscriptionId)/providers/Microsoft.Network/virtualNetworks"
-    }
-
-    $ret
-}
-
-function getAllGWs($subscription) {
-    [array]$ret = $null
-    foreach ($sub in $subscription) {
-        $ret += Get-AzureRmResource -ResourceId "https://management.azure.com/subscriptions/$($sub.SubscriptionId)/providers/Microsoft.Network/virtualNetworkGateways"
-    }
-
-    $ret
-}
-
-function getAllConnections($subscription) {
-    [array]$ret = $null
-    foreach ($sub in $subscription) {
-        $ret += Get-AzureRmResource -ResourceId "https://management.azure.com/subscriptions/$($sub.SubscriptionId)/providers/Microsoft.Network/connections"
-    }
-
-    $ret
-}
-
-#$subs  =  Get-AzureRmSubscription
-
-#$allVnets = getAllVNETS -subscription $subs
-#$allGWs  = getAllGWs -subscription $subs
-#$allConections = getAllConnections -subscription $subs
-#endregion helper functions
-
-
-$g = New-Graph -Type AdjacencyGraph -EnableVertexComparer
+$g = New-Graph -Type AdjacencyGraph # -EnableVertexComparer
 
 #region fill in the graph
 #add vnets
@@ -177,6 +202,45 @@ foreach ($er in $allCircuits) {
     $circuitObject = [Circuit]::new($er.Name, $er.ResourceID, $er.Resourcename, $er.ResourceType, $conn.Location, $conn.SubscriptionID, $conn.Properties)
     Add-Vertex -Vertex $circuitObject -Graph $g
 }
+
+#add classic VNETS
+foreach ($vnet in $classicVnets) {
+    $vnetSite = $vnet.Netconfig.NetworkConfigXML.NetworkConfiguration.VirtualNetworkConfiguration.VirtualNetworkSites.VirtualNetworkSite
+    if ($vnetSite) {
+        $vnetSite | % {
+            $gwConnection = $vnetSite.Gateway.ConnectionsToLocalNetwork.LocalNetworkSiteRef
+            if ($gwConnection) {
+                $mplsConnection = $gwConnection 
+            }
+
+            $vnetHash = [ClassicVNET]::new( $vnet.SubscriptionId,
+                                            $_.Name,
+                                            "ClassicNetwork",
+                                            $_.Location,
+                                            $_.subnets,
+                                            $_.addressSpace.addressPrefixes,
+                                            $_.Dns.DnsServers.DnsServer,
+                                            $mplsConnection)
+            Add-Vertex -Vertex $vnetHash -Graph $g
+        }
+    }
+}
+
+#add classic circuits
+foreach ($er in $classicVnets) {
+    $vnetSite = $er.Netconfig.NetworkConfigXML.NetworkConfiguration.VirtualNetworkConfiguration.VirtualNetworkSites.VirtualNetworkSite
+    if ($vnetSite) {
+        $gwConnection = $vnetSite.Gateway.ConnectionsToLocalNetwork.LocalNetworkSiteRef
+        if ($gwConnection) {
+            $gwConnection | % {
+                $circuitObject = [ClassicCircuit]::new($_.Name, $er.Location, $er.SubscriptionId)
+                Add-Vertex -Vertex $circuitObject -Graph $g
+                #$g.AddVertex($circuitObject)
+            }
+        }
+    }
+}
+
 #endregion fill in the graph
 
 #region build default indexes
@@ -187,7 +251,7 @@ $connByER = @{}
 $vnetBySubscription = @{}
 
 #vnet by subscription
-foreach ($element in ($g.Vertices  | ? {$_ -is [VNET]})){
+foreach ($element in ($g.Vertices  | ? {($_ -is [VNET]) -or ($_ -is [ClassicVNET])})){
     $vnetBySubscription[$element.SubscriptionID] = $vnetBySubscription[$element.SubscriptionID]  + (,$element)
 }
 
@@ -260,15 +324,35 @@ foreach ($element in ($g.Vertices  | ? {$_ -is [Connection]})){
         }
     }
 }
+
+
+# classic VNET to classic  MPLS
+foreach ($cv in  ($g.vertices  | where {$_ -is [ClassicVNET]})){
+    $localConns = $cv.MPLSGWConnection | select -expand name -Unique
+    $classicMPLS  = $g.vertices.where({$_ -is [ClassicCircuit] -AND ($_.label -in $localConns)})
+    
+    $classicMPLS | % {
+        add-edge -from $cv -to $_ -graph $g
+    }
+
+}
+
 #endregion adding edges
 
+
+$fmt2 = {
+    param($edge, $edgeFormatter)
+    If ($edge.Target -is [ClassicCircuit]) {
+            $edgeFormatter.StrokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
+    }
+}
 
 #Export graph
 $graphFile = "c:\temp\testGraph.gv"
 $svgOutFile = "c:\temp\testGraph.svg"
 $pngOutFile = "c:\temp\testGraph.png"
 
-Export-Graph -Graph $g -Format Graphviz -Path $graphFile  -Verbose
+Export-Graph -Graph $g -Format Graphviz -Path $graphFile -EdgeFormatter $fmt2 -Verbose
 $tempFile = Get-Content $graphFile
 $tempFile[0] += "`r`n" + "rankdir = LR"
 $tempFile | Out-File $graphFile -Encoding ascii

@@ -13,9 +13,6 @@ namespace PSGraph
         [Parameter(Mandatory = true)]
         public object Graph { get; set; }
 
-        [Parameter(Mandatory = false)]
-        public bool Unique = true;
-
         protected override void ProcessRecord()
         {
             object graph = Graph;
@@ -34,7 +31,9 @@ namespace PSGraph
                 throw new ArgumentException("'Graph' is an object of an unknown type");
             }
 
-            mi.Invoke(graph, new[] { Vertex });
+            bool result = (bool) mi.Invoke(graph, new[] { Vertex });
+
+            WriteObject(result);
         }
     }
 }
