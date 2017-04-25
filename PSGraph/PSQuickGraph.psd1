@@ -21,7 +21,7 @@ ModuleVersion = '1.0'
 GUID = '4bd5a906-8e03-497e-80eb-209e71caae45'
 
 # Author of this module
-Author = 'Andrei'
+Author = 'Andrey Vernigora'
 
 # Company or vendor of this module
 CompanyName = 'Unknown'
@@ -30,7 +30,7 @@ CompanyName = 'Unknown'
 Copyright = '(c) 2017 Andrei. All rights reserved.'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'This module is a wrapper for QuickGraph library.'
 
 # Minimum version of the Windows PowerShell engine required by this module
 # PowerShellVersion = ''
@@ -54,7 +54,7 @@ Copyright = '(c) 2017 Andrei. All rights reserved.'
 RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = @("QuickGraph.dll", "QuickGraph.Data.dll", "QuickGraph.Graphviz.dll", "QuickGraph.Serialization.dll", "exportTypes.dll")
+RequiredAssemblies = @("QuickGraph.dll", "QuickGraph.Data.dll", "QuickGraph.Graphviz.dll", "QuickGraph.Serialization.dll")
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
 # ScriptsToProcess = @()

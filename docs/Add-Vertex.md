@@ -108,5 +108,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 When adding new vertecies, library checks to see if they are alreagy in the graph. In case they are a new vertex is not added. For the basic .NET types this type of comparison works by default. However if you use your custom type which stores some additional metadata you need to provide a special method to compare them, see Example 2 for reference.
 
 ## RELATED LINKS
-https://github.com/eosfor/PSGraph/wiki/New-Graph
+[New-Graph](https://github.com/eosfor/PSGraph/wiki/New-Graph)
 
