@@ -1,4 +1,5 @@
-﻿$ps = gwmi win32_process
+
+$ps = gwmi win32_process
 
 class process : Psgraph.PSGraphVertex {
     [string]$ProcessName
@@ -49,3 +50,5 @@ cd c:\temp\graphviz\release\bin
 .\dot.exe -Tsvg $graphFile -o $svgOutFile
 .\dot.exe -Tpng $graphFile -o $pngOutFile
 popd
+
+start $pngOutFile
