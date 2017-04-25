@@ -339,12 +339,6 @@ foreach ($cv in  ($g.vertices  | where {$_ -is [ClassicVNET]})){
 
 #endregion adding edges
 
-[System.Action[object,object]]$formatter = {
-    param($edge, $edgeFormatter)
-    If ($edge.Target -is [ClassicCircuit]) {
-            $edgeFormatter.StrokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
-    }
-}
 
 $fmt2 = {
     param($edge, $edgeFormatter)
