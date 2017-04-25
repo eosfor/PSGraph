@@ -28,7 +28,7 @@ PS C:\> Export-Graph -Graph $g -Format Graphviz -Path $graphFile
 ```
 
 ### Example 2
-Exports the gaph $g to a dot file. If an edge leads to a vertex of ClassicCircuit type it becomes of a (200,215,0,44)RGBA color.
+Exports the graph $g to a dot file. If an edge leads to a vertex of ClassicCircuit type it becomes of a (200,215,0,44)RGBA color.
 ```powershell code
 $fmt2 = {
     param($edge, $edgeFormatter)
