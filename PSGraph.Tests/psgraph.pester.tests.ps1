@@ -47,7 +47,13 @@ describe "PSGraph Pester test" {
             Add-Vertex -Vertex ([testclass2]@{property3 = 25; property4 = 'C'}) -Graph $g
 
             $g.VertexCount | should Not BeNullOrEmpty
-            $g.VertexCount | should Be 3
+            $g.VertexCount | should Be 4
+
+            Add-Vertex -Vertex ([testclass1]@{property1 = 2; property2 = 'D'}) -Graph $g
+			Add-Vertex -Vertex ([testclass1]@{property1 = 2; property2 = 'D'}) -Graph $g
+
+            $g.VertexCount | should Not BeNullOrEmpty
+            $g.VertexCount | should Be 5
 
         }
 	}
