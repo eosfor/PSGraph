@@ -138,9 +138,10 @@ The export procedure is pretty complex. It relies on the export capabilities pro
 If you use standard built-in .NET types for vertexes, and you don't need to customize the output of the graph with a different colors or layout options you can use this cmdlet as is, you don't need to put additional efforts. On the other hand if you need to add colors or change some other parameters of vertexes and edges some additional code is required.
 
 Changing the layout options for vertexes
-Layout configuration of vertexes is based on the class, exposed by this module: PSGraphVertex. This class in turn derived from GraphvizVertex from the original library QuickGraph. This class contains all necessary properties needed to manage layout of the edges. If you need to 
+Layout configuration of vertexes is based on the class PSGraphVertex, exposed by this module. This class in turn is derived from GraphvizVertex from the original library QuickGraph. This class contains all necessary properties needed to manage layout of the edges. If you want to configure visual representation of the graph, you need to derive from PSGraphVertex and set properties you need, see Example 3.
 
 Changing layout options for edges
+In order to manage visualization of an edge you need to take a different approach. For this EdgeFormatter parameter is used. It takes a scriptblock, which is called each time an edge gets exported. You can put a logic into the scriptblock and so configure visualization of each edge, see Example 2
 
 ## RELATED LINKS
 
