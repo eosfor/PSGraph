@@ -28,13 +28,13 @@ describe "PSGraph Pester test" {
             class testclass1 : Psgraph.PSGraphVertex {
                 [string]$property1
                 [string]$property2
-                [string]get_UniqueKey() { return $this.uniquekey1 }
+                [string]get_UniqueKey() { return $this.property2 }
             }
 
             class testclass2 : Psgraph.PSGraphVertex {
                 [string]$property3
                 [string]$property4
-                [string]get_UniqueKey() { return $this.uniquekey2 }
+                [string]get_UniqueKey() { return $this.property4 }
             }
 
 
