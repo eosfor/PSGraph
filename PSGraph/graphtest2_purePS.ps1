@@ -41,6 +41,8 @@ $baseEQComparer = [quickGraphTests.baseVertexComparer]::new()
 $graph1 = [QuickGraph.AdjacencyGraph[QuickGraph.Graphviz.Dot.GraphvizVertex,QuickGraph.STaggedEdge[QuickGraph.Graphviz.Dot.GraphvizVertex,int]]]::new($false,  -1, -1, [System.Collections.Generic.IEqualityComparer[QuickGraph.Graphviz.Dot.GraphvizVertex]]$baseEQComparer)
 
 
+
+
 $v1 = [VNET]@{Label = "vnet1"; iprange = "10.10.5.0/24"}
 $v2 = [VNET]@{Label = "vnet1"; iprange = "10.10.6.0/24"}
 $v3 = [VNET]@{Label = "vnet2"; iprange = "10.10.7.0/24"}

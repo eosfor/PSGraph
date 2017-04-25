@@ -16,7 +16,7 @@ namespace PSGraph.Tests
 		{
 			_powershell = PowerShell.Create();
 			_powershell.AddCommand("Import-Module")
-				.AddParameter("Assembly", System.Reflection.Assembly.GetAssembly(typeof (PSGraph.PsGraph)));
+				.AddParameter("Assembly", System.Reflection.Assembly.GetAssembly(typeof (PSGraph.NewPsGraphCmdlet)));
 			_powershell.Invoke();
 			_powershell.Commands.Clear();
 		}
@@ -30,7 +30,7 @@ namespace PSGraph.Tests
 		[TestMethod]
 		public void TestExistingGraphTypeNoProcessing_Success()
 		{
-			PSGraph.PsGraph psGraph = new PSGraph.PsGraph() {Type = PsGraphType.AdjacencyGraph};
+			PSGraph.NewPsGraphCmdlet psGraph = new PSGraph.NewPsGraphCmdlet() {Type = PsGraphType.AdjacencyGraph};
 			Assert.IsTrue(Enum.Equals(psGraph.Type, PsGraphType.AdjacencyGraph));
 		}
 
@@ -38,7 +38,7 @@ namespace PSGraph.Tests
 		[ExpectedException(typeof(ArgumentException), "Unsupported graph.")]
 		public void TestExistingGraphTypeNoProcessing_Unsuccess()
 		{
-			PSGraph.PsGraph psGraph = new PSGraph.PsGraph() { Type = (PsGraphType)0xC0FEE};
+			PSGraph.NewPsGraphCmdlet psGraph = new PSGraph.NewPsGraphCmdlet() { Type = (PsGraphType)0xC0FEE};
 			Assert.IsTrue(Enum.Equals(psGraph.Type, (PsGraphType)0xC0FEE));
 		}
 
