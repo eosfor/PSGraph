@@ -9,3 +9,5 @@ The idea is to have a tool to analyze dependencies of objects in a scripted way.
 ```powershell code
 Install-Module PSQuickGraph -Scope CurrentUser
 ```
+### Usage examples
+[Simple  example for windows processes](https://eosfor.wordpress.com/2017/04/25/lets-graph-it/)
