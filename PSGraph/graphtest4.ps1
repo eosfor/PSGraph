@@ -174,7 +174,7 @@ foreach ($vnet in $allVnets) {
 
 #add subscriptions
 foreach ($s  in $subs){
-    $subObj = [Subscription]::new($s.SubscriptionId, $s.SubscriptionName)
+    $subObj = [Subscription]::new($s.ID, $s.Name)
     Add-Vertex -Vertex $subObj -Graph $g
 }
 
