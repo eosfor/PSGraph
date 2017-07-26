@@ -465,6 +465,7 @@ namespace QuickGraph.Serialization
                 {
                     this.Writer.WriteStartElement("node", GraphMLXmlResolver.GraphMLNamespace);
                     this.Writer.WriteAttributeString("id", this.vertexIdentities(v));
+                    this.Writer.WriteAttributeString("Label", v.ToString());        //stupid stub done by Andrey V to get the label property exported
                     GraphMLSerializer<TVertex, TEdge,TGraph>.WriteDelegateCompiler.VertexAttributesWriter(this.Writer, v);
                     this.Writer.WriteEndElement();
                 }

@@ -3,6 +3,8 @@ using System.Management.Automation;
 using QuickGraph;
 using QuickGraph.Graphviz;
 using System.Reflection;
+using System.Xml;
+using QuickGraph.Serialization;
 
 namespace PSGraph
 {
@@ -48,6 +50,8 @@ namespace PSGraph
             }
 
             WriteVerbose("Add-Edge: Graph type is: " + Graph.GetType().ToString());
+
+            if (_exportType == ExportTypes.GraphML) { ExportGraphML(graph); return; };
 
             Type[] graphGenericArgs = graph.GetType().GetGenericArguments();
             Type vertexType = graphGenericArgs[0];
@@ -108,6 +112,24 @@ namespace PSGraph
             }
 
             formatter.Invoke(e.Edge, e.EdgeFormatter);
+        }
+
+        public void ExportGraphML(dynamic graph)
+        {
+            using (XmlWriter xwriter = XmlWriter.Create(Path))
+            {
+                //graph.(xwriter);
+                Type[] graphGenericArgs = graph.GetType().GetGenericArguments();
+                Type vertexType = graphGenericArgs[0];
+                Type edgeType = graphGenericArgs[1];
+
+                Type eventHandlerType = typeof(FormatVertexEventHandler<>).MakeGenericType(vertexType);
+                var methodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatVertexEventHandler)).MakeGenericMethod(vertexType);
+                dynamic formatVertexEventHandler = Delegate.CreateDelegate(eventHandlerType, methodInfo);
+
+                QuickGraph.Serialization.GraphMLExtensions.SerializeToGraphML<object, STaggedEdge<object, object>, AdjacencyGraph<object, STaggedEdge<object, object>>>(graph, xwriter);
+            }
+
         }
     }
 }
