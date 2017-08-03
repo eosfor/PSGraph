@@ -5,6 +5,8 @@ using QuickGraph.Graphviz;
 using System.Reflection;
 using System.Xml;
 using QuickGraph.Serialization;
+using System.IO;
+using System.Text;
 
 namespace PSGraph
 {
@@ -116,19 +118,35 @@ namespace PSGraph
 
         public void ExportGraphML(dynamic graph)
         {
-            using (XmlWriter xwriter = XmlWriter.Create(Path))
+            //graph.(xwriter);
+            Type[] graphGenericArgs = graph.GetType().GetGenericArguments();
+            Type vertexType = graphGenericArgs[0];
+            Type edgeType = graphGenericArgs[1];
+
+            Type eventHandlerType = typeof(FormatVertexEventHandler<>).MakeGenericType(vertexType);
+            var methodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatVertexEventHandler)).MakeGenericMethod(vertexType);
+            dynamic formatVertexEventHandler = Delegate.CreateDelegate(eventHandlerType, methodInfo);
+
+
+            if (!string.IsNullOrEmpty(Path))
             {
-                //graph.(xwriter);
-                Type[] graphGenericArgs = graph.GetType().GetGenericArguments();
-                Type vertexType = graphGenericArgs[0];
-                Type edgeType = graphGenericArgs[1];
-
-                Type eventHandlerType = typeof(FormatVertexEventHandler<>).MakeGenericType(vertexType);
-                var methodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatVertexEventHandler)).MakeGenericMethod(vertexType);
-                dynamic formatVertexEventHandler = Delegate.CreateDelegate(eventHandlerType, methodInfo);
-
-                QuickGraph.Serialization.GraphMLExtensions.SerializeToGraphML<object, STaggedEdge<object, object>, AdjacencyGraph<object, STaggedEdge<object, object>>>(graph, xwriter);
+                using (XmlWriter xwriter = XmlWriter.Create(Path))
+                {
+                    QuickGraph.Serialization.GraphMLExtensions.SerializeToGraphML<object, STaggedEdge<object, object>, BidirectionalGraph<object, STaggedEdge<object, object>>>(graph, xwriter);
+                }
             }
+            else
+            {
+                StringWriter str = new StringWriter();
+                using (XmlWriter xwriter = XmlWriter.Create(str))
+                {
+                    QuickGraph.Serialization.GraphMLExtensions.SerializeToGraphML<object, STaggedEdge<object, object>, BidirectionalGraph<object, STaggedEdge<object, object>>>(graph, xwriter);
+
+                    WriteObject(str.ToString());
+                }
+
+            }
+
 
         }
     }

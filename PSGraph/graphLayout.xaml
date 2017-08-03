@@ -1,0 +1,36 @@
+﻿<Window x:Class="PSGraph.GraphLayoutWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:graphsharp="clr-namespace:GraphSharp.Controls;assembly=GraphSharp.Controls"
+             xmlns:zoom="clr-namespace:GraphSharp.Controls.Zoom;assembly=GraphSharp.Controls"
+             xmlns:psgraph="clr-namespace:PSGraph"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PSGraph"
+             mc:Ignorable="d" 
+             x:Name="root"
+             d:DesignHeight="366.585" d:DesignWidth="556.829">
+    <Grid>
+        <!--<Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>-->
+
+
+        <!--<StackPanel Orientation="Vertical" Grid.Row="0" >
+            <StackPanel Orientation="Horizontal"  HorizontalAlignment="Stretch" Margin="0">
+                <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
+                        FontSize="10" FontFamily="Verdana" FontWeight="Bold" Margin="0,0,0,0"  
+                        Content="Pick Layout Type"/>
+                <ComboBox ItemsSource="{Binding LayoutAlgorithmTypes}"
+                          SelectedItem="{Binding LayoutAlgorithmType, Mode=TwoWay}" Width="264"/>
+            </StackPanel>
+        </StackPanel>-->
+
+        <zoom:ZoomControl Margin="0,29,0.4,-0.2">
+            <psgraph:PocGraphLayout2 x:Name="graphLayout" Graph="{Binding}" 
+                      OverlapRemovalAlgorithmType="FSA" 
+                      HighlightAlgorithmType="Simple" />
+        </zoom:ZoomControl>        
+    </Grid>
+</Window>

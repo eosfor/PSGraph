@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Management.Automation;
 using QuickGraph;
+using System.Globalization;
 
 //add-edge -from $nodeFrom -to $nodeTo -attributes $attr -graph $g
 
@@ -80,6 +81,7 @@ namespace PSGraph
             bool result = graph.AddVerticesAndEdge(edge);
 
             WriteObject(result);
+           
         }
     }
 }
