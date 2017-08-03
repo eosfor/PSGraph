@@ -58,7 +58,7 @@ namespace PSGraph
             layoutAlgorithmTypes.Add("Tree");
 
             //Pick a default Layout Algorithm Type
-            LayoutAlgorithmType = "Tree";
+            LayoutAlgorithmType = "EfficientSugiyama";
 
         }
 

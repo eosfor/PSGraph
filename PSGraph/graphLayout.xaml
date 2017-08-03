@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>-->
 
 
-        <!--<StackPanel Orientation="Vertical" Grid.Row="0" >
+        <StackPanel Orientation="Vertical" Grid.Row="0" >
             <StackPanel Orientation="Horizontal"  HorizontalAlignment="Stretch" Margin="0">
                 <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
                         FontSize="10" FontFamily="Verdana" FontWeight="Bold" Margin="0,0,0,0"  
@@ -25,10 +25,11 @@
                 <ComboBox ItemsSource="{Binding LayoutAlgorithmTypes}"
                           SelectedItem="{Binding LayoutAlgorithmType, Mode=TwoWay}" Width="264"/>
             </StackPanel>
-        </StackPanel>-->
+        </StackPanel>
 
         <zoom:ZoomControl Margin="0,29,0.4,-0.2">
-            <psgraph:PocGraphLayout2 x:Name="graphLayout" Graph="{Binding}" 
+            <psgraph:PocGraphLayout2 x:Name="graphLayout" Graph="{Binding Path=Graph}" 
+                      LayoutAlgorithmType="{Binding Path=LayoutAlgorithmType, Mode=OneWay}"
                       OverlapRemovalAlgorithmType="FSA" 
                       HighlightAlgorithmType="Simple" />
         </zoom:ZoomControl>        
