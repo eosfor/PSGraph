@@ -40,10 +40,10 @@ namespace PSGraph
 
         public GraphLayoutWindow(dynamic graph)
         {
-            //gw = new GraphVewModel(graph);
+            gw = new GraphVewModel(graph);
             
             InitializeComponent();
-            DataContext = graph;
+            DataContext = gw;
         }
     }
 }
