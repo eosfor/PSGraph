@@ -11,12 +11,6 @@
              x:Name="root"
              d:DesignHeight="366.585" d:DesignWidth="556.829">
     <Grid>
-        <!--<Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>-->
-
-
         <StackPanel Orientation="Vertical" Grid.Row="0" >
             <StackPanel Orientation="Horizontal"  HorizontalAlignment="Stretch" Margin="0">
                 <Label VerticalAlignment="Center" VerticalContentAlignment="Center"
