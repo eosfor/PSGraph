@@ -74,7 +74,7 @@ namespace PSGraph
 
             gc.Graph = Graph;
             gc.LayoutAlgorithmType = LayoutAlgorithmType;
-            //gc.OverlapRemovalAlgorithmType = "FSA";
+            //gc.OverlapRemovalAlgorithmType = "FSA";   //strange thing here
             gc.HighlightAlgorithmType = "Simple";
 
             CurrentGraph = gc;
