@@ -152,7 +152,7 @@ class PSEdgeColoriser{
 }
 #endregion declaring classes
 
-$g = New-Graph -Type BidirectionalGraph # -EnableVertexComparer
+$g = New-Graph -Type AdjacencyGraph # -EnableVertexComparer
 
 #region fill in the graph
 #add vnets

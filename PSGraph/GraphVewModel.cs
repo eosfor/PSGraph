@@ -11,10 +11,13 @@ namespace PSGraph
     class GraphVewModel : INotifyPropertyChanged
     {
         private string layoutAlgorithmType;
-        private BidirectionalGraph<object, STaggedEdge<object, object>> _graph;
+        private dynamic _graph;
         private List<String> layoutAlgorithmTypes = new List<string>();
 
+
         #region Public Properties
+
+        public dynamic CurrentGraph { get; private set; }
 
         public List<String> LayoutAlgorithmTypes
         {
@@ -31,7 +34,7 @@ namespace PSGraph
             }
         }
 
-        public BidirectionalGraph<object, STaggedEdge<object, object>> Graph
+        public dynamic Graph
         {
             get { return _graph; }
             set
@@ -42,7 +45,7 @@ namespace PSGraph
         }
         #endregion
 
-        public GraphVewModel(BidirectionalGraph<object, STaggedEdge<object, object>> inGraph)
+        public GraphVewModel(dynamic inGraph)
         {
             Graph = inGraph;
 
@@ -60,6 +63,21 @@ namespace PSGraph
             //Pick a default Layout Algorithm Type
             LayoutAlgorithmType = "EfficientSugiyama";
 
+            Type graphType = inGraph.GetType();
+            Type[] graphGenericArgs = graphType.GetGenericArguments();
+            Type vertexType = graphGenericArgs[0];
+            Type edgeType = graphGenericArgs[1];
+
+            Type graphLayoutType = typeof(GraphLayout<,,>);
+            var gcType = graphLayoutType.MakeGenericType(vertexType, edgeType, graphType);
+            dynamic gc = Activator.CreateInstance(gcType);
+
+            gc.Graph = Graph;
+            gc.LayoutAlgorithmType = LayoutAlgorithmType;
+            //gc.OverlapRemovalAlgorithmType = "FSA";
+            gc.HighlightAlgorithmType = "Simple";
+
+            CurrentGraph = gc;
         }
 
         #region INotifyPropertyChanged Implementation

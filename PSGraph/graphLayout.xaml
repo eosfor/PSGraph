@@ -21,11 +21,11 @@
             </StackPanel>
         </StackPanel>
 
-        <zoom:ZoomControl Margin="0,29,0.4,-0.2">
-            <psgraph:PocGraphLayout2 x:Name="graphLayout" Graph="{Binding Path=Graph}" 
+        <zoom:ZoomControl Margin="0,29,0.4,-0.2" Content="{Binding Path=CurrentGraph}">
+            <!--<psgraph:PocGraphLayout2 x:Name="graphLayout" Graph="{Binding Path=Graph}" 
                       LayoutAlgorithmType="{Binding Path=LayoutAlgorithmType, Mode=OneWay}"
                       OverlapRemovalAlgorithmType="FSA" 
-                      HighlightAlgorithmType="Simple" />
+                      HighlightAlgorithmType="Simple" />-->
         </zoom:ZoomControl>        
     </Grid>
 </Window>
