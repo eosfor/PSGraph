@@ -5,6 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using GraphSharp.Controls;
 using QuickGraph;
+using GraphSharp.Algorithms.Layout;
 
 namespace PSGraph
 {
@@ -13,6 +14,7 @@ namespace PSGraph
         private string layoutAlgorithmType;
         private dynamic _graph;
         private List<String> layoutAlgorithmTypes = new List<string>();
+        private dynamic _graphLayout;
 
 
         #region Public Properties
@@ -30,6 +32,7 @@ namespace PSGraph
             set
             {
                 layoutAlgorithmType = value;
+                _graphLayout.LayoutAlgorithmType = layoutAlgorithmType;
                 NotifyPropertyChanged("LayoutAlgorithmType");
             }
         }
@@ -49,6 +52,15 @@ namespace PSGraph
         {
             Graph = inGraph;
 
+            Type graphType = inGraph.GetType();
+            Type[] graphGenericArgs = graphType.GetGenericArguments();
+            Type vertexType = graphGenericArgs[0];
+            Type edgeType = graphGenericArgs[1];
+
+            Type graphLayoutType = typeof(GraphLayout<,,>);
+            var gcType = graphLayoutType.MakeGenericType(vertexType, edgeType, graphType);
+            _graphLayout = Activator.CreateInstance(gcType);
+
             //Add Layout Algorithm Types
             layoutAlgorithmTypes.Add("BoundedFR");
             layoutAlgorithmTypes.Add("Circular");
@@ -61,23 +73,22 @@ namespace PSGraph
             layoutAlgorithmTypes.Add("Tree");
 
             //Pick a default Layout Algorithm Type
-            LayoutAlgorithmType = "EfficientSugiyama";
+            LayoutAlgorithmType = "Tree";
 
-            Type graphType = inGraph.GetType();
-            Type[] graphGenericArgs = graphType.GetGenericArguments();
-            Type vertexType = graphGenericArgs[0];
-            Type edgeType = graphGenericArgs[1];
 
-            Type graphLayoutType = typeof(GraphLayout<,,>);
-            var gcType = graphLayoutType.MakeGenericType(vertexType, edgeType, graphType);
-            dynamic gc = Activator.CreateInstance(gcType);
 
-            gc.Graph = Graph;
-            gc.LayoutAlgorithmType = LayoutAlgorithmType;
-            //gc.OverlapRemovalAlgorithmType = "FSA";   //strange thing here
-            gc.HighlightAlgorithmType = "Simple";
+            _graphLayout.Graph = Graph;
+            _graphLayout.LayoutAlgorithmType = LayoutAlgorithmType;
+            //_graphLayout.OverlapRemovalAlgorithmType = "FSA";   //strange thing here
+            _graphLayout.HighlightAlgorithmType = "Simple";
+            _graphLayout.LayoutParameters.WidthPerHeight = 10.0;
+            _graphLayout.LayoutParameters.OptimizeWidthAndHeight = true;
+            _graphLayout.LayoutParameters.Direction = LayoutDirection.LeftToRight;
 
-            CurrentGraph = gc;
+            //GraphLayout<object, STaggedEdge<object, object>, BidirectionalGraph<object, STaggedEdge<object, object>>> _gl = new GraphLayout<object, STaggedEdge<object, object>, BidirectionalGraph<object, STaggedEdge<object, object>>>();
+            //_gl.LayoutAlgorithmType = "Tree";
+
+            CurrentGraph = _graphLayout;
         }
 
         #region INotifyPropertyChanged Implementation
@@ -89,6 +100,7 @@ namespace PSGraph
             if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(info));
+                _graphLayout.Relayout();
             }
         }
 
