@@ -12,7 +12,7 @@
 RootModule = "PSGraph.dll"
 
 # Version number of this module.
-ModuleVersion = '1.0'
+ModuleVersion = '1.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -54,7 +54,7 @@ Description = 'This module is a wrapper for QuickGraph library.'
 RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = @("QuickGraph.dll", "QuickGraph.Data.dll", "QuickGraph.Graphviz.dll", "QuickGraph.Serialization.dll")
+RequiredAssemblies = @("QuickGraph.dll", "QuickGraph.Data.dll", "QuickGraph.Graphviz.dll", "QuickGraph.Serialization.dll", "GraphSharp.dll", "GraphSharp.Controls.dll")
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
 # ScriptsToProcess = @()
