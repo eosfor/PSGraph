@@ -1,5 +1,5 @@
 ﻿#create a new graph
-$g = New-Graph -Type AdjacencyGraph
+$g = New-Graph -Type BidirectionalGraph
 
 #add vertices
 [char]'A'..[char]'P' | % { Add-Vertex -Vertex ([string]([char]$_)) -Graph $g } | Out-Null
@@ -21,6 +21,8 @@ Add-Edge -From J -To K -Graph $g | Out-Null
 Add-Edge -From K -To L -Graph $g | Out-Null
 Add-Edge -From O -To P -Graph $g | Out-Null
 
+
+Show-GraphLayout -Graph $g
 
 #Export graph
 $graphFile = "c:\temp\testGraph1.gv"
