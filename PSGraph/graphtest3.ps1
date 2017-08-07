@@ -124,7 +124,7 @@ function getAllConnections($subscription) {
 #$allConections = getAllConnections -subscription $subs
 #endregion helper functions
 
-$g = New-Graph -Type AdjacencyGraph -EnableVertexComparer
+$g = New-Graph -Type BidirectionalGraph -EnableVertexComparer
 
 #region fill in the graph
 #add vnets
