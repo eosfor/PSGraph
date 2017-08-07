@@ -9,6 +9,8 @@
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+postBuildScript.ps1
+
 
 # Build results
 [Dd]ebug/
