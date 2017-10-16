@@ -287,6 +287,7 @@ foreach ($v in ($g.Vertices  | ? {$_ -is [VNET]})){
     foreach ($v2 in ($g.Vertices  | ? {$_ -is [VNET]})){
         if ($v.ResourceID -eq $v2.PeeredNetwork) {
             Add-Edge -From $v -To $v2 -Graph $g
+            Add-Edge -From $v2 -To $v -Graph $g
         }        
     }    
 }
@@ -347,6 +348,8 @@ $fmt2 = {
     }
 }
 
+
+<#
 #Export graph
 $graphFile = "c:\temp\testGraph.gv"
 $svgOutFile = "c:\temp\testGraph.svg"
@@ -362,3 +365,4 @@ cd c:\temp\graphviz\release\bin
 .\dot.exe -Tsvg $graphFile -o $svgOutFile
 .\dot.exe -Tpng $graphFile -o $pngOutFile
 popd
+#>
