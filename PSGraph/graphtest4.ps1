@@ -24,7 +24,7 @@ class Subscription : Psgraph.PSGraphVertex {
         $this.SubscriptionID = $SubID
         $this.SubscriptionName = $SubName
         $this.Label = $SubName
-        $this.Shape =  "Rectangle"
+        $this.Shape =  "Box"
     }
 
     [string]get_UniqueKey() { return $this.Label }
@@ -43,6 +43,7 @@ class Gateway : Psgraph.PSGraphVertex{
         $this.SubscriptionID = $sID
         $this.Properties = $Prop
         $this.Label = $name
+		$this.Shape = "Polygon"
     }
 
     [string]get_UniqueKey() { return $this.Label + $this.ResourceID }
@@ -65,6 +66,7 @@ class Connection : Psgraph.PSGraphVertex {
         $this.SubscriptionID = $sID
         $this.Properties = $p
         $this.Label = $n
+		$this.Shape = $s
     }
 
     [string]get_UniqueKey() { return $this.Label + $this.ResourceID }
@@ -107,7 +109,7 @@ class ClassicVNET : Psgraph.PSGraphVertex {
     [string]$VNETType = "ARM"
     [string]$ResourceID
     [array]$MPLSGWConnection 
-
+	
     ClassicVNET($sID, $n, $rType, $loc, $sub, $as, $dhcp, $mpls){
             $this.Label = $n
             $this.SubscriptionId = $sID
@@ -120,8 +122,8 @@ class ClassicVNET : Psgraph.PSGraphVertex {
             $this.PeeredNetwork = "NA"
             $this.ResourceID = "NA"
             $this.MPLSGWConnection = $mpls
-            $this.Fillcolor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
-            $this.Style = "Filled"
+			$this.Shape = "Triangle"
+
     }
 
     [string]get_UniqueKey() { return $this.Label }
@@ -136,7 +138,7 @@ class ClassicCircuit : Psgraph.PSGraphVertex {
         $this.ResourceType = "ClassicMPLS"
         $this.SubscriptionID = $sID
         $this.Label = $n
-        $this.Shape =  "Circle"
+        $this.Shape =  "Diamond"
     }
 
     [string]get_UniqueKey() { return $this.Label }
@@ -168,6 +170,7 @@ foreach ($vnet in $allVnets) {
         DHCPOptions = $vnet.Properties.dhcpOptions.dnsServers
         PeeredNetwork = $vnet.Properties.virtualNetworkPeerings.properties.remoteVirtualNetwork.id
         ResourceID = $vnet.ResourceId
+		Shape = "Hexagon"
     }
     Add-Vertex -Vertex([VNET]$vnetHash) -Graph $g
 }
@@ -343,7 +346,7 @@ foreach ($cv in  ($g.vertices  | where {$_ -is [ClassicVNET]})){
 
 $fmt2 = {
     param($edge, $edgeFormatter)
-    If ($edge.Target -is [ClassicCircuit]) {
+    If ($edge.Target -is [VNET]) {
             $edgeFormatter.StrokeGraphvizColor = [QuickGraph.Graphviz.Dot.GraphvizColor]::new(200,215,0,44)
     }
 }
@@ -355,7 +358,7 @@ $graphFile = "c:\temp\testGraph.gv"
 $svgOutFile = "c:\temp\testGraph.svg"
 $pngOutFile = "c:\temp\testGraph.png"
 
-Export-Graph -Graph $g -Format Graphviz -Path $graphFile -EdgeFormatter $fmt2 -Verbose
+Export-Graph -Graph $g -Format Graphviz -Path $graphFile  #-EdgeFormatter $fmt2 -Verbose
 $tempFile = Get-Content $graphFile
 $tempFile[0] += "`r`n" + "rankdir = LR"
 $tempFile | Out-File $graphFile -Encoding ascii
