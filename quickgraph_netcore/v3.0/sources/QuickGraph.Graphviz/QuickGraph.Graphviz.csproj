@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\quickgraph.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETCOREAPP2_0;SILVERLIGHT</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE;RELEASE;NETCOREAPP2_0;SILVERLIGHT</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\CondensatedGraphRenderer.cs" Link="CondensatedGraphRenderer.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizArrow.cs" Link="Dot\GraphvizArrow.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizArrowClipping.cs" Link="Dot\GraphvizArrowClipping.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizArrowFilling.cs" Link="Dot\GraphvizArrowFilling.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizArrowShape.cs" Link="Dot\GraphvizArrowShape.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizClusterMode.cs" Link="Dot\GraphvizClusterMode.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizColor.cs" Link="Dot\GraphvizColor.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizEdge.cs" Link="Dot\GraphvizEdge.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizEdgeDirection.cs" Link="Dot\GraphvizEdgeDirection.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizEdgeExtremity.cs" Link="Dot\GraphvizEdgeExtremity.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizEdgeLabel.cs" Link="Dot\GraphvizEdgeLabel.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizEdgeStyle.cs" Link="Dot\GraphvizEdgeStyle.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizFont.cs" Link="Dot\GraphvizFont.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizGraph.cs" Link="Dot\GraphvizGraph.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizImageType.cs" Link="Dot\GraphvizImageType.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizLabelJustification.cs" Link="Dot\GraphvizLabelJustification.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizLabelLocation.cs" Link="Dot\GraphvizLabelLocation.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizLayer.cs" Link="Dot\GraphvizLayer.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizLayerCollection.cs" Link="Dot\GraphvizLayerCollection.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizOutputMode.cs" Link="Dot\GraphvizOutputMode.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizPageDirection.cs" Link="Dot\GraphvizPageDirection.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizPoint.cs" Link="Dot\GraphvizPoint.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizRankDirection.cs" Link="Dot\GraphvizRankDirection.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizRatioMode.cs" Link="Dot\GraphvizRatioMode.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizRecord.cs" Link="Dot\GraphvizRecord.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizRecordCell.cs" Link="Dot\GraphvizRecordCell.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizRecordCellCollection.cs" Link="Dot\GraphvizRecordCellCollection.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizRecordEscaper.cs" Link="Dot\GraphvizRecordEscaper.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizSize.cs" Link="Dot\GraphvizSize.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizVertex.cs" Link="Dot\GraphvizVertex.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizVertexShape.cs" Link="Dot\GraphvizVertexShape.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\Dot\GraphvizVertexStyle.cs" Link="Dot\GraphvizVertexStyle.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\EdgeMergeCondensatedGraphRenderer.cs" Link="EdgeMergeCondensatedGraphRenderer.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\FormatEdgeEventArgs.cs" Link="FormatEdgeEventArgs.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\FormatVertexEventArgs.cs" Link="FormatVertexEventArgs.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\GraphRendererBase.cs" Link="GraphRendererBase.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\GraphvizAlgorithm.cs" Link="GraphvizAlgorithm.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\GraphvizExtensions.cs" Link="GraphvizExtensions.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\IDotEngine.cs" Link="IDotEngine.cs" />
+    <Compile Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\SvgHtmlWrapper.cs" Link="SvgHtmlWrapper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Dot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\quickgraph\3.0\sources\QuickGraph.Graphviz\quickgraph.snk" Link="quickgraph.snk" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QuickGraph\QuickGraph.csproj" />
+  </ItemGroup>
+
+</Project>
