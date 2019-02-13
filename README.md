@@ -10,4 +10,7 @@ The idea is to have a tool to analyze dependencies of objects in a scripted way.
 Install-Module PSQuickGraph -Scope CurrentUser
 ```
 ### Usage examples
-[Simple  example for windows processes](https://eosfor.wordpress.com/2017/04/25/lets-graph-it/)
+
+- [How to see relationships in your module](https://eosfor.github.io/2018/how-to-see-relationships-in-your-module/)
+- [How to find dependencies between applications](https://eosfor.github.io/2017/how-to-find-dependencies-between-applications/)
+- [Analyzing sysmon events with graph](https://eosfor.github.io/2017/analyzing-sysmon-events-with-graph/)
