@@ -48,6 +48,7 @@ namespace PSGraph
 
                 case PsGraphType.BidirectionalMatrixGraph:
                     //newGraph = new BidirectionalMatrixGraph<Edge<int>();
+                    ThrowTerminatingError(new ErrorRecord(new NotImplementedException(), "99", ErrorCategory.InvalidOperation, null));
                     break;
 
                 case PsGraphType.UndirectedGraph:

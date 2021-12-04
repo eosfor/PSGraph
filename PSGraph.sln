@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.15
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31911.196
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSGraph", "PSGraph\PSGraph.csproj", "{BA26715E-9112-438F-AB7A-95CF35B299A5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{012D6D1C-1DF2-456B-BA61-8F4D3DFB98CD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSGraph.Tests", "PSGraph.Tests\PSGraph.Tests.csproj", "{DCDAB731-4A5D-4078-A01E-EB8AEF660436}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quickGraphTests", "quickGraphTests\quickGraphTests\quickGraphTests.csproj", "{2200CA94-DA2E-4E55-AE3F-8BC82347B226}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PSScripts", "PSScripts", "{8DD302B8-3787-433F-AE50-E1BC68A081DE}"
 	ProjectSection(SolutionItems) = preProject
@@ -20,14 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PSScripts", "PSScripts", "{
 		PSGraph\simpleGraphSample.ps1 = PSGraph\simpleGraphSample.ps1
 		PSGraph\testScript.ps1 = PSGraph\testScript.ps1
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickGraph", "quickgraph\3.0\sources\QuickGraph\QuickGraph.csproj", "{A9A5C115-0680-44B3-A87E-5ECF4C93814E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickGraph.Data", "quickgraph\3.0\sources\QuickGraph.Data\QuickGraph.Data.csproj", "{960C14D1-EDBD-40E5-8AE6-25E311551B87}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickGraph.Graphviz", "quickgraph\3.0\sources\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj", "{595D6322-637A-4A36-97F1-D53F3F9ECEA7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickGraph.Serialization", "quickgraph\3.0\sources\QuickGraph.Serialization\QuickGraph.Serialization.csproj", "{4D96C520-8EDA-49F0-9201-ED8BEE69B1FC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B846169E-1562-4F67-9E91-8C164CD86489}"
 	ProjectSection(SolutionItems) = preProject
@@ -57,41 +47,14 @@ Global
 		{DCDAB731-4A5D-4078-A01E-EB8AEF660436}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DCDAB731-4A5D-4078-A01E-EB8AEF660436}.Release20|Any CPU.ActiveCfg = Release|Any CPU
 		{DCDAB731-4A5D-4078-A01E-EB8AEF660436}.Release20|Any CPU.Build.0 = Release|Any CPU
-		{2200CA94-DA2E-4E55-AE3F-8BC82347B226}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2200CA94-DA2E-4E55-AE3F-8BC82347B226}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2200CA94-DA2E-4E55-AE3F-8BC82347B226}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2200CA94-DA2E-4E55-AE3F-8BC82347B226}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2200CA94-DA2E-4E55-AE3F-8BC82347B226}.Release20|Any CPU.ActiveCfg = Release|Any CPU
-		{2200CA94-DA2E-4E55-AE3F-8BC82347B226}.Release20|Any CPU.Build.0 = Release|Any CPU
-		{A9A5C115-0680-44B3-A87E-5ECF4C93814E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A9A5C115-0680-44B3-A87E-5ECF4C93814E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A9A5C115-0680-44B3-A87E-5ECF4C93814E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A9A5C115-0680-44B3-A87E-5ECF4C93814E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A9A5C115-0680-44B3-A87E-5ECF4C93814E}.Release20|Any CPU.ActiveCfg = Release|Any CPU
-		{A9A5C115-0680-44B3-A87E-5ECF4C93814E}.Release20|Any CPU.Build.0 = Release|Any CPU
-		{960C14D1-EDBD-40E5-8AE6-25E311551B87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{960C14D1-EDBD-40E5-8AE6-25E311551B87}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{960C14D1-EDBD-40E5-8AE6-25E311551B87}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{960C14D1-EDBD-40E5-8AE6-25E311551B87}.Release|Any CPU.Build.0 = Release|Any CPU
-		{960C14D1-EDBD-40E5-8AE6-25E311551B87}.Release20|Any CPU.ActiveCfg = Release20|Any CPU
-		{960C14D1-EDBD-40E5-8AE6-25E311551B87}.Release20|Any CPU.Build.0 = Release20|Any CPU
-		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Release20|Any CPU.ActiveCfg = Release20|Any CPU
-		{595D6322-637A-4A36-97F1-D53F3F9ECEA7}.Release20|Any CPU.Build.0 = Release20|Any CPU
-		{4D96C520-8EDA-49F0-9201-ED8BEE69B1FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D96C520-8EDA-49F0-9201-ED8BEE69B1FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D96C520-8EDA-49F0-9201-ED8BEE69B1FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D96C520-8EDA-49F0-9201-ED8BEE69B1FC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D96C520-8EDA-49F0-9201-ED8BEE69B1FC}.Release20|Any CPU.ActiveCfg = Release|Any CPU
-		{4D96C520-8EDA-49F0-9201-ED8BEE69B1FC}.Release20|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DCDAB731-4A5D-4078-A01E-EB8AEF660436} = {012D6D1C-1DF2-456B-BA61-8F4D3DFB98CD}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5D867CF8-C1FA-46D2-870F-F802CB0977AD}
 	EndGlobalSection
 EndGlobal

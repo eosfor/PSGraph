@@ -191,12 +191,6 @@
     <Compile Include="SvgHtmlWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\QuickGraph\QuickGraph.csproj">
-      <Project>{A9A5C115-0680-44B3-A87E-5ECF4C93814E}</Project>
-      <Name>QuickGraph</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="quickgraph.snk" />
   </ItemGroup>
   <ItemGroup>
