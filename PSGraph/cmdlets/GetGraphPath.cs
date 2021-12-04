@@ -1,11 +1,11 @@
-﻿using QuickGraph;
+﻿using QuikGraph;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Management.Automation;
 using System.Reflection;
 using Microsoft.PowerShell;
-using QuickGraph.Algorithms;
+using QuikGraph.Algorithms;
 
 namespace PSGraph
 {

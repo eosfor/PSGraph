@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Management.Automation;
-using QuickGraph;
+using QuikGraph;
 
 namespace PSGraph
 {

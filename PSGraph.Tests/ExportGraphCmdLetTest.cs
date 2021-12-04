@@ -5,7 +5,7 @@ using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using QuickGraph;
+using QuikGraph;
 using System.Collections.ObjectModel;
 
 // -graph $g -format graphviz -path c:\temp\graph.txt
@@ -146,7 +146,8 @@ namespace PSGraph.Tests
         {
             try
             {
-                var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
+                //var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
+                var graph = new AdjacencyGraph<Object, Edge<object>>();
                 _powershell.AddCommand("Export-Graph");
                 _powershell.AddParameters(new Dictionary<String, Object>
                     {

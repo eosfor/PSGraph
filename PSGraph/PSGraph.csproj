@@ -31,17 +31,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DotParser, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DotParser.1.0.6\lib\net45\DotParser.dll</HintPath>
-    </Reference>
-    <Reference Include="FSharpx.Collections.Experimental, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\FSharpx.Collections.Experimental.1.7.3\lib\40\FSharpx.Collections.Experimental.dll</HintPath>
-    </Reference>
-    <Reference Include="FSharpx.Core, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\FSharpx.Core.1.7.3\lib\40\FSharpx.Core.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="QuikGraph, Version=2.3.0.0, Culture=neutral, PublicKeyToken=46bd58b0789759cb, processorArchitecture=MSIL">
+      <HintPath>..\packages\QuikGraph.2.3.0\lib\net45\QuikGraph.dll</HintPath>
+    </Reference>
+    <Reference Include="QuikGraph.Graphviz, Version=2.3.1.0, Culture=neutral, PublicKeyToken=46bd58b0789759cb, processorArchitecture=MSIL">
+      <HintPath>..\packages\QuikGraph.Graphviz.2.3.1\lib\net40\QuikGraph.Graphviz.dll</HintPath>
+    </Reference>
+    <Reference Include="QuikGraph.Serialization, Version=2.3.0.0, Culture=neutral, PublicKeyToken=46bd58b0789759cb, processorArchitecture=MSIL">
+      <HintPath>..\packages\QuikGraph.Serialization.2.3.0\lib\net40\QuikGraph.Serialization.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -56,30 +56,6 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
-    <Reference Include="YC.QuickGraph, Version=3.7.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.QuickGraph.3.7.4\lib\net45\YC.QuickGraph.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Data, Version=3.7.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.QuickGraph.3.7.4\lib\net45\YC.QuickGraph.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.QuickGraph.FSA, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.QuickGraph.3.7.4\lib\net45\YC.QuickGraph.FSA.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.QuickGraph.FST, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.QuickGraph.3.7.4\lib\net45\YC.QuickGraph.FST.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Glee, Version=3.7.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.QuickGraph.3.7.4\lib\net45\YC.QuickGraph.Glee.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Graphviz, Version=3.7.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.QuickGraph.3.7.4\lib\net45\YC.QuickGraph.Graphviz.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.QuickGraph.Petri, Version=3.7.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.QuickGraph.3.7.4\lib\net45\YC.QuickGraph.Petri.dll</HintPath>
-    </Reference>
-    <Reference Include="YC.QuickGraphFS, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YC.QuickGraph.3.7.4\lib\net45\YC.QuickGraphFS.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="cmdlets\AddEdgeCmdLet.cs" />
