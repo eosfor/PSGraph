@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Management.Automation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using QuickGraph;
+using QuikGraph;
 
 namespace PSGraph.Tests
 {

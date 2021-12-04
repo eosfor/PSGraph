@@ -5,7 +5,7 @@ using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using QuickGraph;
+using QuikGraph;
 using System.Collections.ObjectModel;
 
 //add-edge -from $nodeFrom -to $nodeTo -attributes $attr -graph $g

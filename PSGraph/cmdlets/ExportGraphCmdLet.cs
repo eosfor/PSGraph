@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Management.Automation;
-using QuickGraph;
-using QuickGraph.Graphviz;
+using QuikGraph;
+using QuikGraph.Graphviz;
 using System.Reflection;
 using System.Xml;
-using QuickGraph.Serialization;
+using QuikGraph.Serialization;
 using System.IO;
 using System.Text;
 using System.Linq;
@@ -97,10 +97,10 @@ namespace PSGraph
             {
                 foreach (PropertyInfo p in e.Vertex.GetType().GetProperties())
                 {
-                    var destProperty = e.VertexFormatter.GetType().GetProperty(p.Name);
+                    var destProperty = e.VertexFormat.GetType().GetProperty(p.Name); // e.VertexFormatter.GetType().GetProperty(p.Name);
                     if (destProperty != null)
                     {
-                        destProperty.SetValue(e.VertexFormatter, p.GetValue(e.Vertex));
+                        destProperty.SetValue(e.VertexFormat, p.GetValue(e.Vertex));
                     }
                 }
             }
@@ -114,7 +114,7 @@ namespace PSGraph
                 formatter = ((PSObject)formatter).ImmediateBaseObject;
             }
 
-            formatter.Invoke(e.Edge, e.EdgeFormatter);
+            formatter.Invoke(e.Edge, e.EdgeFormat);
         }
 
         public void ExportGraphML(dynamic graph)
