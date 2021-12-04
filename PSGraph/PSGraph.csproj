@@ -61,11 +61,11 @@
     <Compile Include="cmdlets\AddEdgeCmdLet.cs" />
     <Compile Include="cmdlets\AddVertexCmdlet.cs" />
     <Compile Include="cmdlets\ExportGraphCmdLet.cs" />
-    <Compile Include="ExportTypes.cs" />
+    <Compile Include="types\ExportTypes.cs" />
     <Compile Include="cmdlets\GetGraphPath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="cmdlets\NewPsGraphCmdlet.cs" />
-    <Compile Include="PsGraphType.cs" />
+    <Compile Include="types\PsGraphType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
