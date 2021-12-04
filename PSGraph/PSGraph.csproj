@@ -61,6 +61,7 @@
     <Compile Include="cmdlets\AddEdgeCmdLet.cs" />
     <Compile Include="cmdlets\AddVertexCmdlet.cs" />
     <Compile Include="cmdlets\ExportGraphCmdLet.cs" />
+    <Compile Include="types\DSM.cs" />
     <Compile Include="types\ExportTypes.cs" />
     <Compile Include="cmdlets\GetGraphPath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
