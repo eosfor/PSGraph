@@ -8,10 +8,10 @@ namespace PSGraph
     public class AddVertexCmdlet : PSCmdlet
     {
         [Parameter(Mandatory = true)]
-        public object Vertex { get; set; }
+        public object Vertex;
 
         [Parameter(Mandatory = true)]
-        public object Graph { get; set; }
+        public object Graph;
 
         protected override void ProcessRecord()
         {
