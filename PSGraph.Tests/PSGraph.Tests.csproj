@@ -71,15 +71,15 @@
     <Compile Include="PSHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PSGraph\PSGraph.csproj">
-      <Project>{ba26715e-9112-438f-ab7a-95cf35b299a5}</Project>
-      <Name>PSGraph</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="psgraph.pester.tests.ps1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PSGraphv2\PSGraph.csproj">
+      <Project>{5b7a6901-500d-4d2f-900b-942b471ae425}</Project>
+      <Name>PSGraph</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
