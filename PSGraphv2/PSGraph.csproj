@@ -10,9 +10,11 @@
     <PackageReference Include="DotParser" Version="1.1.0" />
     <PackageReference Include="FSharp.Core" Version="6.0.1" />
     <PackageReference Include="FSharpx.Core" Version="1.8.32" />
+    <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
     <PackageReference Include="QuikGraph" Version="2.3.0" />
     <PackageReference Include="QuikGraph.Graphviz" Version="2.3.1" />
     <PackageReference Include="QuikGraph.Serialization" Version="2.3.0" />
+    <PackageReference Include="Svg" Version="3.3.0" />
     <PackageReference Include="System.Management.Automation" Version="7.2.0" />
   </ItemGroup>
 
