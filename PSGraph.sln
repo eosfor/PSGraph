@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSGraph", "PSGraph\PSGraph.csproj", "{BA26715E-9112-438F-AB7A-95CF35B299A5}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{012D6D1C-1DF2-456B-BA61-8F4D3DFB98CD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSGraph.Tests", "PSGraph.Tests\PSGraph.Tests.csproj", "{DCDAB731-4A5D-4078-A01E-EB8AEF660436}"
@@ -28,7 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B846169E-1
 		docs\New-Graph.md = docs\New-Graph.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSGraphv2", "PSGraphv2\PSGraphv2.csproj", "{5B7A6901-500D-4D2F-900B-942B471AE425}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSGraph", "PSGraphv2\PSGraph.csproj", "{5B7A6901-500D-4D2F-900B-942B471AE425}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,12 +35,6 @@ Global
 		Release20|Any CPU = Release20|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BA26715E-9112-438F-AB7A-95CF35B299A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BA26715E-9112-438F-AB7A-95CF35B299A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BA26715E-9112-438F-AB7A-95CF35B299A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BA26715E-9112-438F-AB7A-95CF35B299A5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BA26715E-9112-438F-AB7A-95CF35B299A5}.Release20|Any CPU.ActiveCfg = Release|Any CPU
-		{BA26715E-9112-438F-AB7A-95CF35B299A5}.Release20|Any CPU.Build.0 = Release|Any CPU
 		{DCDAB731-4A5D-4078-A01E-EB8AEF660436}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DCDAB731-4A5D-4078-A01E-EB8AEF660436}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCDAB731-4A5D-4078-A01E-EB8AEF660436}.Release|Any CPU.ActiveCfg = Release|Any CPU
