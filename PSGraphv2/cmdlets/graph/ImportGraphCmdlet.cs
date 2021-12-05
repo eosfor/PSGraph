@@ -20,7 +20,7 @@ namespace PSGraph
             var s = File.ReadAllText(Path, Encoding.UTF8);
             var p = DotParser.DotParser.parse(s);
 
-            var g = new BidirectionalGraph<object, Edge<object>>();
+            var g = new BidirectionalGraph<object, STaggedEdge<object, object>>();
 
             foreach (var node in p.Nodes)
             {
@@ -32,7 +32,7 @@ namespace PSGraph
             {
                 var from = p.Nodes.Where(n => n.Key == e.Key.Item1).First().Value["label"];
                 var to = p.Nodes.Where(n => n.Key == e.Key.Item2).First().Value["label"];
-                var newEdge = new Edge<object>(from, to);
+                var newEdge = new STaggedEdge<object, object>(from, to, null);
                 g.AddEdge(newEdge);
             }
 
