@@ -1,23 +1,25 @@
-﻿using QuikGraph;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
+using PSGraph.DesignStructureMatrix;
 
-namespace PSGraph.cmdlets
+namespace PSGraph.cmdlets.dsm
 {
-    [Cmdlet(VerbsCommon.New, "DSM")]
-    public  class NewDSMCmdlet: PSCmdlet
+    [Cmdlet(VerbsData.Export, "DSM")]
+    public class ExportDSMCmdlet : PSCmdlet
     {
+        [Parameter(Position = 0, Mandatory = true)]
+        public DesignStructureMatrix.Dsm Dsm;
+
         [Parameter(Mandatory = true)]
-        public BidirectionalGraph<object, STaggedEdge<object, object>> Graph;
+        public string Path;
         protected override void ProcessRecord()
         {
 
-            var d = new DSM.dsm(Graph);
-            WriteObject(d);
+
             //base.ProcessRecord();
         }
     }
