@@ -19,8 +19,9 @@ namespace PSGraph.cmdlets.dsm
         protected override void ProcessRecord()
         {
 
-
-            //base.ProcessRecord();
+            Dsm.Cluster();
+            var r = Dsm.Order();
+            r.ExportSvg(Path);
         }
     }
 }

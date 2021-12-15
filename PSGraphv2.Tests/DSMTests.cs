@@ -15,12 +15,14 @@ namespace PSGraph.Tests
 
         private static BidirectionalGraph<object, STaggedEdge<object, object>> _simpleTestGraph1;
         private static BidirectionalGraph<object, STaggedEdge<object, object>> _simpleTestGraph2;
+        private static BidirectionalGraph<object, STaggedEdge<object, object>> _simpleTestGraph3;
 
         [ClassInitialize()]
         public static void InitPsGraphUnitTest(TestContext tc)
         {
             InitializeSimpleTestGraph1();
             InitializeSimpleTestGraph2();
+            InitializeSimpleTestGraph3();
         }
 
         private static void InitializeSimpleTestGraph1()
@@ -93,6 +95,43 @@ namespace PSGraph.Tests
             _simpleTestGraph2 = g;
 
             //throw new NotImplementedException();
+        }
+
+        private static void InitializeSimpleTestGraph3()
+        {
+            var g = new BidirectionalGraph<object, STaggedEdge<object, object>>();
+
+            g.AddVertex("A");
+            g.AddVertex("B");
+            g.AddVertex("C");
+            g.AddVertex("D");
+            g.AddVertex("E");
+            g.AddVertex("F");
+            g.AddVertex("G");
+            g.AddVertex("H");
+
+            g.AddEdge(new STaggedEdge<object, object>("D", "A", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("H", "A", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("E", "B", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("G", "B", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("E", "C", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("F", "D", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("H", "D", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("B", "E", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("C", "E", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("G", "E", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("A", "F", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("H", "F", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("B", "G", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("C", "G", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("A", "H", String.Empty));
+            g.AddEdge(new STaggedEdge<object, object>("D", "H", String.Empty));
+
+
+
+            System.IO.File.WriteAllText("c:\\temp\\test3.gv", g.ToGraphviz());
+
+            _simpleTestGraph3 = g;
         }
 
         [TestMethod]
