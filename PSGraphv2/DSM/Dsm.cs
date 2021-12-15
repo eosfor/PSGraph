@@ -15,30 +15,42 @@ namespace PSGraph.DesignStructureMatrix
     public class Cluster
     {
         public List<object> Objects = new List<object>();
-
-        //public System.Drawing.Color Color = System.Drawing.Color.FromArgb(Random.Shared.Next(255), Random.Shared.Next(255), Random.Shared.Next(255));
+        public System.Drawing.Color Color = System.Drawing.Color.FromArgb(Random.Shared.Next(255), Random.Shared.Next(255), Random.Shared.Next(255));
 
     }
     public class Dsm
     {
-        //private int[,] _dsm;
         private BidirectionalGraph<object, STaggedEdge<object, object>> _sourceGraph;
         private DsmStorage _dsm;
         private List<Cluster> _clusters;
 
 
         private int _pow_cc = 2;
-        private int _pow_bid = 2;
+        private int _pow_bid = 1;
         private int _pow_dep = 2;
         private int _max_Cl_size = 0;
         private int _rand_accept = 0;
         private int _rand_bid = 0;
         private int _times = 2;
-        private int _stable_limit = 2;
+        private int _stable_limit = 10;
+
+        private float _minObservedtCCost = float.MaxValue ;
+        public float MinObservedtCCost { get => _minObservedtCCost; }
+        private float _tCCost = 0;
 
         public Single this[int row, int col] { get => _dsm[row, col]; }
         public int Count => _dsm.Count;
         public int Size => _dsm.Size;
+
+        private List<Cluster> FindClusterByCoordinates(int i, int j)
+        {
+            var from = _dsm.ColIndex.Where(x => x.Value == i).First();
+            var to = _dsm.RowIndex.Where(e => e.Value == i).First();
+
+            var ret = _clusters.Where(c => c.Objects.Contains(from.Key) && c.Objects.Contains(to.Key)).ToList();
+
+            return ret;
+        }
 
         protected Dsm(BidirectionalGraph<object, STaggedEdge<object, object>> sourceGraph, 
                       DsmStorage dsm, 
@@ -48,7 +60,7 @@ namespace PSGraph.DesignStructureMatrix
                       int max_Cl_size = 0,
                       int rand_accept = 0,
                       int rand_bid = 0,
-                      int times = 2,
+                      int times = 5,
                       int stable_limit = 2)
         {
             _sourceGraph = sourceGraph;
@@ -82,11 +94,11 @@ namespace PSGraph.DesignStructureMatrix
         public void Cluster()
         {
 
-            bool isStable = false;
             int system = 0;
+            var r = new Random();
 
             CreateInitialClusters();
-            var tCCost = CalculateTotalCoordinationCost();
+            _tCCost = CalculateTotalCoordinationCost();
 
             while (system < _stable_limit)
             {
@@ -94,39 +106,39 @@ namespace PSGraph.DesignStructureMatrix
                 {
                     var obj = PickRamdomDsmObject();
                     var bid = CalculateClusterBids(obj);
-                    var bestBid = bid.Last().Value[0];
+
+                    var currentRandBid = r.Next(_rand_bid - 1);
+                    var bestBid = currentRandBid == (_rand_bid - 1) ? bid.Skip(bid.Count - 2).First().Value[0] : bid.Last().Value[0];
+
                     var oldCluster = Move(obj, bestBid);
                     var newTCCost = CalculateTotalCoordinationCost();
-                    if (newTCCost <= tCCost)
+
+                    var currentRandAccept = r.Next(_rand_accept - 1);
+                    //system = newTCCost == _tCCost ? system+1 : system;
+                    if ( newTCCost <= _tCCost  )
                     {
-                        tCCost = newTCCost;
+                        system = newTCCost == _tCCost ? system + 1 : 0;
+                        _tCCost = newTCCost;
                     }
                     else
                     {
-                        var r = new Random();
-                        int choice = -1;
-
-                        // rolling a dice from 0 to _rand_accept
-                        if (_rand_accept > 0)
-                        {
-                            choice = r.Next(_rand_accept);
-                        }
-
-                        // in one case out of _rand_accept possibilities we keep changes
-                        // otherwise - rollback
-                        if (choice != _rand_accept)
-                        {
+                        if (currentRandAccept == (_rand_accept - 1)) {
+                            // rollback
                             foreach (var cluster in oldCluster)
                             {
                                 Move(obj, cluster);
                             }
-                            
+                            system += 1;
                         }
-                        
+                        else
+                        {
+                            _tCCost = newTCCost;
+                            system = 0;
+                        }
+
                     }
                     UpdateClusters();
                 }
-                system++;
             }
         }
 
@@ -141,11 +153,13 @@ namespace PSGraph.DesignStructureMatrix
 
         public void ExportSvg(string Path)
         {
+            int textShift = 15;
+            int itemSize = 5;
             var svgDoc = new SvgDocument()
             {
-                Width = _dsm.Size * 10 + 200,
-                Height = _dsm.Size * 10 + 200,
-                ViewBox = new SvgViewBox() { MinX = 0, MinY = 0, Height = _dsm.Size * 10 + 200, Width = _dsm.Size * 10 + 200 }
+                Width = _dsm.Size * itemSize + textShift,
+                Height = _dsm.Size * itemSize + textShift,
+                ViewBox = new SvgViewBox() { MinX = 0, MinY = 0, Height = _dsm.Size * itemSize + textShift, Width = _dsm.Size * itemSize + textShift }
             };
 
             var svgGroup = new SvgGroup();
@@ -155,31 +169,81 @@ namespace PSGraph.DesignStructureMatrix
 
             for (int i = 0; i <= _dsm.Size - 1; i++)
             {
-                var row = i * 10 + 100;
+                var row = i * itemSize + textShift;
                 for (int j = 0; j <= _dsm.Size - 1; j++)
                 {
-                    var col = j * 10 + 100;
+                    var cl = FindClusterByCoordinates(i, j).First();
+
+                    var col = j * itemSize + textShift;
                     var rect = new SvgRectangle()
                     {
-                        Width = 10,
-                        Height = 10,
+                        Width = itemSize,
+                        Height = itemSize,
                         X = row,
                         Y = col,
-                        StrokeWidth = 1,
-                        Stroke = new SvgColourServer(System.Drawing.Color.Black)
+                        StrokeWidth = (float)0.5,
+                        Stroke = new SvgColourServer(System.Drawing.Color.DimGray)
                     };
-                    if (_dsm.GetByIndex(i, j) == 0)
+                    if (i != j)
                     {
-                        rect.Fill = new SvgColourServer(System.Drawing.Color.White);
+                        if (_dsm.GetByIndex(j, i) == 0)
+                        {
+                            rect.Fill = new SvgColourServer(System.Drawing.Color.White);
+                        }
+                        else
+                        {
+                            rect.Fill = new SvgColourServer(cl.Color); /*new SvgColourServer(System.Drawing.Color.Red);*/
+                        }
                     }
                     else
                     {
-                        rect.Fill = new SvgColourServer(System.Drawing.Color.Red);
+                        rect.Fill = new SvgColourServer(System.Drawing.Color.SlateGray);
                     }
 
                     svgDoc.Children.Add(rect);
 
                 }
+            }
+
+            // cluster bondaries
+            foreach(var cluster in _clusters)
+            {
+                var row = _dsm.RowIndex[cluster.Objects.First()] * itemSize + textShift;
+                var w = cluster.Objects.Count * itemSize;
+                var h = cluster.Objects.Count * itemSize;
+
+                var rect = new SvgRectangle()
+                {
+                    Width = w,
+                    Height = h,
+                    X = row,
+                    Y = row, //top left corner
+                    StrokeWidth = (float)1.0,
+                    Stroke = new SvgColourServer(System.Drawing.Color.Black),
+                    FillOpacity = 0
+                };
+
+                svgDoc.Children.Add(rect);
+            }
+
+            // labels - X
+            foreach (var row in _dsm.RowIndex)
+            {
+                var lbl = new Svg.SvgText(row.Key.ToString());
+                lbl.X.Add(textShift - itemSize);
+                lbl.Y.Add((row.Value + 1) * itemSize + textShift - 1);
+                lbl.FontSize = itemSize - 1;
+                svgDoc.Children.Add(lbl);
+            }
+
+            // labels - Y
+            foreach (var col in _dsm.ColIndex)
+            {
+                var lbl = new Svg.SvgText(col.Key.ToString());
+                lbl.X.Add((col.Value) * itemSize + textShift);
+                lbl.Y.Add(textShift - itemSize + 2);
+                lbl.FontSize = itemSize - 1;
+                svgDoc.Children.Add(lbl);
             }
 
             svgDoc.Write(Path);
@@ -189,7 +253,6 @@ namespace PSGraph.DesignStructureMatrix
         {
             RemoveEmptyClusters();
             RemoveIdenticalClusters();
-            //throw new NotImplementedException();
         }
 
         private void RemoveIdenticalClusters()
@@ -204,14 +267,12 @@ namespace PSGraph.DesignStructureMatrix
                     }
                 }
             }
-            //throw new NotImplementedException();
         }
 
         private void RemoveEmptyClusters()
         {
 
             var r = _clusters.RemoveAll( c => c.Objects.Count == 0);
-            //throw new NotImplementedException();
         }
 
         private List<Cluster> Move(object obj, Cluster bestBid)
@@ -226,7 +287,6 @@ namespace PSGraph.DesignStructureMatrix
             bestBid.Objects.Add(obj);
 
             return oldClusters;
-            //throw new NotImplementedException();
         }
 
         private SortedDictionary<double, List<Cluster>> CalculateClusterBids(object obj)
@@ -305,7 +365,10 @@ namespace PSGraph.DesignStructureMatrix
                 }
             }
 
-            return intraClustertCost + extraClusterCost;
+            var ret = intraClustertCost / extraClusterCost;
+            _minObservedtCCost = ret < _minObservedtCCost ? ret : _minObservedtCCost; //want to record the minimum cost to compare it to the selected one at the end of the run
+
+            return ret;
         }
 
         private List<Cluster> FindDsmObjectCluster(object obj)

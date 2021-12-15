@@ -16,57 +16,64 @@ namespace PSGraph.DesignStructureMatrix
         private Dictionary<object, int> _colIndex = new Dictionary<object, int>();
         private BidirectionalGraph<object, STaggedEdge<object, object>> _sourceGraph;
 
-        public Single this[object from, object to] { get => FindDsmElementByGraphVertex(from, to); }
+        public Single this[object from, object to] { get => FindDsmElementByGraphVertex(from, to); set => SetDsmElementByGraphVertex(from, to, value);  }
+
         public List<object> Objects { get => GetDsmElementNames(); }
         public int Size => this.Objects.Count;
         public int Count => (this._dsm.RowCount * this._dsm.ColumnCount);
 
         public Matrix<float> Dsm { get => _dsm; }
-        
+
+        public Dictionary<object, int> RowIndex => _rowIndex;
+        public Dictionary<object, int> ColIndex => _colIndex;
+
+
         public Single GetByIndex(int i, int j)
         {
             return _dsm[i, j];
         }
-        
+
+
+        private void SetDsmElementByGraphVertex(object from, object to, float value)
+        {
+            var colIndex = _colIndex[from];
+            var rowIndex = _rowIndex[to];
+
+            _dsm[rowIndex, colIndex] = value;
+
+            //throw new NotImplementedException();
+        }
+
         public DsmStorage GetOrderedDsm(List<Cluster> clusters) 
         {
-            var ret = Matrix<Single>.Build.Dense(_sourceGraph.VertexCount, _sourceGraph.VertexCount);
+            Dictionary<object, int> rowIndex = new Dictionary<object, int>();
+            Dictionary<object, int> colIndex = new Dictionary<object, int>();
+            List<object> index = new List<object>();
+            int i = 0;
+            foreach (var cluster in clusters)
+            {
+                foreach (var item in cluster.Objects)
+                {
+                    index.Add(item);
+                    rowIndex[item] = i;
+                    colIndex[item] = i;
+                    i++;
+                }
+            }
+
+            Matrix<Single> ret = Matrix<Single>.Build.Dense(_sourceGraph.VertexCount, _sourceGraph.VertexCount);
             _dsm.CopyTo(ret);
-            Dictionary<object, int> newRowIndex = new Dictionary<object, int>(_rowIndex);
-            Dictionary<object, int> newColIndex = new Dictionary<object, int>(_colIndex);
 
-            int targetRowIndex = 0;
-            foreach (var cluster in clusters)
+            var newDsmStorage = new DsmStorage(ret, rowIndex, colIndex, _sourceGraph);
+            foreach (var item1 in index)
             {
-                foreach (var element in cluster.Objects)
+                foreach (var item2 in index)
                 {
-                    var sourceRowIndex = newRowIndex[element];
-                    if (sourceRowIndex != targetRowIndex)
-                    {
-                        SwapRows(sourceRowIndex, targetRowIndex, newRowIndex, ret);
-                    }
-                    targetRowIndex++;
+                    newDsmStorage[item1, item2] = this[item1, item2];
                 }
             }
 
-            int targetColumnIndex = 0;
-            foreach (var cluster in clusters)
-            {
-                foreach (var element in cluster.Objects)
-                {
-                    var sourceColumnIndex = newColIndex[element];
-                    if (sourceColumnIndex != targetColumnIndex)
-                    {
-                        SwapColumns(sourceColumnIndex, targetColumnIndex, newColIndex, ret);
-                    }
-                    targetColumnIndex++;
-                }
-            }
-
-
-
-
-            return new DsmStorage(ret, newRowIndex, newColIndex, _sourceGraph);
+            return newDsmStorage;
         }
 
         public void SwapRowsByObject(object source, object target)
@@ -124,45 +131,6 @@ namespace PSGraph.DesignStructureMatrix
 
             _colIndex.Add(sourceKey, targetIdx);
             _colIndex.Add(targetKey, sourceIdx);
-        }
-
-        private void SwapRows(int sourceRowIndex, int targetRowIndex, Dictionary<object, int> rowIndex, Matrix<Single> m)
-        {
-            var t = m.Row(targetRowIndex);
-            m.SetRow(targetRowIndex, m.Row(sourceRowIndex));
-            m.SetRow(sourceRowIndex, t);
-
-            var sourceDictionaryRecord = rowIndex.Where(e => e.Value == sourceRowIndex).First();
-            var targetDictionaryRecord = rowIndex.Where(e => e.Value == targetRowIndex).First();
-
-            var sourceKey = sourceDictionaryRecord.Key;
-            var targetKey = targetDictionaryRecord.Key;
-
-            rowIndex.Remove(sourceDictionaryRecord.Key);
-            rowIndex.Remove(targetDictionaryRecord.Key);
-
-            rowIndex.Add(sourceKey, targetRowIndex);
-            rowIndex.Add(targetKey, sourceRowIndex);
-        }
-
-
-        private void SwapColumns(int sourceColumnIndex, int targetColumnIndex, Dictionary<object, int> colIndex, Matrix<Single> m)
-        {
-            var t = m.Column(targetColumnIndex);
-            m.SetColumn(targetColumnIndex, m.Column(sourceColumnIndex));
-            m.SetColumn(sourceColumnIndex, t);
-
-            var sourceDictionaryRecord = colIndex.Where(e => e.Value == sourceColumnIndex).First();
-            var targetDictionaryRecord = colIndex.Where(e => e.Value == targetColumnIndex).First();
-
-            var sourceKey = sourceDictionaryRecord.Key;
-            var targetKey = targetDictionaryRecord.Key;
-
-            colIndex.Remove(sourceKey);
-            colIndex.Remove(targetKey);
-
-            colIndex.Add(sourceKey, targetColumnIndex);
-            colIndex.Add(targetKey, sourceColumnIndex);
         }
 
         private List<object> GetDsmElementNames()
