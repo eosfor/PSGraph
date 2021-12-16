@@ -78,7 +78,7 @@ namespace PSGraph.DesignStructureMatrix
                       DsmStorage dsm, 
                       List<Cluster> clusters,
                       int pow_cc = 2,
-                      double pow_bid = 2,
+                      double pow_bid = 1,
                       int max_Cl_size = 0,
                       int rand_accept = 0,
                       int rand_bid = 0,
