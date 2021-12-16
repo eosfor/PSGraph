@@ -17,6 +17,26 @@ namespace PSGraph.DesignStructureMatrix
         public List<object> Objects = new List<object>();
         public System.Drawing.Color Color = System.Drawing.Color.FromArgb(Random.Shared.Next(255), Random.Shared.Next(255), Random.Shared.Next(255));
 
+        public override bool Equals(object? obj)
+        {
+            bool res = false;
+
+            if (null != obj)
+            {
+                if (((Cluster)obj).Objects.Count == Objects.Count)
+                {
+                    foreach (var item in ((Cluster)obj).Objects)
+                    {
+                        if (Objects.Contains(item)) { res = true; break; }
+                        else { res = false; }
+                    }
+                }
+
+            }
+
+            return obj is Cluster cluster &&
+                   res;//EqualityComparer<List<object>>.Default.Equals(Objects, cluster.Objects) &&
+        }
     }
     public class Dsm
     {
@@ -26,13 +46,15 @@ namespace PSGraph.DesignStructureMatrix
 
 
         private int _pow_cc = 2;
-        private int _pow_bid = 1;
+        private double _pow_bid = 0.5;
         private int _pow_dep = 2;
         private int _max_Cl_size = 0;
         private int _rand_accept = 0;
         private int _rand_bid = 0;
         private int _times = 2;
         private int _stable_limit = 10;
+
+        private Stack<SortedDictionary<double, List<Cluster>>> _historicalBids = new Stack<SortedDictionary<double, List<Cluster>>>();
 
         private float _minObservedtCCost = float.MaxValue ;
         public float MinObservedtCCost { get => _minObservedtCCost; }
@@ -56,7 +78,7 @@ namespace PSGraph.DesignStructureMatrix
                       DsmStorage dsm, 
                       List<Cluster> clusters,
                       int pow_cc = 2,
-                      int pow_bid = 2,
+                      double pow_bid = 2,
                       int max_Cl_size = 0,
                       int rand_accept = 0,
                       int rand_bid = 0,
@@ -106,6 +128,7 @@ namespace PSGraph.DesignStructureMatrix
                 {
                     var obj = PickRamdomDsmObject();
                     var bid = CalculateClusterBids(obj);
+                    _historicalBids.Push(bid);
 
                     var currentRandBid = r.Next(_rand_bid - 1);
                     var bestBid = currentRandBid == (_rand_bid - 1) ? bid.Skip(bid.Count - 2).First().Value[0] : bid.Last().Value[0];
@@ -261,7 +284,7 @@ namespace PSGraph.DesignStructureMatrix
             {
                 for (int i = k + 1; i < _clusters.Count; i++)
                 {
-                    if (_clusters[i] == _clusters[k])
+                    if (_clusters[i].Equals(_clusters[k]))
                     {
                         _clusters.RemoveAt(i);
                     }
