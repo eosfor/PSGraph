@@ -64,10 +64,6 @@ namespace PSGraph.Tests
             g.AddVertex(new PSVertex("G"));
 
 
-
-
-            _simpleTestGraph1 = g;
-
             g.AddEdge(new PSEdge(new PSVertex("F"), new PSVertex("A"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("A"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("A"), new PSEdgeTag()));
@@ -153,22 +149,22 @@ namespace PSGraph.Tests
             var dsmStorage = new DsmStorage(_simpleTestGraph1);
 
             // TODO: in case Tags are used as weights Asserts need to change
-            Assert.AreEqual(1, dsmStorage["A", "C"]);
-            Assert.AreEqual(1, dsmStorage["C", "A"]);
-
-            Assert.AreEqual(1, dsmStorage["C", "E"]);
-            Assert.AreEqual(1, dsmStorage["E", "C"]);
-
-            Assert.AreEqual(1, dsmStorage["D", "C"]);
-
-            Assert.AreEqual(1, dsmStorage["B", "E"]);
+            Assert.AreEqual(1, dsmStorage[new PSVertex("A"), new PSVertex("C")]);
+            Assert.AreEqual(1, dsmStorage[new PSVertex("C"), new PSVertex("A")]);
 
 
-            Assert.AreEqual(0, dsmStorage["B", "A"]);
-            Assert.AreEqual(0, dsmStorage["E", "B"]);
+            Assert.AreEqual(1, dsmStorage[new PSVertex("C"), new PSVertex("E")]);
+            Assert.AreEqual(1, dsmStorage[new PSVertex("E"), new PSVertex("C")]);
+
+            Assert.AreEqual(1, dsmStorage[new PSVertex("D"), new PSVertex("C")]);
+
+            Assert.AreEqual(1, dsmStorage[new PSVertex("B"), new PSVertex("E")]);
+
+            Assert.AreEqual(0, dsmStorage[new PSVertex("B"), new PSVertex("A")]);
+            Assert.AreEqual(0, dsmStorage[new PSVertex("E"), new PSVertex("B")]);
 
             // if i = j -> it is a diagonal and the weight is 0
-            Assert.AreEqual(0, dsmStorage["E", "E"]);
+            Assert.AreEqual(0, dsmStorage[new PSVertex("E"), new PSVertex("E")]);
         }
 
         [TestMethod]

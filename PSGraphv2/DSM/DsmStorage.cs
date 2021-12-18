@@ -13,20 +13,20 @@ namespace PSGraph.DesignStructureMatrix
     {
         private Matrix<Single> _dsm;
 
-        private Dictionary<object, int> _rowIndex = new Dictionary<object, int>();
-        private Dictionary<object, int> _colIndex = new Dictionary<object, int>();
+        private Dictionary<PSVertex, int> _rowIndex = new Dictionary<PSVertex, int>();
+        private Dictionary<PSVertex, int> _colIndex = new Dictionary<PSVertex, int>();
         private PSBidirectionalGraph _sourceGraph;
 
-        public Single this[object from, object to] { get => FindDsmElementByGraphVertex(from, to); set => SetDsmElementByGraphVertex(from, to, value);  }
+        public Single this[PSVertex from, PSVertex to] { get => FindDsmElementByGraphVertex(from, to); set => SetDsmElementByGraphVertex(from, to, value);  }
 
-        public List<object> Objects { get => GetDsmElementNames(); }
+        public List<PSVertex> Objects { get => GetDsmElementNames(); }
         public int Size => this.Objects.Count;
         public int Count => (this._dsm.RowCount * this._dsm.ColumnCount);
 
         public Matrix<float> Dsm { get => _dsm; }
 
-        public Dictionary<object, int> RowIndex => _rowIndex;
-        public Dictionary<object, int> ColIndex => _colIndex;
+        public Dictionary<PSVertex, int> RowIndex => _rowIndex;
+        public Dictionary<PSVertex, int> ColIndex => _colIndex;
 
 
         public Single GetByIndex(int i, int j)
@@ -35,7 +35,7 @@ namespace PSGraph.DesignStructureMatrix
         }
 
 
-        private void SetDsmElementByGraphVertex(object from, object to, float value)
+        private void SetDsmElementByGraphVertex(PSVertex from, PSVertex to, float value)
         {
             var colIndex = _colIndex[from];
             var rowIndex = _rowIndex[to];
@@ -47,9 +47,9 @@ namespace PSGraph.DesignStructureMatrix
 
         public DsmStorage GetOrderedDsm(List<Cluster> clusters) 
         {
-            Dictionary<object, int> rowIndex = new Dictionary<object, int>();
-            Dictionary<object, int> colIndex = new Dictionary<object, int>();
-            List<object> index = new List<object>();
+            Dictionary<PSVertex, int> rowIndex = new Dictionary<PSVertex, int>();
+            Dictionary<PSVertex, int> colIndex = new Dictionary<PSVertex, int>();
+            List<PSVertex> index = new List<PSVertex>();
             int i = 0;
             foreach (var cluster in clusters)
             {
@@ -77,7 +77,7 @@ namespace PSGraph.DesignStructureMatrix
             return newDsmStorage;
         }
 
-        public void SwapRowsByObject(object source, object target)
+        public void SwapRowsByObject(PSVertex source, PSVertex target)
         {
             var sourceIdx = _rowIndex[source];
             var targetIdx = _rowIndex[target];
@@ -85,7 +85,7 @@ namespace PSGraph.DesignStructureMatrix
             SwapRows(sourceIdx, targetIdx);
         }
 
-        public void SwapColumnsByObject(object source, object target)
+        public void SwapColumnsByObject(PSVertex source, PSVertex target)
         {
             var sourceIdx = _rowIndex[source];
             var targetIdx = _rowIndex[target];
@@ -134,12 +134,12 @@ namespace PSGraph.DesignStructureMatrix
             _colIndex.Add(targetKey, sourceIdx);
         }
 
-        private List<object> GetDsmElementNames()
+        private List<PSVertex> GetDsmElementNames()
         {
             return _colIndex.Keys.ToList();
         }
 
-        private float FindDsmElementByGraphVertex(object from, object to)
+        private float FindDsmElementByGraphVertex(PSVertex from, PSVertex to)
         {
             if (from == to)
             {
@@ -192,8 +192,8 @@ namespace PSGraph.DesignStructureMatrix
         }
 
         protected DsmStorage(Matrix<Single> dsm,
-                             Dictionary<object, int> rowIndex,
-                             Dictionary<object, int> colIndex,
+                             Dictionary<PSVertex, int> rowIndex,
+                             Dictionary<PSVertex, int> colIndex,
                              PSBidirectionalGraph graph)
         {
             _sourceGraph = graph;

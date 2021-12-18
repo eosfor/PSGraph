@@ -15,16 +15,17 @@ namespace PSGraph
         public string Path;
         protected override void ProcessRecord()
         {
-            //var graph = new PSBidirectionalGraph(false);
-            //using (var xmlReader = XmlReader.Create(Path))
-            //{
-            //    graph.DeserializeFromGraphML<PSVertex, PSEdge, PSBidirectionalGraph>(
-            //        xmlReader,
-            //        v => v,
-            //        (source, target, id) => new PSEdge(source, target));
-            //}
+            var graph = new PSBidirectionalGraph(false);
+            using (var xmlReader = XmlReader.Create(Path))
+            {
+                graph.DeserializeFromGraphML<PSVertex, PSEdge, PSBidirectionalGraph>(
+                    xmlReader,
+                    id => new PSVertex(id),
+                    (source, target, id) => new PSEdge(source, target, new PSEdgeTag()));
+            }
 
-            throw new NotImplementedException();
+            WriteObject(graph);
+            //throw NotImplementedException(); 
         }
     }
 }

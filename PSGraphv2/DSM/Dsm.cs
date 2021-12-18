@@ -15,7 +15,7 @@ namespace PSGraph.DesignStructureMatrix
 {
     public class Cluster
     {
-        public List<object> Objects = new List<object>();
+        public List<PSVertex> Objects = new List<PSVertex>();
         public System.Drawing.Color Color = System.Drawing.Color.FromArgb(Random.Shared.Next(255), Random.Shared.Next(255), Random.Shared.Next(255));
 
         public override bool Equals(object? obj)
@@ -61,7 +61,7 @@ namespace PSGraph.DesignStructureMatrix
         public float MinObservedtCCost { get => _minObservedtCCost; }
         private float _tCCost = 0;
 
-        public Single this[int row, int col] { get => _dsm[row, col]; }
+        public Single this[PSVertex row, PSVertex col] { get => _dsm[row, col]; }
         public int Count => _dsm.Count;
         public int Size => _dsm.Size;
 
@@ -299,7 +299,7 @@ namespace PSGraph.DesignStructureMatrix
             var r = _clusters.RemoveAll( c => c.Objects.Count == 0);
         }
 
-        private List<Cluster> Move(object obj, Cluster bestBid)
+        private List<Cluster> Move(PSVertex obj, Cluster bestBid)
         {
             var oldClusters = FindDsmObjectCluster(obj);
             
@@ -313,7 +313,7 @@ namespace PSGraph.DesignStructureMatrix
             return oldClusters;
         }
 
-        private SortedDictionary<double, List<Cluster>> CalculateClusterBids(object obj)
+        private SortedDictionary<double, List<Cluster>> CalculateClusterBids(PSVertex obj)
         {
             double bid;
             var ret = new SortedDictionary<double, List<Cluster>>();
@@ -347,7 +347,7 @@ namespace PSGraph.DesignStructureMatrix
             return ret;
         }
 
-        private object PickRamdomDsmObject()
+        private PSVertex PickRamdomDsmObject()
         {
             var r = new Random();
             var idx = r.Next(_dsm.Size - 1);
