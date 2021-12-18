@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
+using PSGraph.Model;
 using QuikGraph;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace PSGraph.DesignStructureMatrix
 
         private Dictionary<object, int> _rowIndex = new Dictionary<object, int>();
         private Dictionary<object, int> _colIndex = new Dictionary<object, int>();
-        private BidirectionalGraph<object, STaggedEdge<object, object>> _sourceGraph;
+        private PSBidirectionalGraph _sourceGraph;
 
         public Single this[object from, object to] { get => FindDsmElementByGraphVertex(from, to); set => SetDsmElementByGraphVertex(from, to, value);  }
 
@@ -184,7 +185,7 @@ namespace PSGraph.DesignStructureMatrix
 
 
         #region constructors
-        public DsmStorage(BidirectionalGraph<object, STaggedEdge<object, object>> graph)
+        public DsmStorage(PSBidirectionalGraph graph)
         {
             _sourceGraph = graph;
             _dsm = GraphToDSM();
@@ -193,7 +194,7 @@ namespace PSGraph.DesignStructureMatrix
         protected DsmStorage(Matrix<Single> dsm,
                              Dictionary<object, int> rowIndex,
                              Dictionary<object, int> colIndex,
-                             BidirectionalGraph<object, STaggedEdge<object, object>> graph)
+                             PSBidirectionalGraph graph)
         {
             _sourceGraph = graph;
             _dsm = dsm;

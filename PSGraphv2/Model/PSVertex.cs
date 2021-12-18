@@ -34,7 +34,7 @@ namespace PSGraph.Model
 
         public override bool Equals(PSVertex? x, PSVertex? y)
         {
-            if (null != x && null != y) { return x.Label == y.Label; }
+            if ((null != x) && (null != y)) { return x.Label == y.Label; }
             else { return false; }
         }
 

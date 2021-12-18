@@ -1,4 +1,5 @@
-﻿using QuikGraph;
+﻿using PSGraph.Model;
+using QuikGraph;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace PSGraph.cmdlets
     public  class NewDSMCmdlet: PSCmdlet
     {
         [Parameter(Mandatory = true)]
-        public BidirectionalGraph<object, STaggedEdge<object, object>> Graph;
+        public PSBidirectionalGraph Graph;
         protected override void ProcessRecord()
         {
 

@@ -9,14 +9,14 @@ namespace PSGraph
     public class AddVertexCmdlet : PSCmdlet
     {
         [Parameter(Mandatory = true)]
-        public PSVertex Vertex;
+        public object Vertex;
 
         [Parameter(Mandatory = true)]
         public PSBidirectionalGraph Graph;
 
         protected override void ProcessRecord()
         {
-            var result = Graph.AddVertex(Vertex);
+            var result = Graph.AddVertex(new PSVertex(Vertex.ToString(), Vertex));
             WriteVerbose(result.ToString());
         }
     }
