@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuikGraph;
 using System.Collections.ObjectModel;
+using PSGraph.Model;
 
 // -graph $g -format graphviz -path c:\temp\graph.txt
 namespace PSGraph.Tests
@@ -36,7 +37,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void TestGraphPropertyNoProcessing_Success()
         {
-            var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
+            var graph = new PSBidirectionalGraph();
             PSGraph.ExportGraphCmdLet export = new PSGraph.ExportGraphCmdLet();
             PSGraph.ExportTypes expType = export.Format;
 
@@ -68,14 +69,6 @@ namespace PSGraph.Tests
             Assert.IsTrue(Enum.Equals(export.Format, ExportTypes.Graphviz));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException), "Unsupported export type.")]
-        public void TestExistingExportTypeNoProcessing_Unsuccess()
-        {
-            ExportGraphCmdLet export = new ExportGraphCmdLet() { Format = (ExportTypes)0xC0FEE };
-            Assert.IsTrue(Enum.Equals(export.Format, (ExportTypes)0xC0FEE));
-        }
-
 
         [TestMethod]
         [ExpectedException(typeof(ParameterBindingException), "Graph null", AllowDerivedTypes = true)]
@@ -98,56 +91,14 @@ namespace PSGraph.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(CmdletInvocationException), "Unsupported graph type.")]
-        public void TestUnsupportedGraphTypeProcessing_Unsuccess()
-        {
-            try
-            {
-                Object graph = new Object();
-                _powershell.AddCommand("Export-Graph");
-                _powershell.AddParameters(new Dictionary<String, Object>
-                    {
-                        {"graph", graph}, {"format", ExportTypes.Graphviz}
-                    });
-                Collection<PSObject> result = _powershell.Invoke();
-
-            }
-            finally
-            {
-                _powershell.Commands.Clear();
-            }
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ParameterBindingException), "Unsupported export type.")]
-        public void TestUnsupportedExportTypeProcessing_Unsuccess()
-        {
-            try
-            {
-                var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
-                _powershell.AddCommand("Export-Graph");
-                _powershell.AddParameters(new Dictionary<String, Object>
-                    {
-                        {"graph", graph}, {"format", (ExportTypes)0xC0FEE}
-                    });
-                Collection<PSObject> result = _powershell.Invoke();
-
-            }
-            finally
-            {
-                _powershell.Commands.Clear();
-            }
-        }
-
 
         [TestMethod]
         public void TestExportGraphProcessing_Success()
         {
             try
             {
-                //var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
-                var graph = new AdjacencyGraph<Object, Edge<object>>();
+                //var graph = new PSBidirectionalGraph()();
+                var graph = new PSBidirectionalGraph();
                 _powershell.AddCommand("Export-Graph");
                 _powershell.AddParameters(new Dictionary<String, Object>
                     {

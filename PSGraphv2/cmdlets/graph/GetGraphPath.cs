@@ -6,6 +6,7 @@ using System.Management.Automation;
 using System.Reflection;
 using Microsoft.PowerShell;
 using QuikGraph.Algorithms;
+using PSGraph.Model;
 
 namespace PSGraph
 {
@@ -13,64 +14,26 @@ namespace PSGraph
     public class GetGraphPath : PSCmdlet
     {
         [Parameter(Mandatory = true)]
-        public object From { get; set; }
+        [ValidateNotNullOrEmpty]
+        public PSVertex From;
 
         [Parameter(Mandatory = true)]
-        public object To { get; set; }
+        [ValidateNotNullOrEmpty]
+        public PSVertex To;
 
         [Parameter(Mandatory = true)]
-        public object Graph { get; set; }
+        [ValidateNotNullOrEmpty]
+        public PSBidirectionalGraph Graph;
 
         protected override void ProcessRecord()
         {
-            dynamic graph = Graph;
 
-            if (graph is PSObject)
-            {
-                graph = ((PSObject)graph).ImmediateBaseObject;
-            }
-            if (graph == null)
-            {
-                throw new ArgumentException("'Graph' mustn't be equal to null");
-            }
+            var tryFunc = Graph.ShortestPathsDijkstra(e => e.Weight, From);
+            
+            IEnumerable<PSEdge>? result = null;
+            tryFunc.Invoke(To, out result);
 
-            dynamic from = From;
-            if (from is PSObject)
-            {
-                from = ((PSObject)from).ImmediateBaseObject;
-            }
-            if (from == null)
-            {
-                throw new ArgumentException("'From' mustn't be equal to null");
-            }
-
-            dynamic to = To;
-            if (to is PSObject)
-            {
-                to = ((PSObject)to).ImmediateBaseObject;
-            }
-            if (to == null)
-            {
-                throw new ArgumentException("'To' mustn't be equal to null");
-            }
-
-            Type[] graphGenericArgs = graph.GetType().GetGenericArguments();
-            Type edgeType = graphGenericArgs[1];
-
-            Type edgeWeightsFuncType = typeof(Func<,>).MakeGenericType(edgeType, typeof(double));
-            var methodInfo = typeof(GetGraphPath).GetMethod(nameof(EqualEdgeWeights), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(edgeType);
-            dynamic edgeWeightsFunc = Delegate.CreateDelegate(edgeWeightsFuncType, methodInfo);
-
-            dynamic tryGetFunc = AlgorithmExtensions.ShortestPathsDijkstra(graph, edgeWeightsFunc, from);
-
-            object[] tryGetFuncParams = { to, null };
-            if (tryGetFunc.DynamicInvoke(tryGetFuncParams))
-            {
-                WriteObject(tryGetFuncParams[1]);
-            }
+            WriteObject(result);
         }
-
-        // weight for all edges = 1
-        private static double EqualEdgeWeights<TEdgeT>(TEdgeT j) => 1;
     }
 }
