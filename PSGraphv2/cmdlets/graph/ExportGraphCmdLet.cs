@@ -9,6 +9,7 @@ using System.IO;
 using System.Text;
 using System.Linq;
 using PSGraph.Model;
+using QuikGraph.Algorithms;
 
 namespace PSGraph
 {
@@ -46,7 +47,9 @@ namespace PSGraph
         {
             using (var xmlWriter = XmlWriter.Create(Path))
             {
-                Graph.SerializeToGraphML<PSVertex, PSEdge, PSBidirectionalGraph>(xmlWriter);
+                Graph.SerializeToGraphML<PSVertex, PSEdge, PSBidirectionalGraph>(xmlWriter,
+                    v => v.Label,
+                    Graph.GetEdgeIdentity());
             }
         }
 

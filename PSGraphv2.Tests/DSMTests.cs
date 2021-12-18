@@ -6,6 +6,7 @@ using QuikGraph.Graphviz.Dot;
 using QuikGraph.Graphviz;
 using System;
 using System.Collections.Generic;
+using PSGraph.Model;
 
 namespace PSGraph.Tests
 {
@@ -13,9 +14,9 @@ namespace PSGraph.Tests
     public class DSMTests
     {
 
-        private static BidirectionalGraph<object, STaggedEdge<object, object>> _simpleTestGraph1;
-        private static BidirectionalGraph<object, STaggedEdge<object, object>> _simpleTestGraph2;
-        private static BidirectionalGraph<object, STaggedEdge<object, object>> _simpleTestGraph3;
+        private static PSBidirectionalGraph _simpleTestGraph1;
+        private static PSBidirectionalGraph _simpleTestGraph2;
+        private static PSBidirectionalGraph _simpleTestGraph3;
 
         [ClassInitialize()]
         public static void InitPsGraphUnitTest(TestContext tc)
@@ -27,25 +28,23 @@ namespace PSGraph.Tests
 
         private static void InitializeSimpleTestGraph1()
         {
-            var g = new BidirectionalGraph<object, STaggedEdge<object, object>>();
+            var g = new PSBidirectionalGraph();
 
-            g.AddVertex("A");
-            g.AddVertex("B");
-            g.AddVertex("C");
-            g.AddVertex("D");
-            g.AddVertex("E");
+            g.AddVertex(new PSVertex("A"));
+            g.AddVertex(new PSVertex("B"));
+            g.AddVertex(new PSVertex("C"));
+            g.AddVertex(new PSVertex("D"));
+            g.AddVertex(new PSVertex("E"));
 
-            g.AddEdge(new STaggedEdge<object, object>("A", "C", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("C", "A", String.Empty));
+            g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("C"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("A"), new PSEdgeTag()));
 
-            g.AddEdge(new STaggedEdge<object, object>("C", "E", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("E", "C", String.Empty));
+            g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("E"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("C"), new PSEdgeTag()));
 
 
-            g.AddEdge(new STaggedEdge<object, object>("D", "C", String.Empty));
-
-            g.AddEdge(new STaggedEdge<object, object>("B", "E", String.Empty));
-
+            g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("C"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("E"), new PSEdgeTag()));
 
             _simpleTestGraph1 = g;
 
@@ -54,41 +53,49 @@ namespace PSGraph.Tests
 
         private static void InitializeSimpleTestGraph2()
         {
-            var g = new BidirectionalGraph<object, STaggedEdge<object, object>>();
+            var g = new PSBidirectionalGraph();
 
-            g.AddVertex("A");
-            g.AddVertex("B");
-            g.AddVertex("C");
-            g.AddVertex("D");
-            g.AddVertex("E");
-            g.AddVertex("F");
-            g.AddVertex("G");
+            g.AddVertex(new PSVertex("A"));
+            g.AddVertex(new PSVertex("B"));
+            g.AddVertex(new PSVertex("C"));
+            g.AddVertex(new PSVertex("D"));
+            g.AddVertex(new PSVertex("E"));
+            g.AddVertex(new PSVertex("F"));
+            g.AddVertex(new PSVertex("G"));
 
-            g.AddEdge(new STaggedEdge<object, object>("F", "A", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("E", "A", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("B", "A", String.Empty));
 
-            g.AddEdge(new STaggedEdge<object, object>("G", "B", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("D", "B", String.Empty));
 
-            g.AddEdge(new STaggedEdge<object, object>("G", "C", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("D", "C", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("B", "C", String.Empty));
 
-            g.AddEdge(new STaggedEdge<object, object>("B", "D", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("C", "D", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("E", "D", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("G", "D", String.Empty));
+            _simpleTestGraph1 = g;
 
-            g.AddEdge(new STaggedEdge<object, object>("D", "E", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("F", "E", String.Empty));
+            g.AddEdge(new PSEdge(new PSVertex("F"), new PSVertex("A"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("A"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("A"), new PSEdgeTag()));
 
-            g.AddEdge(new STaggedEdge<object, object>("A", "F", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("E", "F", String.Empty));
+            g.AddEdge(new PSEdge(new PSVertex("G"), new PSVertex("B"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("B"), new PSEdgeTag()));
 
-            g.AddEdge(new STaggedEdge<object, object>("B", "G", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("C", "G", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("D", "G", String.Empty));
+            g.AddEdge(new PSEdge(new PSVertex("G"), new PSVertex("C"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("C"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("C"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("D"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("D"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("D"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("G"), new PSVertex("D"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("E"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("F"), new PSVertex("E"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("E"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("F"), new PSVertex("E"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("F"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("F"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("G"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("G"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("G"), new PSEdgeTag()));
 
             System.IO.File.WriteAllText("c:\\temp\\test2.gv", g.ToGraphviz()); 
 
@@ -99,34 +106,33 @@ namespace PSGraph.Tests
 
         private static void InitializeSimpleTestGraph3()
         {
-            var g = new BidirectionalGraph<object, STaggedEdge<object, object>>();
+            var g = new PSBidirectionalGraph();
 
-            g.AddVertex("A");
-            g.AddVertex("B");
-            g.AddVertex("C");
-            g.AddVertex("D");
-            g.AddVertex("E");
-            g.AddVertex("F");
-            g.AddVertex("G");
-            g.AddVertex("H");
+            g.AddVertex(new PSVertex("A"));
+            g.AddVertex(new PSVertex("B"));
+            g.AddVertex(new PSVertex("C"));
+            g.AddVertex(new PSVertex("D"));
+            g.AddVertex(new PSVertex("E"));
+            g.AddVertex(new PSVertex("F"));
+            g.AddVertex(new PSVertex("G"));
+            g.AddVertex(new PSVertex("H"));
 
-            g.AddEdge(new STaggedEdge<object, object>("D", "A", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("H", "A", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("E", "B", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("G", "B", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("E", "C", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("F", "D", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("H", "D", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("B", "E", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("C", "E", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("G", "E", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("A", "F", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("H", "F", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("B", "G", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("C", "G", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("A", "H", String.Empty));
-            g.AddEdge(new STaggedEdge<object, object>("D", "H", String.Empty));
-
+            g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("A"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("H"), new PSVertex("A"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("B"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("G"), new PSVertex("B"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("C"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("F"), new PSVertex("D"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("H"), new PSVertex("D"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("E"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("E"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("G"), new PSVertex("E"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("F"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("H"), new PSVertex("F"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("G"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("G"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("H"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("H"), new PSEdgeTag()));
 
 
             System.IO.File.WriteAllText("c:\\temp\\test3.gv", g.ToGraphviz());

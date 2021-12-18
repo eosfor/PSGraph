@@ -9,6 +9,7 @@ using System.Diagnostics;
 using Svg;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using PSGraph.Model;
 
 namespace PSGraph.DesignStructureMatrix
 {
@@ -40,7 +41,7 @@ namespace PSGraph.DesignStructureMatrix
     }
     public class Dsm
     {
-        private BidirectionalGraph<object, STaggedEdge<object, object>> _sourceGraph;
+        private PSBidirectionalGraph _sourceGraph;
         private DsmStorage _dsm;
         private List<Cluster> _clusters;
 
@@ -74,7 +75,7 @@ namespace PSGraph.DesignStructureMatrix
             return ret;
         }
 
-        protected Dsm(BidirectionalGraph<object, STaggedEdge<object, object>> sourceGraph, 
+        protected Dsm(PSBidirectionalGraph sourceGraph, 
                       DsmStorage dsm, 
                       List<Cluster> clusters,
                       int pow_cc = 2,
@@ -97,7 +98,7 @@ namespace PSGraph.DesignStructureMatrix
             _stable_limit = stable_limit;
         }
 
-        public Dsm(BidirectionalGraph<object, STaggedEdge<object, object>> graph)
+        public Dsm(PSBidirectionalGraph graph)
         {
             var r = new Random();
             _sourceGraph = graph;
@@ -107,7 +108,7 @@ namespace PSGraph.DesignStructureMatrix
             _rand_bid = r.Next() % 2 == 0 ? (int)Math.Round((decimal)_dsm.Size / 2) : _max_Cl_size * 2;
         }
 
-        private DsmStorage GraphToDSM(BidirectionalGraph<object, STaggedEdge<object, object>> graph)
+        private DsmStorage GraphToDSM(PSBidirectionalGraph graph)
         {
             return new DsmStorage(graph);
 
