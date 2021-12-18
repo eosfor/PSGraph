@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PSGraph.Model
 {
-    public class PSVertex : EqualityComparer<PSVertex>
+    public class PSVertex
     {
         public string Label;
         public string Name => Label;
@@ -32,15 +32,24 @@ namespace PSGraph.Model
         //    return new PSVertex(obj.ToString());
         //}
 
-        public override bool Equals(PSVertex? x, PSVertex? y)
+        public override bool Equals(object? obj)
         {
-            if ((null != x) && (null != y)) { return x.Label == y.Label; }
-            else { return false; }
+            if (obj == null) return false;
+            if (GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return Label == ((PSVertex)obj).Label;
         }
 
-        public override int GetHashCode([DisallowNull] PSVertex obj)
+        public override int GetHashCode()
         {
             return Label.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return Label;
         }
     }
 }

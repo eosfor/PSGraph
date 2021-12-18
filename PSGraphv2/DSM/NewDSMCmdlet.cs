@@ -19,7 +19,6 @@ namespace PSGraph.cmdlets
 
             var d = new DesignStructureMatrix.Dsm(Graph);
             WriteObject(d);
-            //base.ProcessRecord();
         }
     }
 }
