@@ -8,82 +8,57 @@ using QuikGraph.Serialization;
 using System.IO;
 using System.Text;
 using System.Linq;
+using PSGraph.Model;
 
 namespace PSGraph
 {
     [Cmdlet(VerbsData.Export, "Graph")]
     public class ExportGraphCmdLet : PSCmdlet
     {
-        private ExportTypes _exportType;
+        [Parameter(Mandatory = true)]
+        [ValidateNotNullOrEmpty]
+        public PSBidirectionalGraph Graph;
 
         [Parameter(Mandatory = true)]
-        public object Graph { get; set; }
+        [ValidateNotNullOrEmpty]
+        public ExportTypes Format;
 
-        [Parameter(Mandatory = true)]
-        public ExportTypes Format
-        {
-            get { return _exportType; }
-            set
-            {
-                if (_exportType != value)
-                {
-                    if (!Enum.IsDefined(typeof(ExportTypes), value))
-                        throw new ArgumentException();
-                    _exportType = value;
-                }
-            }
-        }
-
-        [Parameter]
-        public string Path { get; set; }
-
-        [Parameter]
-        public object EdgeFormatter { get; set; }
+        [Parameter(Mandatory = false)]
+        [ValidateNotNullOrEmpty]
+        public string Path;
 
         protected override void ProcessRecord()
         {
-            object graph = Graph;
-            if (graph is PSObject)
+            switch (Format)
             {
-                graph = ((PSObject)graph).ImmediateBaseObject;
+                case ExportTypes.Graphviz:
+                    ExportGraphViz();
+                    break;
+                case ExportTypes.GraphML:
+                    ExportGraphML();
+                    break;
+                default:
+                    break;
             }
-            if (graph == null)
+        }
+
+        private void ExportGraphML()
+        {
+            using (var xmlWriter = XmlWriter.Create(Path))
             {
-                throw new ArgumentException("'Graph' mustn't be equal to null");
+                Graph.SerializeToGraphML<PSVertex, PSEdge, PSBidirectionalGraph>(xmlWriter);
             }
+        }
 
-            WriteVerbose("Add-Edge: Graph type is: " + Graph.GetType().ToString());
+        private void ExportGraphViz()
+        {
+            var graphviz = new GraphvizAlgorithm<PSVertex, PSEdge>(Graph);
+            graphviz.FormatVertex += Graphviz_FormatVertex;
+            var result = graphviz.Generate();
 
-            if (_exportType == ExportTypes.GraphML) { ExportGraphML(graph); return; };
-
-            Type[] graphGenericArgs = graph.GetType().GetGenericArguments();
-            Type vertexType = graphGenericArgs[0];
-            Type edgeType = graphGenericArgs[1];
-            Type graphvizAlgType = typeof(GraphvizAlgorithm<,>).MakeGenericType(vertexType, edgeType);
-
-            dynamic graphviz = Activator.CreateInstance(graphvizAlgType, graph);
-
-            Type eventHandlerType = typeof(FormatVertexEventHandler<>).MakeGenericType(vertexType);
-            var methodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatVertexEventHandler)).MakeGenericMethod(vertexType);
-            dynamic formatVertexEventHandler = Delegate.CreateDelegate(eventHandlerType, methodInfo);
-            graphviz.FormatVertex += formatVertexEventHandler;
-
-            if (EdgeFormatter != null)
+            if (Path != null)
             {
-                Type formatEdgeEventHandlerType = typeof(FormatEdgeAction<,>).MakeGenericType(vertexType, edgeType);
-                var formatEdgeMethodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatEdgeAction))
-                    .MakeGenericMethod(vertexType, edgeType);
-                dynamic formatEdgeEventHandler =
-                    Delegate.CreateDelegate(formatEdgeEventHandlerType, this, formatEdgeMethodInfo);
-                graphviz.FormatEdge += formatEdgeEventHandler;
-            }
-
-            string result = graphviz.Generate();
-
-            string path = Path;
-            if (path != null)
-            {
-                System.IO.File.WriteAllText(path, result);
+                File.WriteAllText(Path, result);
             }
             else
             {
@@ -91,80 +66,16 @@ namespace PSGraph
             }
         }
 
-        public static void FormatVertexEventHandler<TVertex>(object sender, FormatVertexEventArgs<TVertex> e)
+        private void Graphviz_FormatVertex(object sender, FormatVertexEventArgs<PSVertex> args)
         {
-            if (e.Vertex is PSGraphVertex)
+            foreach (PropertyInfo p in args.Vertex.GVertexParameters.GetType().GetProperties())
             {
-                foreach (PropertyInfo p in e.Vertex.GetType().GetProperties())
+                var destProperty = args.VertexFormat.GetType().GetProperty(p.Name);
+                if (destProperty != null)
                 {
-                    var destProperty = e.VertexFormat.GetType().GetProperty(p.Name); // e.VertexFormatter.GetType().GetProperty(p.Name);
-                    if (destProperty != null)
-                    {
-                        destProperty.SetValue(e.VertexFormat, p.GetValue(e.Vertex));
-                    }
+                    destProperty.SetValue(args.VertexFormat, p.GetValue(args.Vertex.GVertexParameters));
                 }
             }
-        }
-
-        public void FormatEdgeAction<TVertex, TEdge>(object sender, FormatEdgeEventArgs<TVertex, TEdge> e) where TEdge : IEdge<TVertex>
-        {
-            dynamic formatter = EdgeFormatter;
-            if (formatter is PSObject)
-            {
-                formatter = ((PSObject)formatter).ImmediateBaseObject;
-            }
-
-            formatter.Invoke(e.Edge, e.EdgeFormat);
-        }
-
-        public void ExportGraphML(dynamic graph)
-        {
-            Type[] graphGenericArgs = graph.GetType().GetGenericArguments();
-            Type vertexType = graphGenericArgs[0];
-            Type edgeType = graphGenericArgs[1];
-            Type graphType = graph.GetType();
-
-            var serializeToGraphMLMethod = typeof(GraphMLExtensions)
-                         .GetMethods()
-                         .Where(m => m.Name == "SerializeToGraphML")
-                         .Select(m => new
-                         {
-                             Method = m,
-                             Params = m.GetParameters(),
-                             Args = m.GetGenericArguments()
-                         })
-                         .Where(x => x.Params.Length == 2 && x.Params[1].ParameterType == typeof(XmlWriter))
-                         .Select(x => x.Method)
-                         .First();
-            MethodInfo serializeToGraphMLMethodInst = serializeToGraphMLMethod.MakeGenericMethod(vertexType, edgeType, graphType);
-
-
-            Type eventHandlerType = typeof(FormatVertexEventHandler<>).MakeGenericType(vertexType);
-            var methodInfo = typeof(ExportGraphCmdLet).GetMethod(nameof(FormatVertexEventHandler)).MakeGenericMethod(vertexType);
-            dynamic formatVertexEventHandler = Delegate.CreateDelegate(eventHandlerType, methodInfo);
-
-
-            if (!string.IsNullOrEmpty(Path))
-            {
-                using (XmlWriter xwriter = XmlWriter.Create(Path))
-                {
-
-                    serializeToGraphMLMethodInst.Invoke(null, new object[]{ graph, xwriter});
-                }
-            }
-            else
-            {
-                using (StringWriter str = new StringWriter())
-                {
-                    using (XmlWriter xwriter = XmlWriter.Create(str))
-                    {
-                        serializeToGraphMLMethodInst.Invoke(null, new object[] { graph, xwriter });
-                        WriteObject(str.ToString());
-                    }
-                }
-            }
-
-
         }
     }
 }

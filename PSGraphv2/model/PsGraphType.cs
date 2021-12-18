@@ -2,6 +2,7 @@
 {
     public enum PsGraphType
     {
-        AdjacencyGraph, BidirectionalGraph, BidirectionalMatrixGraph, UndirectedGraph
+        //BidirectionalGraph //, AdjacencyGraph, BidirectionalMatrixGraph, UndirectedGraph
+        PSBidirectionalGraph
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuikGraph;
 using System.Collections.ObjectModel;
+using PSGraph.Model;
 
 //add-edge -from $nodeFrom -to $nodeTo -attributes $attr -graph $g
 namespace PSGraph.Tests
@@ -35,46 +36,46 @@ namespace PSGraph.Tests
         [TestMethod]
         public void TestGraphPropertyNoProcessing_Success()
         {
-            var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
+            var graph = new PSBidirectionalGraph();
             PSGraph.AddEdgeCmdLet psGraph = new PSGraph.AddEdgeCmdLet() { Graph = graph };
 
             Assert.IsTrue(Object.Equals(psGraph.Graph, graph));
             Assert.IsTrue(psGraph.From == null);
             Assert.IsTrue(psGraph.To == null);
-            Assert.IsTrue(psGraph.Attribute == null);
+            Assert.IsTrue(psGraph.Tag == null);
         }
 
         [TestMethod]
         public void TestFromPropertyNoProcessing_Success()
         {
-            var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
+            var graph = new PSBidirectionalGraph();
             PSGraph.AddEdgeCmdLet psGraph = new PSGraph.AddEdgeCmdLet() { From = graph };
 
             Assert.IsTrue(Object.Equals(psGraph.From, graph));
             Assert.IsTrue(psGraph.Graph == null);
             Assert.IsTrue(psGraph.To == null);
-            Assert.IsTrue(psGraph.Attribute == null);
+            Assert.IsTrue(psGraph.Tag == null);
         }
 
         [TestMethod]
         public void TestToPropertyNoProcessing_Success()
         {
-            var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
+            var graph = new PSBidirectionalGraph();
             PSGraph.AddEdgeCmdLet psGraph = new PSGraph.AddEdgeCmdLet() { To = graph };
 
             Assert.IsTrue(Object.Equals(psGraph.To, graph));
             Assert.IsTrue(psGraph.Graph == null);
             Assert.IsTrue(psGraph.From == null);
-            Assert.IsTrue(psGraph.Attribute == null);
+            Assert.IsTrue(psGraph.Tag == null);
         }
 
         [TestMethod]
         public void TestAttributePropertyNoProcessing_Success()
         {
             var obj = new Object();
-            PSGraph.AddEdgeCmdLet psGraph = new PSGraph.AddEdgeCmdLet() { Attribute = obj };
+            PSGraph.AddEdgeCmdLet psGraph = new PSGraph.AddEdgeCmdLet() { Tag = obj };
 
-            Assert.IsTrue(Object.Equals(psGraph.Attribute, obj));
+            Assert.IsTrue(Object.Equals(psGraph.Tag, obj));
             Assert.IsTrue(psGraph.Graph == null);
             Assert.IsTrue(psGraph.From == null);
             Assert.IsTrue(psGraph.To == null);
@@ -103,29 +104,6 @@ namespace PSGraph.Tests
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(CmdletInvocationException), "Unsupported graph.", AllowDerivedTypes = true)]
-        public void TestUnknownGraphObjectParameterProcessing_Unsuccess()
-        {
-            try
-            {
-                Object graph = new Object();
-                Object to = new Object();
-                Object from = new Object();
-                Object attr = new Object();
-                _powershell.AddCommand("Add-Edge");
-                _powershell.AddParameters(new Dictionary<String, Object>
-                    {
-                        {"From", from}, {"To", to}, {"Attribute", attr}, {"Graph", graph}
-                    });
-                Collection<PSObject> result = _powershell.Invoke();
-
-            }
-            finally
-            {
-                _powershell.Commands.Clear();
-            }
-        }
 
         [TestMethod]
         [ExpectedException(typeof(ParameterBindingException), "To object is missing.", AllowDerivedTypes = true)]
@@ -133,7 +111,7 @@ namespace PSGraph.Tests
         {
             try
             {
-                var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
+                var graph = new PSBidirectionalGraph();
                 Object to = null;
                 Object from = new Object();
                 Object attr = new Object();
@@ -157,7 +135,7 @@ namespace PSGraph.Tests
         {
             try
             {
-                var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
+                var graph = new PSBidirectionalGraph();
                 Object to = new Object();
                 Object from = null;
                 Object attr = new Object();
@@ -180,14 +158,14 @@ namespace PSGraph.Tests
         {
             try
             {
-                var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
+                var graph = new PSBidirectionalGraph();
                 Object to = new Object();
                 Object from = new Object();
-                Object attr = new Object();
+                Object tag = new Object();
                 _powershell.AddCommand("Add-Edge");
                 _powershell.AddParameters(new Dictionary<String, Object>
                     {
-                        {"From", from}, {"To", to}, {"Attribute", attr}, {"Graph", graph}
+                        {"From", from}, {"To", to}, {"Tag", tag}, {"Graph", graph}
                     });
                 Collection<PSObject> result = _powershell.Invoke();
 
@@ -203,9 +181,9 @@ namespace PSGraph.Tests
         {
             try
             {
-                var graph = new AdjacencyGraph<Object, STaggedEdge<Object, Object>>();
-                Object to = new Object();
-                Object from = new Object();
+                var graph = new PSBidirectionalGraph();
+                string to = "to";
+                string from = "from";
                 _powershell.AddCommand("Add-Edge");
                 _powershell.AddParameters(new Dictionary<String, Object>
                     {

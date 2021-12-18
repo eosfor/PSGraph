@@ -2,6 +2,7 @@
 using System.Management.Automation;
 using QuikGraph;
 using System.Globalization;
+using PSGraph.Model;
 
 //add-edge -from $nodeFrom -to $nodeTo -attributes $attr -graph $g
 
@@ -11,76 +12,28 @@ namespace PSGraph
     public class AddEdgeCmdLet : PSCmdlet
     {
         [Parameter(Mandatory = true)]
-        public object From { get; set; }
+        public object From;
 
         [Parameter(Mandatory = true)]
-        public object To { get; set; }
+        public object To;
 
         [Parameter(Mandatory = true)]
-        public object Graph { get; set; }
+        public PSBidirectionalGraph Graph;
 
-        [Parameter]
-        public object Attribute { get; set; }
+        [Parameter(Mandatory = false)]
+        public object Tag;
 
         protected override void ProcessRecord()
         {
-
             ProcesRecordDefault();
         }
 
         void ProcesRecordDefault()
         {
-            dynamic graph = Graph;
+            var edge = new PSEdge(new PSVertex(From.ToString(), From), new PSVertex(To.ToString(), To), new PSEdgeTag(Tag?.ToString()));
+            var result = Graph.AddVerticesAndEdge(edge);
 
-            if (graph is PSObject)
-            {
-                graph = ((PSObject)graph).ImmediateBaseObject;
-            }
-
-            if (graph == null)
-            {
-                throw new ArgumentException($"'Graph' mustn't be equal to null");
-            }
-
-            object from = From;
-            if (from is PSObject)
-            {
-                from = ((PSObject)from).ImmediateBaseObject;
-            }
-
-            if (from == null)
-            {
-                throw new ArgumentException("'From' mustn't be equal to null");
-            }
-
-            object to = To;
-            if (to is PSObject)
-            {
-                to = ((PSObject)to).ImmediateBaseObject;
-            }
-
-            if (to == null)
-            {
-                throw new ArgumentException("'To' mustn't be equal to null");
-            }
-
-            WriteVerbose("Add-Edge: Graph type is: " + Graph.GetType());
-            WriteVerbose("Add-Edge: From type is: " + From.GetType());
-            WriteVerbose("Add-Edge: To type is: " + To.GetType());
-
-            object attribute = Attribute;
-            if (attribute is PSObject)
-            {
-                attribute = ((PSObject)attribute).ImmediateBaseObject;
-            }
-
-            Type[] graphGenericArgs = graph.GetType().GetGenericArguments();
-            Type edgeType = graphGenericArgs[1];
-            dynamic edge = Activator.CreateInstance(edgeType, from, to, attribute);
-
-            bool result = graph.AddVerticesAndEdge(edge);
-
-            WriteObject(result);
+            WriteVerbose(result.ToString());
            
         }
     }

@@ -4,15 +4,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{012D6D1C-1DF2-456B-BA61-8F4D3DFB98CD}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PSScripts", "PSScripts", "{8DD302B8-3787-433F-AE50-E1BC68A081DE}"
 	ProjectSection(SolutionItems) = preProject
-		PSGraph\eventTest.ps1 = PSGraph\eventTest.ps1
-		PSGraph\graphtest.ps1 = PSGraph\graphtest.ps1
-		PSGraph\graphtest2_purePS.ps1 = PSGraph\graphtest2_purePS.ps1
-		PSGraph\graphtest4.ps1 = PSGraph\graphtest4.ps1
-		PSGraph\simpleGraphSample.ps1 = PSGraph\simpleGraphSample.ps1
-		PSGraph\testScript.ps1 = PSGraph\testScript.ps1
+		PSGraphv2\PSScripts\eventTest.ps1 = PSGraphv2\PSScripts\eventTest.ps1
+		PSGraphv2\PSScripts\graphtest.ps1 = PSGraphv2\PSScripts\graphtest.ps1
+		PSGraphv2\PSScripts\graphtest2_purePS.ps1 = PSGraphv2\PSScripts\graphtest2_purePS.ps1
+		PSGraphv2\PSScripts\graphtest3.ps1 = PSGraphv2\PSScripts\graphtest3.ps1
+		PSGraphv2\PSScripts\graphtest4.ps1 = PSGraphv2\PSScripts\graphtest4.ps1
+		PSGraphv2\PSScripts\simpleGraphSample.ps1 = PSGraphv2\PSScripts\simpleGraphSample.ps1
+		PSGraphv2\PSScripts\testScript.ps1 = PSGraphv2\PSScripts\testScript.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B846169E-1562-4F67-9E91-8C164CD86489}"
@@ -26,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B846169E-1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSGraph", "PSGraphv2\PSGraph.csproj", "{5B7A6901-500D-4D2F-900B-942B471AE425}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSGraph.Tests", "PSGraphv2.Tests\PSGraph.Tests.csproj", "{726B4CA8-BF11-450F-80AC-A0E50CE90339}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSGraph.Tests", "PSGraphv2.Tests\PSGraph.Tests.csproj", "{726B4CA8-BF11-450F-80AC-A0E50CE90339}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
