@@ -4,15 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{012D6D1C-1DF2-456B-BA61-8F4D3DFB98CD}"
-	ProjectSection(SolutionItems) = preProject
-		PSGraphv2\PSScripts\eventTest.ps1 = PSGraphv2\PSScripts\eventTest.ps1
-		PSGraphv2\PSScripts\graphtest.ps1 = PSGraphv2\PSScripts\graphtest.ps1
-		PSGraphv2\PSScripts\graphtest2_purePS.ps1 = PSGraphv2\PSScripts\graphtest2_purePS.ps1
-		PSGraphv2\PSScripts\graphtest3.ps1 = PSGraphv2\PSScripts\graphtest3.ps1
-		PSGraphv2\PSScripts\graphtest4.ps1 = PSGraphv2\PSScripts\graphtest4.ps1
-		PSGraphv2\PSScripts\simpleGraphSample.ps1 = PSGraphv2\PSScripts\simpleGraphSample.ps1
-		PSGraphv2\PSScripts\testScript.ps1 = PSGraphv2\PSScripts\testScript.ps1
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B846169E-1562-4F67-9E91-8C164CD86489}"
 	ProjectSection(SolutionItems) = preProject

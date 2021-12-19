@@ -6,7 +6,8 @@ namespace PSGraph
     public enum ExportTypes
     {
         Graphviz,
-        GraphML
+        GraphML,
+        MSAGL
     }
 
     public abstract class PSGraphVertex : GraphvizVertex
