@@ -15,6 +15,7 @@ using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Miscellaneous;
 using QuikGraph.Graphviz;
+using QuikGraph.MSAGL;
 
 namespace PSGraph.Tests
 {
@@ -162,22 +163,8 @@ namespace PSGraph.Tests
 		[TestMethod]
 		public void TestAllGraphTypeProcessing_Success()
 		{
-			var drawingGraph = new Graph();
-
-            foreach (var v in _simpleTestGraph2.Vertices)
-            {
-                drawingGraph.AddNode(v.Label).LabelText = v.Label;
-            }
-
-
-            foreach (var edge in _simpleTestGraph2.Edges)
-            {
-                var e = drawingGraph.AddEdge(edge.Source.Label, edge.Target.Label); // now the drawing graph has nodes A,B and and an edge A -> B\
-                                                                                    // the geometry graph is still null, so we are going to create it
-            }
-            
+            var drawingGraph = _simpleTestGraph2.ToMsaglGraph();
             drawingGraph.CreateGeometryGraph();
-
 
 			// Now the drawing graph elements point to the corresponding geometry elements, 
 			// however the node boundary curves are not set.
@@ -193,10 +180,30 @@ namespace PSGraph.Tests
 
 			LayoutHelpers.CalculateLayout(drawingGraph.GeometryGraph, new SugiyamaLayoutSettings(), null);
 			PrintSvgAsString(drawingGraph);
-
 		}
 
-		static void AssignLabelsDimensions(Graph drawingGraph)
+        [TestMethod]
+        public void TestAllGraphTypeProcessingPowershell_Success()
+        {
+            var graph = _simpleTestGraph2;
+
+            try
+            {
+                _powershell.AddCommand("Export-Graph");
+                _powershell.AddParameters(new Dictionary<String, Object>
+                    {
+                        {"Format", ExportTypes.MSAGL}, { "Graph", graph }, { "Path", "c:\\temp\\msagl.svg" }
+                    });
+                Collection<PSObject> result = _powershell.Invoke();
+
+            }
+            finally
+            {
+                _powershell.Commands.Clear();
+            }
+        }
+
+        void AssignLabelsDimensions(Graph drawingGraph)
 		{
             // In general, the label dimensions should depend on the viewer
             foreach (var n in drawingGraph.Nodes)
@@ -207,7 +214,7 @@ namespace PSGraph.Tests
             }
 		}
 
-		static void PrintSvgAsString(Graph drawingGraph)
+		void PrintSvgAsString(Graph drawingGraph)
 		{
 			var ms = new MemoryStream();
 			var writer = new StreamWriter(ms);

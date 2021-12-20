@@ -15,6 +15,7 @@ using Microsoft.Msagl.Core.Geometry.Curves;
 using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Miscellaneous;
+using QuikGraph.MSAGL;
 
 namespace PSGraph
 {
@@ -53,25 +54,16 @@ namespace PSGraph
 
         private void ExportMSAGL()
         {
-            var drawingGraph = new Graph();
-
-            foreach (var v in Graph.Vertices)
-            {
-                drawingGraph.AddNode(v.Label).LabelText = v.Label;
-            }
-
-
-            foreach (var edge in Graph.Edges)
-            {
-                var e = drawingGraph.AddEdge(edge.Source.Label, edge.Target.Label); // now the drawing graph has nodes A,B and and an edge A -> B\
-                                                                                    // the geometry graph is still null, so we are going to create it
-            }
-
+            var drawingGraph = Graph.ToMsaglGraph();
             drawingGraph.CreateGeometryGraph();
 
-
+            // Now the drawing graph elements point to the corresponding geometry elements, 
+            // however the node boundary curves are not set.
+            // Setting the node boundaries
             foreach (var n in drawingGraph.Nodes)
             {
+                // Ideally we should look at the drawing node attributes, and figure out, the required node size
+                // I am not sure how to find out the size of a string rendered in SVG. Here, we just blindly assign to each node a rectangle with width 60 and height 40, and round its corners.
                 n.GeometryNode.BoundaryCurve = CurveFactory.CreateRectangleWithRoundedCorners(60, 40, 3, 2, new Point(0, 0));
             }
 
