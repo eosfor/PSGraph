@@ -201,40 +201,5 @@ namespace PSGraph.Tests
             var r = dsm.Order();
             r.ExportSvg("c:\\temp\\basictest.svg");
         }
-
-        //[TestMethod]
-        //public void CreateEmptyDSM()
-        //{
-        //    var m = Matrix<Single>.Build.Random(100, 100, Random.Shared.Next());
-        //    var tstDsm = new dsm(m);
-        //}
-
-        //[TestMethod]
-        //public void DsmStorageBasic()
-        //{
-
-        //}
-
-        //[TestMethod]
-        //public void ClusterDSM()
-        //{
-        //    var m = Matrix<Single>.Build.Dense(10, 10);
-
-        //    var r = new Random();
-        //    var list = new List<int> { 0, 1 };
-
-        //    for (int i = 0; i < m.RowCount; i++)
-        //    {
-        //        for (int j = 0; j < m.ColumnCount; j++)
-        //        {
-        //            m[i,j] = r.Next(list.Count);
-        //        }
-        //    }
-
-
-        //    var tstDsm = new dsm(m);
-        //    tstDsm.Cluster();
-        //}
-
     }
 }
