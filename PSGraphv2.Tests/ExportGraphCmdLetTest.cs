@@ -39,7 +39,7 @@ namespace PSGraph.Tests
         {
             var graph = new PSBidirectionalGraph();
             PSGraph.ExportGraphCmdLet export = new PSGraph.ExportGraphCmdLet();
-            PSGraph.ExportTypes expType = export.Format;
+            PSGraph.GraphExportTypes expType = export.Format;
 
             export.Graph = graph;
 
@@ -52,7 +52,7 @@ namespace PSGraph.Tests
         public void TestPathPropertyNoProcessing_Success()
         {
             PSGraph.ExportGraphCmdLet export = new PSGraph.ExportGraphCmdLet();
-            PSGraph.ExportTypes expType = export.Format;
+            PSGraph.GraphExportTypes expType = export.Format;
 
             String originPath = @"C:\Temp";
             export.Path = originPath;
@@ -65,8 +65,8 @@ namespace PSGraph.Tests
         [TestMethod]
         public void TestExistingExportTypeNoProcessing_Success()
         {
-            ExportGraphCmdLet export = new ExportGraphCmdLet() { Format = ExportTypes.Graphviz};
-            Assert.IsTrue(Enum.Equals(export.Format, ExportTypes.Graphviz));
+            ExportGraphCmdLet export = new ExportGraphCmdLet() { Format = GraphExportTypes.Graphviz};
+            Assert.IsTrue(Enum.Equals(export.Format, GraphExportTypes.Graphviz));
         }
 
 
@@ -80,7 +80,7 @@ namespace PSGraph.Tests
                _powershell.AddCommand("Export-Graph");
                 _powershell.AddParameters(new Dictionary<String, Object>
                     {
-                        {"graph", graph}, {"format", ExportTypes.Graphviz}
+                        {"graph", graph}, {"format", GraphExportTypes.Graphviz}
                     });
                 Collection<PSObject> result = _powershell.Invoke();
 
@@ -102,7 +102,7 @@ namespace PSGraph.Tests
                 _powershell.AddCommand("Export-Graph");
                 _powershell.AddParameters(new Dictionary<String, Object>
                     {
-                        {"graph", graph}, {"format", ExportTypes.Graphviz}
+                        {"graph", graph}, {"format", GraphExportTypes.Graphviz}
                     });
                 Collection<PSObject> result = _powershell.Invoke();
 

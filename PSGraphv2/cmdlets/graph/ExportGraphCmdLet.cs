@@ -31,7 +31,7 @@ namespace PSGraph
 
         [Parameter(Mandatory = true)]
         [ValidateNotNullOrEmpty]
-        public ExportTypes Format;
+        public GraphExportTypes Format;
 
         [Parameter(Mandatory = false)]
         [ValidateNotNullOrEmpty]
@@ -41,15 +41,15 @@ namespace PSGraph
         {
             switch (Format)
             {
-                case ExportTypes.Graphviz:
+                case GraphExportTypes.Graphviz:
                     ExportGraphViz();
                     break;
-                case ExportTypes.GraphML:
+                case GraphExportTypes.GraphML:
                     ExportGraphML();
                     break;
-                case ExportTypes.MSAGL_FASTINCREMENTAL:
-                case ExportTypes.MSAGL_MDS:
-                case ExportTypes.MSAGL_SUGIYAMA:
+                case GraphExportTypes.MSAGL_FASTINCREMENTAL:
+                case GraphExportTypes.MSAGL_MDS:
+                case GraphExportTypes.MSAGL_SUGIYAMA:
                     ExportMSAGL();
                     break;
                 default:
@@ -77,13 +77,13 @@ namespace PSGraph
             LayoutAlgorithmSettings? las = null;
             switch (Format)
             {
-                case ExportTypes.MSAGL_MDS:
+                case GraphExportTypes.MSAGL_MDS:
                     las = new MdsLayoutSettings();
                     break;
-                case ExportTypes.MSAGL_SUGIYAMA:
+                case GraphExportTypes.MSAGL_SUGIYAMA:
                     las = new SugiyamaLayoutSettings();
                     break;
-                case ExportTypes.MSAGL_FASTINCREMENTAL:
+                case GraphExportTypes.MSAGL_FASTINCREMENTAL:
                     las = new FastIncrementalLayoutSettings();
                     break;
             }
