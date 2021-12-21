@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PSGraph
 {
-    public enum ExportTypes
+    public enum GraphExportTypes
     {
         Graphviz,
         GraphML,

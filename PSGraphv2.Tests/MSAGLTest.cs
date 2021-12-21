@@ -192,7 +192,7 @@ namespace PSGraph.Tests
                 _powershell.AddCommand("Export-Graph");
                 _powershell.AddParameters(new Dictionary<String, Object>
                     {
-                        {"Format", ExportTypes.MSAGL_MDS}, { "Graph", graph }, { "Path", "c:\\temp\\msagl.svg" }
+                        {"Format", GraphExportTypes.MSAGL_MDS}, { "Graph", graph }, { "Path", "c:\\temp\\msagl.svg" }
                     });
                 Collection<PSObject> result = _powershell.Invoke();
 

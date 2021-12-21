@@ -65,6 +65,8 @@ namespace PSGraph.DesignStructureMatrix
         public int Count => _dsm.Count;
         public int Size => _dsm.Size;
 
+        public Matrix<float> DsmStorage { get => _dsm.Dsm; }
+
         private List<Cluster> FindClusterByCoordinates(int i, int j)
         {
             var from = _dsm.ColIndex.Where(x => x.Value == i).First();
