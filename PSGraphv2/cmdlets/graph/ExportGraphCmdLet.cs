@@ -17,6 +17,8 @@ using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Miscellaneous;
 using QuikGraph.MSAGL;
 using Microsoft.Msagl.Layout.MDS;
+using Microsoft.Msagl.Layout.Incremental;
+using Microsoft.Msagl.Core.Layout;
 
 namespace PSGraph
 {
@@ -45,10 +47,13 @@ namespace PSGraph
                 case ExportTypes.GraphML:
                     ExportGraphML();
                     break;
-                case ExportTypes.MSAGL:
+                case ExportTypes.MSAGL_FASTINCREMENTAL:
+                case ExportTypes.MSAGL_MDS:
+                case ExportTypes.MSAGL_SUGIYAMA:
                     ExportMSAGL();
                     break;
                 default:
+                    ExportGraphViz();
                     break;
             }
         }
@@ -69,8 +74,21 @@ namespace PSGraph
 
             AssignLabelsDimensions(drawingGraph);
 
-            var ls = new MdsLayoutSettings();
-            LayoutHelpers.CalculateLayout(drawingGraph.GeometryGraph, ls, null);
+            LayoutAlgorithmSettings? las = null;
+            switch (Format)
+            {
+                case ExportTypes.MSAGL_MDS:
+                    las = new MdsLayoutSettings();
+                    break;
+                case ExportTypes.MSAGL_SUGIYAMA:
+                    las = new SugiyamaLayoutSettings();
+                    break;
+                case ExportTypes.MSAGL_FASTINCREMENTAL:
+                    las = new FastIncrementalLayoutSettings();
+                    break;
+            }
+            
+            LayoutHelpers.CalculateLayout(drawingGraph.GeometryGraph, las, null);
             PrintSvgAsString(drawingGraph);
         }
 
