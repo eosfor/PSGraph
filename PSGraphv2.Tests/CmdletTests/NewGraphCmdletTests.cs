@@ -17,7 +17,7 @@ namespace PSGraph.Tests
 		{
 			_powershell = PowerShell.Create();
 			_powershell.AddCommand("Import-Module")
-				.AddParameter("Assembly", System.Reflection.Assembly.GetAssembly(typeof (PSGraph.NewPsGraphCmdlet)));
+				.AddParameter("Assembly", System.Reflection.Assembly.GetAssembly(typeof(PSGraph.NewPsGraphCmdlet)));
 			_powershell.Invoke();
 			_powershell.Commands.Clear();
 		}
@@ -35,10 +35,10 @@ namespace PSGraph.Tests
 			{
 				_powershell.AddCommand("New-Graph");
 				Collection<PSObject>  result = _powershell.Invoke();
+				
 				Assert.IsTrue(result != null);
 				Assert.IsTrue(result.Count == 1);
 				Assert.IsTrue(result[0].ImmediateBaseObject.GetType() == typeof (PSBidirectionalGraph));
-				_powershell.Commands.Clear();
 			}
 			finally
 			{

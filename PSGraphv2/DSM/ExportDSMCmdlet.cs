@@ -38,8 +38,9 @@ namespace PSGraph.cmdlets.dsm
 
         private void ExportText()
         {
-            DelimitedWriter.Write(Path, Dsm.DsmStorage , ",");
-            //throw new NotImplementedException();
+            Dsm.Cluster();
+            var r = Dsm.Order();
+            DelimitedWriter.Write(Path, r.DsmStorage , ",");
         }
 
         private void ExportSVG()
