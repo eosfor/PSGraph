@@ -16,6 +16,7 @@ using Microsoft.Msagl.Layout.Layered;
 using Microsoft.Msagl.Core.Geometry;
 using Microsoft.Msagl.Miscellaneous;
 using QuikGraph.MSAGL;
+using Microsoft.Msagl.Layout.MDS;
 
 namespace PSGraph
 {
@@ -62,14 +63,14 @@ namespace PSGraph
             // Setting the node boundaries
             foreach (var n in drawingGraph.Nodes)
             {
-                // Ideally we should look at the drawing node attributes, and figure out, the required node size
-                // I am not sure how to find out the size of a string rendered in SVG. Here, we just blindly assign to each node a rectangle with width 60 and height 40, and round its corners.
-                n.GeometryNode.BoundaryCurve = CurveFactory.CreateRectangleWithRoundedCorners(60, 40, 3, 2, new Point(0, 0));
+                var w = 0.68 * (n.LabelText.Length * n.Label.FontSize);
+                n.GeometryNode.BoundaryCurve = CurveFactory.CreateRectangleWithRoundedCorners(w, 40, 3, 2, new Point(0, 0));
             }
 
             AssignLabelsDimensions(drawingGraph);
 
-            LayoutHelpers.CalculateLayout(drawingGraph.GeometryGraph, new SugiyamaLayoutSettings(), null);
+            var ls = new MdsLayoutSettings();
+            LayoutHelpers.CalculateLayout(drawingGraph.GeometryGraph, ls, null);
             PrintSvgAsString(drawingGraph);
         }
 
@@ -78,7 +79,7 @@ namespace PSGraph
             // In general, the label dimensions should depend on the viewer
             foreach (var n in drawingGraph.Nodes)
             {
-                n.Label.Width = n.Width * 0.6;
+                n.Label.Width = n.Width * 0.99;
                 n.Label.Height = 40;
                 n.Attr.FillColor = Color.Azure;
             }
