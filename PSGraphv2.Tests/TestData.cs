@@ -1,49 +1,26 @@
-﻿using System;
+﻿using PSGraph.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.ObjectModel;
-using System.Management.Automation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PSGraph.Model;
-using QuikGraph;
-using System.IO;
-using Microsoft.Msagl.Core.Geometry;
-using Microsoft.Msagl.Core.Geometry.Curves;
-using Microsoft.Msagl.Drawing;
-using Microsoft.Msagl.Layout.Layered;
-using Microsoft.Msagl.Miscellaneous;
-using QuikGraph.Graphviz;
-using QuikGraph.MSAGL;
 
 namespace PSGraph.Tests
 {
-    [TestClass]
-    public class MSAGLTest
+    public static class TestData
     {
-		static private PowerShell _powershell;
+        public static PSBidirectionalGraph SimpleTestGraph1 { get; private set; }
+        public static PSBidirectionalGraph SimpleTestGraph2 { get; private set; }
+        public static PSBidirectionalGraph SimpleTestGraph3 { get; private set; }
 
-		private static PSBidirectionalGraph _simpleTestGraph1;
-		private static PSBidirectionalGraph _simpleTestGraph2;
-		private static PSBidirectionalGraph _simpleTestGraph3;
-
-		[ClassInitialize()]
-		public static void InitPsGraphUnitTest(TestContext tc)
-		{
-			_powershell = PowerShell.Create();
-			_powershell.AddCommand("Import-Module")
-				.AddParameter("Assembly", System.Reflection.Assembly.GetAssembly(typeof(PSGraph.NewPsGraphCmdlet)));
-			_powershell.Invoke();
-			_powershell.Commands.Clear();
-
-
-            InitializeSimpleTestGraph1();
-            InitializeSimpleTestGraph2();
-            InitializeSimpleTestGraph3();
+        static TestData()
+        {
+            SimpleTestGraph1 = InitializeSimpleTestGraph1();
+            SimpleTestGraph2 = InitializeSimpleTestGraph2();
+            SimpleTestGraph3 = InitializeSimpleTestGraph3();
         }
 
-        private static void InitializeSimpleTestGraph1()
+        private static PSBidirectionalGraph InitializeSimpleTestGraph1()
         {
             var g = new PSBidirectionalGraph();
 
@@ -63,12 +40,10 @@ namespace PSGraph.Tests
             g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("C"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("E"), new PSEdgeTag()));
 
-            _simpleTestGraph1 = g;
-
-            //throw new NotImplementedException();
+            return g;
         }
 
-        private static void InitializeSimpleTestGraph2()
+        private static PSBidirectionalGraph InitializeSimpleTestGraph2()
         {
             var g = new PSBidirectionalGraph();
 
@@ -110,14 +85,10 @@ namespace PSGraph.Tests
             g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("G"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("G"), new PSEdgeTag()));
 
-            System.IO.File.WriteAllText("c:\\temp\\test2.gv", g.ToGraphviz());
-
-            _simpleTestGraph2 = g;
-
-            //throw new NotImplementedException();
+            return g;
         }
 
-        private static void InitializeSimpleTestGraph3()
+        private static PSBidirectionalGraph InitializeSimpleTestGraph3()
         {
             var g = new PSBidirectionalGraph();
 
@@ -147,86 +118,7 @@ namespace PSGraph.Tests
             g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("H"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("H"), new PSEdgeTag()));
 
-
-            System.IO.File.WriteAllText("c:\\temp\\test3.gv", g.ToGraphviz());
-
-            _simpleTestGraph3 = g;
+            return g;
         }
-
-        [ClassCleanup()]
-		public static void CleanupPsGraphUnitTest()
-		{
-			_powershell?.Dispose();
-		}
-
-
-		[TestMethod]
-		public void TestAllGraphTypeProcessing_Success()
-		{
-            var drawingGraph = _simpleTestGraph2.ToMsaglGraph();
-            drawingGraph.CreateGeometryGraph();
-
-			// Now the drawing graph elements point to the corresponding geometry elements, 
-			// however the node boundary curves are not set.
-			// Setting the node boundaries
-			foreach (var n in drawingGraph.Nodes)
-			{
-				// Ideally we should look at the drawing node attributes, and figure out, the required node size
-				// I am not sure how to find out the size of a string rendered in SVG. Here, we just blindly assign to each node a rectangle with width 60 and height 40, and round its corners.
-				n.GeometryNode.BoundaryCurve = CurveFactory.CreateRectangleWithRoundedCorners(60, 40, 3, 2, new Point(0, 0));
-			}
-
-			AssignLabelsDimensions(drawingGraph);
-
-			LayoutHelpers.CalculateLayout(drawingGraph.GeometryGraph, new SugiyamaLayoutSettings(), null);
-			PrintSvgAsString(drawingGraph);
-		}
-
-        [TestMethod]
-        public void TestAllGraphTypeProcessingPowershell_Success()
-        {
-            var graph = _simpleTestGraph2;
-
-            try
-            {
-                _powershell.AddCommand("Export-Graph");
-                _powershell.AddParameters(new Dictionary<String, Object>
-                    {
-                        {"Format", GraphExportTypes.MSAGL_MDS}, { "Graph", graph }, { "Path", "c:\\temp\\msagl.svg" }
-                    });
-                Collection<PSObject> result = _powershell.Invoke();
-
-            }
-            finally
-            {
-                _powershell.Commands.Clear();
-            }
-        }
-
-        void AssignLabelsDimensions(Graph drawingGraph)
-		{
-            // In general, the label dimensions should depend on the viewer
-            foreach (var n in drawingGraph.Nodes)
-            {
-                n.Label.Width = n.Width * 0.6;
-                n.Label.Height = 40;
-                n.Attr.FillColor = Color.Azure;
-            }
-		}
-
-		void PrintSvgAsString(Graph drawingGraph)
-		{
-			var ms = new MemoryStream();
-			var writer = new StreamWriter(ms);
-			var svgWriter = new SvgGraphWriter(writer.BaseStream, drawingGraph);
-			svgWriter.Write();
-			// get the string from MemoryStream
-			ms.Position = 0;
-			var sr = new StreamReader(ms);
-			var myStr = sr.ReadToEnd();
-
-            System.IO.File.WriteAllText("c:\\temp\\ttt.svg", myStr);
-            //System.Console.WriteLine(myStr);
-        }
-	}
+    }
 }
