@@ -45,7 +45,7 @@ namespace PSGraph.DesignStructureMatrix
             //throw new NotImplementedException();
         }
 
-        public DsmStorage GetOrderedDsm(List<Cluster> clusters) 
+        public DsmStorage GetOrderedDsm(List<DSMCluster> clusters) 
         {
             Dictionary<PSVertex, int> rowIndex = new Dictionary<PSVertex, int>();
             Dictionary<PSVertex, int> colIndex = new Dictionary<PSVertex, int>();

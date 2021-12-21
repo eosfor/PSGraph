@@ -54,7 +54,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void BasicClusterTest()
         {
-            var dsm = new Dsm(TestData.SimpleTestGraph2);
+            var dsm = new Dsm(TestData.SimpleTestGraph3);
             dsm.Cluster();
 
         }
@@ -62,7 +62,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void BasicClusterOrderTest()
         {
-            var dsm = new Dsm(TestData.SimpleTestGraph2);
+            var dsm = new Dsm(TestData.SimpleTestGraph3);
             dsm.Cluster();
             var r = dsm.Order();
         }
@@ -70,7 +70,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void BasicDsmExportTest()
         {
-            var dsm = new Dsm(TestData.SimpleTestGraph1);
+            var dsm = new Dsm(TestData.SimpleTestGraph3);
             dsm.Cluster();
             var r = dsm.Order();
             var f = System.IO.Path.GetTempPath();
