@@ -7,7 +7,9 @@ namespace PSGraph
     {
         Graphviz,
         GraphML,
-        MSAGL
+        MSAGL_MDS,
+        MSAGL_SUGIYAMA,
+        MSAGL_FASTINCREMENTAL
     }
 
     public abstract class PSGraphVertex : GraphvizVertex
