@@ -13,53 +13,26 @@ using PSGraph.Model;
 
 namespace PSGraph.DesignStructureMatrix
 {
-    public class Cluster
-    {
-        public List<PSVertex> Objects = new List<PSVertex>();
-        public System.Drawing.Color Color = System.Drawing.Color.FromArgb(Random.Shared.Next(255), Random.Shared.Next(255), Random.Shared.Next(255));
-
-        public override bool Equals(object? obj)
-        {
-            bool res = false;
-
-            if (null != obj)
-            {
-                if (((Cluster)obj).Objects.Count == Objects.Count)
-                {
-                    foreach (var item in ((Cluster)obj).Objects)
-                    {
-                        if (Objects.Contains(item)) { res = true; break; }
-                        else { res = false; }
-                    }
-                }
-
-            }
-
-            return obj is Cluster cluster &&
-                   res;//EqualityComparer<List<object>>.Default.Equals(Objects, cluster.Objects) &&
-        }
-    }
     public class Dsm
     {
         private PSBidirectionalGraph _sourceGraph;
         private DsmStorage _dsm;
-        private List<Cluster> _clusters;
+        private List<DSMCluster> _clusters;
 
 
         private int _pow_cc = 2;
         private double _pow_bid = 0.5;
-        private int _pow_dep = 2;
         private int _max_Cl_size = 0;
         private int _rand_accept = 0;
         private int _rand_bid = 0;
         private int _times = 2;
         private int _stable_limit = 10;
 
-        private Stack<SortedDictionary<double, List<Cluster>>> _historicalBids = new Stack<SortedDictionary<double, List<Cluster>>>();
+        private Stack<SortedDictionary<double, List<DSMCluster>>> _historicalBids = new Stack<SortedDictionary<double, List<DSMCluster>>>();
 
-        private float _minObservedtCCost = float.MaxValue ;
-        public float MinObservedtCCost { get => _minObservedtCCost; }
-        private float _tCCost = 0;
+        private double _minObservedtCCost = double.MaxValue ;
+        public double MinObservedtCCost { get => _minObservedtCCost; }
+        private double _tCCost = 0;
 
         public Single this[PSVertex row, PSVertex col] { get => _dsm[row, col]; }
         public int Count => _dsm.Count;
@@ -67,7 +40,8 @@ namespace PSGraph.DesignStructureMatrix
 
         public Matrix<float> DsmStorage { get => _dsm.Dsm; }
 
-        private List<Cluster> FindClusterByCoordinates(int i, int j)
+
+        private List<DSMCluster> FindClusterByCoordinates(int i, int j)
         {
             var from = _dsm.ColIndex.Where(x => x.Value == i).First();
             var to = _dsm.RowIndex.Where(e => e.Value == i).First();
@@ -77,43 +51,9 @@ namespace PSGraph.DesignStructureMatrix
             return ret;
         }
 
-        protected Dsm(PSBidirectionalGraph sourceGraph, 
-                      DsmStorage dsm, 
-                      List<Cluster> clusters,
-                      int pow_cc = 2,
-                      double pow_bid = 1,
-                      int max_Cl_size = 0,
-                      int rand_accept = 0,
-                      int rand_bid = 0,
-                      int times = 5,
-                      int stable_limit = 2)
-        {
-            _sourceGraph = sourceGraph;
-            _dsm = dsm;
-            _clusters = clusters;
-            _pow_cc = pow_cc;
-            _pow_bid = pow_bid;
-            _max_Cl_size = max_Cl_size;
-            _rand_accept = rand_accept;
-            _rand_bid = rand_bid;
-            _times = times;
-            _stable_limit = stable_limit;
-        }
-
-        public Dsm(PSBidirectionalGraph graph)
-        {
-            var r = new Random();
-            _sourceGraph = graph;
-            _dsm = GraphToDSM(_sourceGraph);
-            _max_Cl_size = _dsm.Size;
-            _rand_accept = r.Next() % 2 == 0 ? (int)Math.Round((decimal)_dsm.Size / 2) : _max_Cl_size * 2;
-            _rand_bid = r.Next() % 2 == 0 ? (int)Math.Round((decimal)_dsm.Size / 2) : _max_Cl_size * 2;
-        }
-
         private DsmStorage GraphToDSM(PSBidirectionalGraph graph)
         {
             return new DsmStorage(graph);
-
         }
 
         public void Cluster()
@@ -140,7 +80,7 @@ namespace PSGraph.DesignStructureMatrix
                     var newTCCost = CalculateTotalCoordinationCost();
 
                     var currentRandAccept = r.Next(_rand_accept - 1);
-                    //system = newTCCost == _tCCost ? system+1 : system;
+
                     if ( newTCCost <= _tCCost  )
                     {
                         system = newTCCost == _tCCost ? system + 1 : 0;
@@ -150,10 +90,7 @@ namespace PSGraph.DesignStructureMatrix
                     {
                         if (currentRandAccept == (_rand_accept - 1)) {
                             // rollback
-                            foreach (var cluster in oldCluster)
-                            {
-                                Move(obj, cluster);
-                            }
+                            Move(obj, oldCluster);
                             system += 1;
                         }
                         else
@@ -297,49 +234,32 @@ namespace PSGraph.DesignStructureMatrix
 
         private void RemoveEmptyClusters()
         {
-
             var r = _clusters.RemoveAll( c => c.Objects.Count == 0);
         }
 
-        private List<Cluster> Move(PSVertex obj, Cluster bestBid)
+        private DSMCluster Move(PSVertex obj, DSMCluster bestBid)
         {
-            var oldClusters = FindDsmObjectCluster(obj);
-            
-            foreach (var cluster in oldClusters)
-            {
-                cluster.Objects.Remove(obj);
-            }
-
+            var oldCluster = FindDsmObjectCluster(obj);
+            oldCluster.Objects.Remove(obj);
             bestBid.Objects.Add(obj);
 
-            return oldClusters;
+            return oldCluster;
         }
 
-        private SortedDictionary<double, List<Cluster>> CalculateClusterBids(PSVertex obj)
+        private SortedDictionary<double, List<DSMCluster>> CalculateClusterBids(PSVertex obj)
         {
-            double bid;
-            var ret = new SortedDictionary<double, List<Cluster>>();
+            double bid = 0;
+            var ret = new SortedDictionary<double, List<DSMCluster>>();
 
             foreach (var cluster in _clusters)
             {
-                bid = 0;
-                foreach (var dsmObject in cluster.Objects)
-                {
-                    if (dsmObject != obj) // avoid diagonal elements
-                    {
-                        var a = _dsm[obj, dsmObject];
-                        var b = _dsm[dsmObject, obj];
-                        bid += Math.Pow(a + b, _pow_dep) / Math.Pow(cluster.Objects.Count, _pow_bid);
-
-                    }
-                }
-
+                bid += cluster.Bid(obj, _dsm);
 
                 if (ret.ContainsKey(bid)) {
                     ret[bid].Add(cluster);
                 }
                 else {
-                    var l = new List<Cluster>();
+                    var l = new List<DSMCluster>();
                     l.Add(cluster);
                     ret.Add(bid, l);
                 }
@@ -355,63 +275,76 @@ namespace PSGraph.DesignStructureMatrix
             var idx = r.Next(_dsm.Size - 1);
 
             return _dsm.Objects[idx];
-
-            //throw new NotImplementedException();
         }
 
-        private float CalculateTotalCoordinationCost()
+        private double CalculateTotalCoordinationCost()
         {
-            float intraClustertCost = 0;
-            float extraClusterCost = 0;
-            float cl_size = 0;
+            double tcc = 0;
 
-            foreach (var item in _clusters)
+            foreach (var cluster in _clusters)
             {
-                cl_size += (float)(Math.Pow(item.Objects.Count, _pow_cc));
-            }
-
-            foreach (var obj1 in _dsm.Objects)
-            {
-                var cluster1 = FindDsmObjectCluster(obj1);
-                foreach (var obj2 in _dsm.Objects)
+                foreach (var o in _dsm.Objects)
                 {
-                    var cluster2 = FindDsmObjectCluster(obj2);
-
-                    var dsmSum = _dsm[obj1, obj2] + _dsm[obj2, obj1];
-                    if (cluster1.SequenceEqual(cluster2)) // what if any of these clusters have more than one list?
-                    {
-                        // sum intra cluster cost
-                        intraClustertCost += dsmSum * cl_size;
-                    }
-                    else
-                    {
-                        // sum extra cluster cost
-                        extraClusterCost += (float)(dsmSum * Math.Pow(_dsm.Size, _pow_cc));
-                    }
+                    tcc += cluster.CoordinationCost(o, _dsm);
                 }
             }
 
-            var ret = intraClustertCost / extraClusterCost;
-            _minObservedtCCost = ret < _minObservedtCCost ? ret : _minObservedtCCost; //want to record the minimum cost to compare it to the selected one at the end of the run
+            //want to record the minimum cost to compare it to the selected one at the end of the run
+            _minObservedtCCost = tcc < _minObservedtCCost ? tcc : _minObservedtCCost;
 
-            return ret;
+            return tcc;
         }
 
-        private List<Cluster> FindDsmObjectCluster(object obj)
+        private DSMCluster FindDsmObjectCluster(object obj)
         {
-            return _clusters.Where(l => l.Objects.Contains(obj)).ToList();
+            return _clusters.Where(l => l.Objects.Contains(obj)).First();
         }
 
         private void CreateInitialClusters()
         {
-            _clusters = new List<Cluster>();
+            _clusters = new List<DSMCluster>();
             foreach (var item in _dsm.Objects)
             {
-                var cluster = new Cluster();
+                var cluster = new DSMCluster();
                 cluster.Objects.Add(item);
                 _clusters.Add(cluster);
             }
-            //throw new NotImplementedException();
         }
+
+        #region constructors
+        protected Dsm(PSBidirectionalGraph sourceGraph,
+              DsmStorage dsm,
+              List<DSMCluster> clusters,
+              int pow_cc = 2,
+              double pow_bid = 1,
+              int max_Cl_size = 0,
+              int rand_accept = 0,
+              int rand_bid = 0,
+              int times = 5,
+              int stable_limit = 2)
+        {
+            _sourceGraph = sourceGraph;
+            _dsm = dsm;
+            _clusters = clusters;
+            _pow_cc = pow_cc;
+            _pow_bid = pow_bid;
+            _max_Cl_size = max_Cl_size;
+            _rand_accept = rand_accept;
+            _rand_bid = rand_bid;
+            _times = times;
+            _stable_limit = stable_limit;
+        }
+
+        public Dsm(PSBidirectionalGraph graph)
+        {
+            var r = new Random();
+            _sourceGraph = graph;
+            _dsm = GraphToDSM(_sourceGraph);
+            _max_Cl_size = _dsm.Size;
+            _rand_accept = r.Next() % 2 == 0 ? (int)Math.Round((decimal)_dsm.Size / 2) : _max_Cl_size * 2;
+            _rand_bid = r.Next() % 2 == 0 ? (int)Math.Round((decimal)_dsm.Size / 2) : _max_Cl_size * 2;
+        }
+
+        #endregion constructors
     }
 }
