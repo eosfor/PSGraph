@@ -8,7 +8,7 @@ using Microsoft.PowerShell;
 using QuikGraph.Algorithms;
 using PSGraph.Model;
 
-namespace PSGraph
+namespace PSGraph.Cmdlets
 {
     [Cmdlet(VerbsCommon.Get, "GraphPath")]
     public class GetGraphPath : PSCmdlet

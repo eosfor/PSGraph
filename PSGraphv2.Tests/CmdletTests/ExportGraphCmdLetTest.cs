@@ -21,7 +21,7 @@ namespace PSGraph.Tests
         {
             _powershell = PowerShell.Create();
             _powershell.AddCommand("Import-Module")
-                .AddParameter("Assembly", System.Reflection.Assembly.GetAssembly(typeof(PSGraph.NewPsGraphCmdlet)));
+                .AddParameter("Assembly", System.Reflection.Assembly.GetAssembly(typeof(PSGraph.Cmdlets.NewPsGraphCmdlet)));
             _powershell.Invoke();
             _powershell.Commands.Clear();
         }
@@ -36,7 +36,7 @@ namespace PSGraph.Tests
         public void TestGraphPropertyNoProcessing_Success()
         {
             var graph = new PSBidirectionalGraph();
-            PSGraph.ExportGraphCmdLet export = new PSGraph.ExportGraphCmdLet();
+            PSGraph.Cmdlets.ExportGraphViewCmdLet export = new PSGraph.Cmdlets.ExportGraphViewCmdLet();
             PSGraph.GraphExportTypes expType = export.Format;
 
             export.Graph = graph;
@@ -49,7 +49,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void TestPathPropertyNoProcessing_Success()
         {
-            PSGraph.ExportGraphCmdLet export = new PSGraph.ExportGraphCmdLet();
+            PSGraph.Cmdlets.ExportGraphViewCmdLet export = new PSGraph.Cmdlets.ExportGraphViewCmdLet();
             PSGraph.GraphExportTypes expType = export.Format;
 
             String originPath = @"C:\Temp";
@@ -63,7 +63,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void TestExistingExportTypeNoProcessing_Success()
         {
-            ExportGraphCmdLet export = new ExportGraphCmdLet() { Format = GraphExportTypes.Graphviz};
+            PSGraph.Cmdlets.ExportGraphViewCmdLet export = new PSGraph.Cmdlets.ExportGraphViewCmdLet() { Format = GraphExportTypes.Graphviz};
             Assert.IsTrue(Enum.Equals(export.Format, GraphExportTypes.Graphviz));
         }
 

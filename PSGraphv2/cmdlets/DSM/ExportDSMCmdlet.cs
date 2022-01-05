@@ -8,7 +8,7 @@ using MathNet.Numerics.Data.Text;
 using PSGraph.DesignStructureMatrix;
 using PSGraph.Model;
 
-namespace PSGraph.cmdlets.dsm
+namespace PSGraph.Cmdlets
 {
     [Cmdlet(VerbsData.Export, "DSM")]
     public class ExportDSMCmdlet : PSCmdlet
@@ -38,16 +38,16 @@ namespace PSGraph.cmdlets.dsm
 
         private void ExportText()
         {
-            Dsm.Cluster();
-            var r = Dsm.Order();
-            DelimitedWriter.Write(Path, r.DsmStorage , ",");
+            //Dsm.Cluster();
+            //var r = Dsm.Order();
+            DelimitedWriter.Write(Path, Dsm.DsmStorage , ",");
         }
 
         private void ExportSVG()
         {
-            Dsm.Cluster();
-            var r = Dsm.Order();
-            r.ExportSvg(Path);
+            //Dsm.Cluster();
+            //var r = Dsm.Order();
+            Dsm.ExportSvg(Path);
         }
     }
 }

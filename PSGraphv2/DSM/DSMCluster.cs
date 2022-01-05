@@ -20,10 +20,34 @@ namespace PSGraph.DesignStructureMatrix
 
         public List<System.ValueTuple<double, double, PSVertex>> TccHistory { get; private set; }
 
-
-        public DSMCluster()
+        public HashSet<DSMCluster> GetOutEdges(List<DSMCluster> clusters, Dsm dsm)
         {
-            TccHistory = new List<System.ValueTuple<double,double, PSVertex>>();
+            var ret = new HashSet<DSMCluster>();
+            foreach (var item in Objects)
+            {
+                var column = dsm.Column(item);
+                foreach (var i in dsm.ColIndex)
+                {
+                    if (! Objects.Contains(i.Key))
+                    {
+                        if (dsm[i.Key, item] == 1)
+                        {
+                            ret.Add(dsm.FindDsmObjectCluster(i.Key));
+                        }
+                    }
+                }
+            }
+
+            return ret;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendJoin(",", (object[])Objects.ToArray());
+
+            return sb.ToString();
+            //return base.ToString();
         }
 
         public double CoordinationCost(PSVertex obj, DsmStorage dsm)
@@ -109,5 +133,12 @@ namespace PSGraph.DesignStructureMatrix
         {
             return Objects.GetHashCode();
         }
+
+        #region contructors
+        public DSMCluster()
+        {
+            TccHistory = new List<System.ValueTuple<double, double, PSVertex>>();
+        }
+        #endregion cosntructors
     }
 }

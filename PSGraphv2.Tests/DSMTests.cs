@@ -77,5 +77,16 @@ namespace PSGraph.Tests
             var p = System.IO.Path.Combine(f, "basictest.svg");
             r.ExportSvg(p);
         }
+
+        [TestMethod]
+        public void GetOutEdgesTest()
+        {
+            var dsm = new Dsm(TestData.SimpleTestGraph4);
+            dsm.Cluster();
+            foreach (var c in dsm.Clusters)
+            {
+                var r = c.GetOutEdges(dsm.Clusters, dsm);
+            }
+        }
     }
 }

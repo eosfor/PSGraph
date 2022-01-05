@@ -7,7 +7,7 @@ using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PSGraph.cmdlets
+namespace PSGraph.Cmdlets
 {
     [Cmdlet(VerbsCommon.New, "DSM")]
     public  class NewDSMCmdlet: PSCmdlet

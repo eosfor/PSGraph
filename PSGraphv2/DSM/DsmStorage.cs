@@ -34,6 +34,18 @@ namespace PSGraph.DesignStructureMatrix
             return _dsm[i, j];
         }
 
+        public float[] Row(PSVertex obj)
+        {
+            var idx = _rowIndex[obj];
+            return _dsm.Row(idx).ToArray();
+        }
+
+        public float[] Column(PSVertex obj)
+        {
+            var idx = _colIndex[obj];
+            return _dsm.Column(idx).ToArray();
+        }
+
 
         private void SetDsmElementByGraphVertex(PSVertex from, PSVertex to, float value)
         {

@@ -5,7 +5,7 @@ using PSGraph.Model;
 using System.Xml;
 using QuikGraph.Serialization;
 
-namespace PSGraph
+namespace PSGraph.Cmdlets
 {
     [Cmdlet(VerbsData.Import, "Graph")]
     public class ImportGraphCmdlet: PSCmdlet
