@@ -9,7 +9,7 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-RootModule = "PSGraphv2.dll"
+RootModule = "PSGraph.dll"
 
 # Version number of this module.
 ModuleVersion = '2.0'
