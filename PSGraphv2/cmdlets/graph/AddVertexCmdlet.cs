@@ -3,7 +3,7 @@ using System;
 using System.Management.Automation;
 using System.Reflection;
 
-namespace PSGraph
+namespace PSGraph.Cmdlets
 {
     [Cmdlet(VerbsCommon.Add, "Vertex")]
     public class AddVertexCmdlet : PSCmdlet

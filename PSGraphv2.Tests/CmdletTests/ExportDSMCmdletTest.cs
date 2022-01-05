@@ -20,7 +20,7 @@ namespace PSGraph.Tests
         {
             _powershell = PowerShell.Create();
             _powershell.AddCommand("Import-Module")
-                .AddParameter("Assembly", System.Reflection.Assembly.GetAssembly(typeof(PSGraph.NewPsGraphCmdlet)));
+                .AddParameter("Assembly", System.Reflection.Assembly.GetAssembly(typeof(PSGraph.Cmdlets.NewPsGraphCmdlet)));
             _powershell.Invoke();
             _powershell.Commands.Clear();
         }

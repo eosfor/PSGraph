@@ -19,26 +19,44 @@ namespace PSGraph.DesignStructureMatrix
         private DsmStorage _dsm;
         private List<DSMCluster> _clusters;
 
-
+        // algo parameters
         private int _pow_cc = 2;
         private double _pow_bid = 0.5;
         private int _max_Cl_size = 0;
-        private int _rand_accept = 0;
+        private int _rand_accept = 4;
         private int _rand_bid = 0;
-        private int _times = 2;
+        private int _times = 7;
         private int _stable_limit = 10;
+        private double _tCCost = 0;
+
+        // some stats
+        private double _minObservedtCCost = double.MaxValue;
+        private int _rollbackCount = 0;
+
+        private int _system = 0;
+        private int _runCount = 0;
 
         private Stack<SortedDictionary<double, List<DSMCluster>>> _historicalBids = new Stack<SortedDictionary<double, List<DSMCluster>>>();
+        private Stack<ValueTuple<double, int>> _historicalTCC = new Stack<ValueTuple<double, int>>();
+        private Stack<int> _historicalStableLimit = new Stack<int>();
 
-        private double _minObservedtCCost = double.MaxValue ;
         public double MinObservedtCCost { get => _minObservedtCCost; }
-        private double _tCCost = 0;
+        public Stack<ValueTuple<double, int>> HistoricalTCC { get => _historicalTCC; }
+        public Stack<SortedDictionary<double, List<DSMCluster>>> HistoricalBids { get => _historicalBids; }
+        public Stack<int> HistoricalStableLimit { get => _historicalStableLimit; } 
+        public int RunCount { get => _runCount; }
+
+        public int RollbackCount { get => _rollbackCount; }
 
         public Single this[PSVertex row, PSVertex col] { get => _dsm[row, col]; }
         public int Count => _dsm.Count;
         public int Size => _dsm.Size;
+        public List<DSMCluster> Clusters => _clusters;
 
         public Matrix<float> DsmStorage { get => _dsm.Dsm; }
+
+        public Dictionary<PSVertex, int>  RowIndex => _dsm.RowIndex;
+        public Dictionary<PSVertex, int> ColIndex => _dsm.ColIndex;
 
 
         private List<DSMCluster> FindClusterByCoordinates(int i, int j)
@@ -56,16 +74,59 @@ namespace PSGraph.DesignStructureMatrix
             return new DsmStorage(graph);
         }
 
+
+        public float[] Row(PSVertex obj)
+        {
+            return _dsm.Row(obj);
+        }
+
+        public float[] Column(PSVertex obj)
+        {
+            return _dsm.Column(obj);
+        }
+
+        public PSBidirectionalGraph GetClusteredViewGraph()
+        {
+            if (_clusters == null) throw new InvalidOperationException("The DSM hasn't been clustered yet. Please run the corresponding command first");
+            var ret = new PSBidirectionalGraph();
+
+            foreach (var c in _clusters)
+            {
+                var edges = c.GetOutEdges(_clusters, this);
+
+                if(edges.Count == 0)
+                {
+                    ret.AddVertex(new PSVertex(c.ToString(), c));
+                    continue;
+                }
+
+                foreach (var e in edges)
+                {
+                    ret.AddVerticesAndEdge(new PSEdge(new PSVertex(c.ToString(), c), new PSVertex(e.ToString(), e), new PSEdgeTag()) );
+                }
+            }
+
+            return ret;
+        }
+
         public void Cluster()
         {
-
-            int system = 0;
             var r = new Random();
 
-            CreateInitialClusters();
+            if (null == _clusters && _runCount == 0)
+            {
+                CreateInitialClusters();
+            }
+
+            //if (_runCount > 0)
+            //{
+            //    _system = 0; //reset the stability counter for cases when one feeds the same DSM again
+            //}
+
+            _runCount += 1;
             _tCCost = CalculateTotalCoordinationCost();
 
-            while (system < _stable_limit)
+            while (_system < _stable_limit)
             {
                 for (int k = 0; k <= _dsm.Size * _times; k++)
                 {
@@ -83,20 +144,24 @@ namespace PSGraph.DesignStructureMatrix
 
                     if ( newTCCost <= _tCCost  )
                     {
-                        system = newTCCost == _tCCost ? system + 1 : 0;
+                        _system = newTCCost == _tCCost ? _system + 1 : 0;
                         _tCCost = newTCCost;
+                        _historicalStableLimit.Push(_system);
                     }
                     else
                     {
                         if (currentRandAccept == (_rand_accept - 1)) {
                             // rollback
                             Move(obj, oldCluster);
-                            system += 1;
+                            _system += 1;
+                            _historicalStableLimit.Push(_system);
+                            ++_rollbackCount;
                         }
                         else
                         {
                             _tCCost = newTCCost;
-                            system = 0;
+                            _system = 0;
+                            _historicalStableLimit.Push(_system);
                         }
 
                     }
@@ -109,13 +174,17 @@ namespace PSGraph.DesignStructureMatrix
         public Dsm Order()
         {
             var d = _dsm.GetOrderedDsm(_clusters);
-            var x = new Dsm(_sourceGraph, d, _clusters ,_pow_cc, _pow_bid, _max_Cl_size, _rand_accept, _rand_bid, _times, _stable_limit);
+            var x = new Dsm(this, d);
 
             return x;
         }
 
         public void ExportSvg(string Path)
         {
+            if (null == _clusters && _runCount == 0)
+            {
+                CreateInitialClusters();
+            }
             int textShift = 15;
             int itemSize = 5;
             var svgDoc = new SvgDocument()
@@ -291,11 +360,12 @@ namespace PSGraph.DesignStructureMatrix
 
             //want to record the minimum cost to compare it to the selected one at the end of the run
             _minObservedtCCost = tcc < _minObservedtCCost ? tcc : _minObservedtCCost;
+            _historicalTCC.Push((tcc,_system));
 
             return tcc;
         }
 
-        private DSMCluster FindDsmObjectCluster(object obj)
+        public DSMCluster FindDsmObjectCluster(object obj)
         {
             return _clusters.Where(l => l.Objects.Contains(obj)).First();
         }
@@ -312,27 +382,28 @@ namespace PSGraph.DesignStructureMatrix
         }
 
         #region constructors
-        protected Dsm(PSBidirectionalGraph sourceGraph,
-              DsmStorage dsm,
-              List<DSMCluster> clusters,
-              int pow_cc = 2,
-              double pow_bid = 1,
-              int max_Cl_size = 0,
-              int rand_accept = 0,
-              int rand_bid = 0,
-              int times = 5,
-              int stable_limit = 2)
+        public Dsm(Dsm dsm, DsmStorage newStorage)
         {
-            _sourceGraph = sourceGraph;
-            _dsm = dsm;
-            _clusters = clusters;
-            _pow_cc = pow_cc;
-            _pow_bid = pow_bid;
-            _max_Cl_size = max_Cl_size;
-            _rand_accept = rand_accept;
-            _rand_bid = rand_bid;
-            _times = times;
-            _stable_limit = stable_limit;
+            _dsm = newStorage;
+            
+            _clusters = dsm._clusters;
+            _sourceGraph = dsm._sourceGraph;
+            _pow_cc = dsm._pow_cc;
+            _pow_bid = dsm._pow_bid;
+            _max_Cl_size = dsm._max_Cl_size;
+            _rand_accept = dsm._rand_accept;
+            _rand_bid = dsm._rand_bid;
+            _times = dsm._times;
+            _stable_limit = dsm._stable_limit;
+            _minObservedtCCost = dsm._minObservedtCCost;
+            _rollbackCount = dsm._rollbackCount;
+            _runCount = dsm._runCount;
+            //_system = dsm._system; do not copy to be abe to restart clustering process
+
+            // TODO: need to get rid of cloning; perhaps it is better to reshuffle the matrix inplace
+            _historicalTCC = dsm._historicalTCC;
+            _historicalStableLimit = dsm._historicalStableLimit;
+            _historicalBids = dsm._historicalBids;
         }
 
         public Dsm(PSBidirectionalGraph graph)

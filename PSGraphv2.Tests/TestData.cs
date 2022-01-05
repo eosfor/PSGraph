@@ -1,9 +1,11 @@
 ﻿using PSGraph.Model;
+using QuikGraph.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace PSGraph.Tests
 {
@@ -12,13 +14,30 @@ namespace PSGraph.Tests
         public static PSBidirectionalGraph SimpleTestGraph1 { get; private set; }
         public static PSBidirectionalGraph SimpleTestGraph2 { get; private set; }
         public static PSBidirectionalGraph SimpleTestGraph3 { get; private set; }
+        public static PSBidirectionalGraph SimpleTestGraph4 { get; private set; }
 
         static TestData()
         {
             SimpleTestGraph1 = InitializeSimpleTestGraph1();
             SimpleTestGraph2 = InitializeSimpleTestGraph2();
             SimpleTestGraph3 = InitializeSimpleTestGraph3();
+            SimpleTestGraph4 = InitializeSimpleTestGraph4();
         }
+
+        private static PSBidirectionalGraph? InitializeSimpleTestGraph4()
+        {
+            var d = System.IO.Directory.GetCurrentDirectory();
+            var graph = new PSBidirectionalGraph(false);
+            using (var xmlReader = XmlReader.Create(@"C:\Work\PSGraph\PSGraphv2.Tests\vms.graphml"))
+            {
+                graph.DeserializeFromGraphML<PSVertex, PSEdge, PSBidirectionalGraph>(
+                    xmlReader,
+                    id => new PSVertex(id),
+                    (source, target, id) => new PSEdge(source, target, new PSEdgeTag()));
+            }
+            return graph;
+        }
+
 
         private static PSBidirectionalGraph InitializeSimpleTestGraph1()
         {

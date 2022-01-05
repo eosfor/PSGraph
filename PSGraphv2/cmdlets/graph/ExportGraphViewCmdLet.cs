@@ -20,10 +20,10 @@ using Microsoft.Msagl.Layout.MDS;
 using Microsoft.Msagl.Layout.Incremental;
 using Microsoft.Msagl.Core.Layout;
 
-namespace PSGraph
+namespace PSGraph.Cmdlets
 {
     [Cmdlet(VerbsData.Export, "Graph")]
-    public class ExportGraphCmdLet : PSCmdlet
+    public class ExportGraphViewCmdLet : PSCmdlet
     {
         [Parameter(Mandatory = true)]
         [ValidateNotNullOrEmpty]

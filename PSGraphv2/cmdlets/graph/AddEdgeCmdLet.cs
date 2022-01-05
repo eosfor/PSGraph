@@ -6,7 +6,7 @@ using PSGraph.Model;
 
 //add-edge -from $nodeFrom -to $nodeTo -attributes $attr -graph $g
 
-namespace PSGraph
+namespace PSGraph.Cmdlets
 {
     [Cmdlet(VerbsCommon.Add, "Edge")]
     public class AddEdgeCmdLet : PSCmdlet

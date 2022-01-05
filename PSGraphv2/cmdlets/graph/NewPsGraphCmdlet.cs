@@ -4,7 +4,7 @@ using System.Management.Automation;
 using PSGraph.Model;
 using QuikGraph;
 
-namespace PSGraph
+namespace PSGraph.Cmdlets
 {
     [Cmdlet(VerbsCommon.New, "Graph")]
     public class NewPsGraphCmdlet : PSCmdlet

@@ -22,7 +22,7 @@ namespace PSGraph.Tests
         {
             _powershell = PowerShell.Create();
             _powershell.AddCommand("Import-Module")
-                .AddParameter("Assembly", System.Reflection.Assembly.GetAssembly(typeof(PSGraph.NewPsGraphCmdlet)));
+                .AddParameter("Assembly", System.Reflection.Assembly.GetAssembly(typeof(PSGraph.Cmdlets.NewPsGraphCmdlet)));
             _powershell.Invoke();
             _powershell.Commands.Clear();
         }
@@ -37,7 +37,7 @@ namespace PSGraph.Tests
         public void TestGraphPropertyNoProcessing_Success()
         {
             var graph = new PSBidirectionalGraph();
-            PSGraph.AddEdgeCmdLet psGraph = new PSGraph.AddEdgeCmdLet() { Graph = graph };
+            PSGraph.Cmdlets.AddEdgeCmdLet psGraph = new PSGraph.Cmdlets.AddEdgeCmdLet() { Graph = graph };
 
             Assert.IsTrue(Object.Equals(psGraph.Graph, graph));
             Assert.IsTrue(psGraph.From == null);
@@ -49,7 +49,7 @@ namespace PSGraph.Tests
         public void TestFromPropertyNoProcessing_Success()
         {
             var graph = new PSBidirectionalGraph();
-            PSGraph.AddEdgeCmdLet psGraph = new PSGraph.AddEdgeCmdLet() { From = graph };
+            PSGraph.Cmdlets.AddEdgeCmdLet psGraph = new PSGraph.Cmdlets.AddEdgeCmdLet() { From = graph };
 
             Assert.IsTrue(Object.Equals(psGraph.From, graph));
             Assert.IsTrue(psGraph.Graph == null);
@@ -61,7 +61,7 @@ namespace PSGraph.Tests
         public void TestToPropertyNoProcessing_Success()
         {
             var graph = new PSBidirectionalGraph();
-            PSGraph.AddEdgeCmdLet psGraph = new PSGraph.AddEdgeCmdLet() { To = graph };
+            PSGraph.Cmdlets.AddEdgeCmdLet psGraph = new PSGraph.Cmdlets.AddEdgeCmdLet() { To = graph };
 
             Assert.IsTrue(Object.Equals(psGraph.To, graph));
             Assert.IsTrue(psGraph.Graph == null);
@@ -73,7 +73,7 @@ namespace PSGraph.Tests
         public void TestAttributePropertyNoProcessing_Success()
         {
             var obj = new Object();
-            PSGraph.AddEdgeCmdLet psGraph = new PSGraph.AddEdgeCmdLet() { Tag = obj };
+            PSGraph.Cmdlets.AddEdgeCmdLet psGraph = new PSGraph.Cmdlets.AddEdgeCmdLet() { Tag = obj };
 
             Assert.IsTrue(Object.Equals(psGraph.Tag, obj));
             Assert.IsTrue(psGraph.Graph == null);
