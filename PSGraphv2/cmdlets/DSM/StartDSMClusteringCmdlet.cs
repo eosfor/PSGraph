@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace PSGraph.Cmdlets
 {
-    [Cmdlet("Run", "DSMClustering")]
-    public class RunDSMClusteringCmdlet: PSCmdlet
+    [Cmdlet(VerbsLifecycle.Start, "DSMClustering")]
+    public class StartDSMClusteringCmdlet: PSCmdlet
     {
         [Parameter(Mandatory = true)]
         public DesignStructureMatrix.Dsm Dsm;
