@@ -10,11 +10,23 @@ namespace PSGraph.Model
 {
     public class PSVertex
     {
-        public string Label;
+        private string label;
         public string Name => Label;
+
+        public string Label { get => label; set => SetLabel(value); }
+
+
         public GraphvizVertex GVertexParameters = new GraphvizVertex();
         public object? OriginalObject;
         public List<object>? Metadata;
+
+
+        private void SetLabel(string value)
+        {
+            label = value;
+            GVertexParameters.Label = value;
+            //throw new NotImplementedException();
+        }
 
         public PSVertex(string label)
         {
