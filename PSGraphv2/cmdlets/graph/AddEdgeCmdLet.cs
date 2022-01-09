@@ -12,12 +12,15 @@ namespace PSGraph.Cmdlets
     public class AddEdgeCmdLet : PSCmdlet
     {
         [Parameter(Mandatory = true)]
-        public object From;
+        [ValidateNotNullOrEmpty]
+        public PSObject From;
 
         [Parameter(Mandatory = true)]
-        public object To;
+        [ValidateNotNullOrEmpty]
+        public PSObject To;
 
         [Parameter(Mandatory = true)]
+        [ValidateNotNullOrEmpty]
         public PSBidirectionalGraph Graph;
 
         [Parameter(Mandatory = false)]
@@ -25,12 +28,34 @@ namespace PSGraph.Cmdlets
 
         protected override void ProcessRecord()
         {
-            ProcesRecordDefault();
+            ProcessRecordDefault();
         }
 
-        void ProcesRecordDefault()
+        void ProcessRecordDefault()
         {
-            var edge = new PSEdge(new PSVertex(From.ToString(), From), new PSVertex(To.ToString(), To), new PSEdgeTag(Tag?.ToString()));
+            PSVertex? newFrom = null;
+            PSVertex? newTo = null;
+
+            if (From.ImmediateBaseObject is PSVertex)
+            {
+                newFrom = (PSVertex)From.ImmediateBaseObject;
+            }
+            else
+            {
+                newFrom = new PSVertex(From.ImmediateBaseObject.ToString(), From.ImmediateBaseObject);
+            }
+
+            if (To.ImmediateBaseObject is PSVertex)
+            {
+                newTo = (PSVertex)To.ImmediateBaseObject;
+            }
+            else
+            {
+                newTo = new PSVertex(To.ImmediateBaseObject.ToString(), To.ImmediateBaseObject);
+            }
+
+
+            var edge = new PSEdge(newFrom, newTo, new PSEdgeTag(Tag?.ToString()));
             var result = Graph.AddVerticesAndEdge(edge);
 
             WriteVerbose(result.ToString());

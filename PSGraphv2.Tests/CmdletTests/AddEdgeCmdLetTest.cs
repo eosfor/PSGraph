@@ -45,29 +45,30 @@ namespace PSGraph.Tests
             Assert.IsTrue(psGraph.Tag == null);
         }
 
-        [TestMethod]
-        public void TestFromPropertyNoProcessing_Success()
-        {
-            var graph = new PSBidirectionalGraph();
-            PSGraph.Cmdlets.AddEdgeCmdLet psGraph = new PSGraph.Cmdlets.AddEdgeCmdLet() { From = graph };
+        // TODO: what is this for?
+        //[TestMethod]
+        //public void TestFromPropertyNoProcessing_Success()
+        //{
+        //    var graph = new PSBidirectionalGraph();
+        //    PSGraph.Cmdlets.AddEdgeCmdLet psGraph = new PSGraph.Cmdlets.AddEdgeCmdLet() { From = graph };
 
-            Assert.IsTrue(Object.Equals(psGraph.From, graph));
-            Assert.IsTrue(psGraph.Graph == null);
-            Assert.IsTrue(psGraph.To == null);
-            Assert.IsTrue(psGraph.Tag == null);
-        }
+        //    Assert.IsTrue(Object.Equals(psGraph.From, graph));
+        //    Assert.IsTrue(psGraph.Graph == null);
+        //    Assert.IsTrue(psGraph.To == null);
+        //    Assert.IsTrue(psGraph.Tag == null);
+        //}
 
-        [TestMethod]
-        public void TestToPropertyNoProcessing_Success()
-        {
-            var graph = new PSBidirectionalGraph();
-            PSGraph.Cmdlets.AddEdgeCmdLet psGraph = new PSGraph.Cmdlets.AddEdgeCmdLet() { To = graph };
+        //[TestMethod]
+        //public void TestToPropertyNoProcessing_Success()
+        //{
+        //    var graph = new PSBidirectionalGraph();
+        //    PSGraph.Cmdlets.AddEdgeCmdLet psGraph = new PSGraph.Cmdlets.AddEdgeCmdLet() { To = graph };
 
-            Assert.IsTrue(Object.Equals(psGraph.To, graph));
-            Assert.IsTrue(psGraph.Graph == null);
-            Assert.IsTrue(psGraph.From == null);
-            Assert.IsTrue(psGraph.Tag == null);
-        }
+        //    Assert.IsTrue(Object.Equals(psGraph.To, graph));
+        //    Assert.IsTrue(psGraph.Graph == null);
+        //    Assert.IsTrue(psGraph.From == null);
+        //    Assert.IsTrue(psGraph.Tag == null);
+        //}
 
         [TestMethod]
         public void TestAttributePropertyNoProcessing_Success()

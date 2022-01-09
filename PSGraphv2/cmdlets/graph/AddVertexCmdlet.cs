@@ -9,14 +9,30 @@ namespace PSGraph.Cmdlets
     public class AddVertexCmdlet : PSCmdlet
     {
         [Parameter(Mandatory = true)]
-        public object Vertex;
+        [ValidateNotNullOrEmpty]
+        public PSObject Vertex;
 
         [Parameter(Mandatory = true)]
+        [ValidateNotNullOrEmpty]
         public PSBidirectionalGraph Graph;
 
         protected override void ProcessRecord()
         {
-            var result = Graph.AddVertex(new PSVertex(Vertex.ToString(), Vertex));
+
+            //var v = ((PSObject) Vertex).ImmediateBaseObject;
+
+            PSVertex? newPSVertex = null;
+
+            if (Vertex.ImmediateBaseObject is PSVertex)
+            {
+                newPSVertex = (PSVertex)Vertex.ImmediateBaseObject;
+            }
+            else
+            {
+                newPSVertex = new PSVertex(Vertex.ImmediateBaseObject.ToString(), Vertex.ImmediateBaseObject);
+            }
+
+            var result = Graph.AddVertex(newPSVertex);
             WriteVerbose(result.ToString());
         }
     }
