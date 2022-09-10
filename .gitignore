@@ -237,3 +237,5 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+PSGraphv2/.DS_Store
+.DS_Store
