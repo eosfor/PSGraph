@@ -211,8 +211,8 @@ namespace PSGraph.DesignStructureMatrix
                     {
                         Width = itemSize,
                         Height = itemSize,
-                        X = row,
-                        Y = col,
+                        X = col,//row,
+                        Y = row,//col,
                         StrokeWidth = (float)0.5,
                         Stroke = new SvgColourServer(System.Drawing.Color.DimGray)
                     };
