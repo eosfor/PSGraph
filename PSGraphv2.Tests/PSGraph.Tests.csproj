@@ -26,4 +26,9 @@
     <ProjectReference Include="..\PSGraphv2\PSGraph.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="vms.graphml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

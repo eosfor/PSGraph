@@ -27,8 +27,9 @@ namespace PSGraph.Tests
         private static PSBidirectionalGraph? InitializeSimpleTestGraph4()
         {
             var d = System.IO.Directory.GetCurrentDirectory();
+            var testGraphPath = System.IO.Path.Combine(d, "vms.graphml");
             var graph = new PSBidirectionalGraph(false);
-            using (var xmlReader = XmlReader.Create(@"C:\Work\PSGraph\PSGraphv2.Tests\vms.graphml"))
+            using (var xmlReader = XmlReader.Create(testGraphPath))
             {
                 graph.DeserializeFromGraphML<PSVertex, PSEdge, PSBidirectionalGraph>(
                     xmlReader,
