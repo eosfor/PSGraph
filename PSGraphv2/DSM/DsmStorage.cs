@@ -137,8 +137,8 @@ namespace PSGraph.DesignStructureMatrix
                 return 0;
             }
 
-            var colIndex = _colIndex[from];
-            var rowIndex = _rowIndex[to];
+            var colIndex = _colIndex[to];
+            var rowIndex = _rowIndex[from];
 
             return _dsm[rowIndex, colIndex];
         }
