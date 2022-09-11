@@ -16,8 +16,8 @@ namespace PSGraph.Cmdlets
         protected override void ProcessRecord()
         {
             Dsm.Cluster();
-            var r = Dsm.Order();
-            WriteObject(r);
+            Dsm.Order();
+            WriteObject(Dsm);
             //base.ProcessRecord();
         }
     }

@@ -64,7 +64,7 @@ namespace PSGraph.Tests
         {
             var dsm = new Dsm(TestData.SimpleTestGraph3);
             dsm.Cluster();
-            var r = dsm.Order();
+            dsm.Order();
         }
 
         [TestMethod]
@@ -72,10 +72,10 @@ namespace PSGraph.Tests
         {
             var dsm = new Dsm(TestData.SimpleTestGraph3);
             dsm.Cluster();
-            var r = dsm.Order();
+            dsm.Order();
             var f = System.IO.Path.GetTempPath();
             var p = System.IO.Path.Combine(f, "basictest.svg");
-            r.ExportSvg(p);
+            dsm.ExportSvg(p);
         }
 
         [TestMethod]

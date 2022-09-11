@@ -4,20 +4,22 @@ $g = New-Graph
 #add vertices
 # [char]'A'..[char]'P' | % { Add-Vertex -Vertex ([string]([char]$_)) -Graph $g } | Out-Null
 
-'A', 'D', 'E', 'F','G','M','B','H','I' | % { Add-Vertex -Vertex ([string]([char]$_)) -Graph $g } | Out-Null
+'A', 'B', 'C', 'D','G' | % { Add-Vertex -Vertex ([string]([char]$_)) -Graph $g } | Out-Null
 
 #add edges
+Add-Edge -From A -To C -Graph $g | Out-Null
 Add-Edge -From A -To D -Graph $g | Out-Null
-Add-Edge -From A -To E -Graph $g | Out-Null
-Add-Edge -From D -to F -Graph $g | Out-Null
-Add-Edge -From E -To F -Graph $g | Out-Null
-# Add-Edge -From E -To G -Graph $g | Out-Null
-Add-Edge -From G -To M -Graph $g | Out-Null
-Add-Edge -From B -To E -Graph $g | Out-Null
+
 Add-Edge -From B -To G -Graph $g | Out-Null
-Add-Edge -From B -To H -Graph $g | Out-Null
-Add-Edge -From H -To I -Graph $g | Out-Null
-Add-Edge -From M -To B -Graph $g | Out-Null
+
+Add-Edge -From C -to A -Graph $g | Out-Null
+Add-Edge -From C -To B -Graph $g | Out-Null
+Add-Edge -From C -To G -Graph $g | Out-Null
+
+Add-Edge -From D -To B -Graph $g | Out-Null
+
+Add-Edge -From G -To D -Graph $g | Out-Null
+
 
 #Add-Edge -From I -To L -Graph $g | Out-Null
 #Add-Edge -From C -To J -Graph $g | Out-Null
@@ -78,6 +80,7 @@ dot -Tsvg $graphFile -o $env:TMPDIR/srcGraph.svg
 open $env:TMPDIR/srcGraph.svg
 open $Env:TMPDIR/dsm.svg
 open $Env:TMPDIR/dsm.txt
+open $Env:TMPDIR/dsm2.svg
 open $Env:TMPDIR/dsm3.svg
 open $Env:TMPDIR/dsm4.svg
 open $Env:TMPDIR/dsm5.svg

@@ -57,34 +57,13 @@ namespace PSGraph.DesignStructureMatrix
             //throw new NotImplementedException();
         }
 
-        public DsmStorage GetOrderedDsm(List<DSMCluster> clusters) 
+        public DsmStorage GetPoweredDsm(int exponent) 
         {
-            Dictionary<PSVertex, int> rowIndex = new Dictionary<PSVertex, int>();
-            Dictionary<PSVertex, int> colIndex = new Dictionary<PSVertex, int>();
-            List<PSVertex> index = new List<PSVertex>();
-            int i = 0;
-            foreach (var cluster in clusters)
-            {
-                foreach (var item in cluster.Objects)
-                {
-                    index.Add(item);
-                    rowIndex[item] = i;
-                    colIndex[item] = i;
-                    i++;
-                }
-            }
-
             Matrix<Single> ret = Matrix<Single>.Build.Dense(_sourceGraph.VertexCount, _sourceGraph.VertexCount);
             _dsm.CopyTo(ret);
+            ret = ret.Power(exponent);
 
-            var newDsmStorage = new DsmStorage(ret, rowIndex, colIndex, _sourceGraph);
-            foreach (var item1 in index)
-            {
-                foreach (var item2 in index)
-                {
-                    newDsmStorage[item1, item2] = this[item1, item2];
-                }
-            }
+            var newDsmStorage = new DsmStorage(ret, _rowIndex, _colIndex, _sourceGraph);
 
             return newDsmStorage;
         }
@@ -185,8 +164,8 @@ namespace PSGraph.DesignStructureMatrix
 
                 // TODO: support tag as weight;
 
-                var colIndex = _rowIndex[from];
-                var rowIndex = _colIndex[to];
+                var colIndex = _colIndex[to];//_rowIndex[from];
+                var rowIndex = _rowIndex[from];//_colIndex[to];
                 dsm[rowIndex, colIndex] = linkWeight;
             }
 
@@ -203,7 +182,7 @@ namespace PSGraph.DesignStructureMatrix
             _dsm = GraphToDSM();
         }
 
-        protected DsmStorage(Matrix<Single> dsm,
+        public DsmStorage(Matrix<Single> dsm,
                              Dictionary<PSVertex, int> rowIndex,
                              Dictionary<PSVertex, int> colIndex,
                              PSBidirectionalGraph graph)

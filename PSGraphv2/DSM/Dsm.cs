@@ -17,7 +17,7 @@ namespace PSGraph.DesignStructureMatrix
     {
         private PSBidirectionalGraph _sourceGraph;
         private DsmStorage _dsm;
-        private List<DSMCluster> _clusters;
+        private List<DSMCluster> _clusters = new List<DSMCluster>();
 
         // algo parameters
         private int _pow_cc = 2;
@@ -43,7 +43,7 @@ namespace PSGraph.DesignStructureMatrix
         public double MinObservedtCCost { get => _minObservedtCCost; }
         public Stack<ValueTuple<double, int>> HistoricalTCC { get => _historicalTCC; }
         public Stack<SortedDictionary<double, List<DSMCluster>>> HistoricalBids { get => _historicalBids; }
-        public Stack<int> HistoricalStableLimit { get => _historicalStableLimit; } 
+        public Stack<int> HistoricalStableLimit { get => _historicalStableLimit; }
         public int RunCount { get => _runCount; }
 
         public int RollbackCount { get => _rollbackCount; }
@@ -55,7 +55,7 @@ namespace PSGraph.DesignStructureMatrix
 
         public Matrix<float> DsmStorage { get => _dsm.Dsm; }
 
-        public Dictionary<PSVertex, int>  RowIndex => _dsm.RowIndex;
+        public Dictionary<PSVertex, int> RowIndex => _dsm.RowIndex;
         public Dictionary<PSVertex, int> ColIndex => _dsm.ColIndex;
 
 
@@ -87,14 +87,14 @@ namespace PSGraph.DesignStructureMatrix
 
         public PSBidirectionalGraph GetClusteredViewGraph()
         {
-            if (_clusters == null) throw new InvalidOperationException("The DSM hasn't been clustered yet. Please run the corresponding command first");
+            if (_clusters.Count() == 0) throw new InvalidOperationException("The DSM hasn't been clustered yet. Please run the corresponding command first");
             var ret = new PSBidirectionalGraph();
 
             foreach (var c in _clusters)
             {
                 var edges = c.GetOutEdges(_clusters, this);
 
-                if(edges.Count == 0)
+                if (edges.Count == 0)
                 {
                     ret.AddVertex(new PSVertex(c.ToString(), c));
                     continue;
@@ -102,7 +102,7 @@ namespace PSGraph.DesignStructureMatrix
 
                 foreach (var e in edges)
                 {
-                    ret.AddVerticesAndEdge(new PSEdge(new PSVertex(c.ToString(), c), new PSVertex(e.ToString(), e), new PSEdgeTag()) );
+                    ret.AddVerticesAndEdge(new PSEdge(new PSVertex(c.ToString(), c), new PSVertex(e.ToString(), e), new PSEdgeTag()));
                 }
             }
 
@@ -113,7 +113,7 @@ namespace PSGraph.DesignStructureMatrix
         {
             var r = new Random();
 
-            if (null == _clusters && _runCount == 0)
+            if (_clusters.Count == 0 && _runCount == 0)
             {
                 CreateInitialClusters();
             }
@@ -142,7 +142,7 @@ namespace PSGraph.DesignStructureMatrix
 
                     var currentRandAccept = r.Next(_rand_accept - 1);
 
-                    if ( newTCCost <= _tCCost  )
+                    if (newTCCost <= _tCCost)
                     {
                         _system = newTCCost == _tCCost ? _system + 1 : 0;
                         _tCCost = newTCCost;
@@ -150,7 +150,8 @@ namespace PSGraph.DesignStructureMatrix
                     }
                     else
                     {
-                        if (currentRandAccept == (_rand_accept - 1)) {
+                        if (currentRandAccept == (_rand_accept - 1))
+                        {
                             // rollback
                             Move(obj, oldCluster);
                             _system += 1;
@@ -171,17 +172,72 @@ namespace PSGraph.DesignStructureMatrix
         }
 
 
-        public Dsm Order()
+        public void Order()
         {
-            var d = _dsm.GetOrderedDsm(_clusters);
-            var x = new Dsm(this, d);
+            Dictionary<PSVertex, int> rowIndex = new Dictionary<PSVertex, int>();
+            Dictionary<PSVertex, int> colIndex = new Dictionary<PSVertex, int>();
+            List<PSVertex> index = new List<PSVertex>();
+            int i = 0;
+            foreach (var cluster in _clusters)
+            {
+                foreach (var item in cluster.Objects)
+                {
+                    index.Add(item);
+                    rowIndex[item] = i;
+                    colIndex[item] = i;
+                    i++;
+                }
+            }
 
-            return x;
+            Matrix<Single> ret = Matrix<Single>.Build.Dense(_sourceGraph.VertexCount, _sourceGraph.VertexCount);
+            _dsm.Dsm.CopyTo(ret);
+
+            var newDsmStorage = new DsmStorage(ret, rowIndex, colIndex, _sourceGraph);
+            foreach (var item1 in index)
+            {
+                foreach (var item2 in index)
+                {
+                    newDsmStorage[item1, item2] = this[item1, item2];
+                }
+            }
+
+            _dsm = newDsmStorage;
+        }
+
+        public Dsm Power(int exponent)
+        {
+            // var d = _dsm.GetPoweredDsm(exponent);
+            // var x = new Dsm(this, d);
+
+            // return x;
+
+            Dictionary<PSVertex, int> rowIndex = new Dictionary<PSVertex, int>();
+            Dictionary<PSVertex, int> colIndex = new Dictionary<PSVertex, int>();
+            List<PSVertex> index = new List<PSVertex>();
+            int i = 0;
+            foreach (var cluster in _clusters)
+            {
+                foreach (var item in cluster.Objects)
+                {
+                    index.Add(item);
+                    rowIndex[item] = i;
+                    colIndex[item] = i;
+                    i++;
+                }
+            }
+
+            Matrix<Single> ret = Matrix<Single>.Build.Dense(_sourceGraph.VertexCount, _sourceGraph.VertexCount);
+            _dsm.Dsm.CopyTo(ret);
+            ret = ret.Power(exponent);
+
+            var newDsmStorage = new DsmStorage(ret, rowIndex, colIndex, _sourceGraph);
+
+            return new Dsm(this, newDsmStorage, true);
         }
 
         public void ExportSvg(string Path)
         {
-            if (null == _clusters && _runCount == 0)
+            if (_clusters.Count == 0 && _runCount == 0)
             {
                 CreateInitialClusters();
             }
@@ -205,20 +261,22 @@ namespace PSGraph.DesignStructureMatrix
                 for (int j = 0; j <= _dsm.Size - 1; j++)
                 {
                     var cl = FindClusterByCoordinates(i, j).First();
+                    var el = _dsm.GetByIndex(j, i);
 
                     var col = j * itemSize + textShift;
                     var rect = new SvgRectangle()
                     {
                         Width = itemSize,
                         Height = itemSize,
-                        X = col,//row,
-                        Y = row,//col,
+                        X = row,
+                        Y = col,
                         StrokeWidth = (float)0.5,
                         Stroke = new SvgColourServer(System.Drawing.Color.DimGray)
                     };
                     if (i != j)
                     {
-                        if (_dsm.GetByIndex(j, i) == 0)
+                        
+                        if (el == 0)
                         {
                             rect.Fill = new SvgColourServer(System.Drawing.Color.White);
                         }
@@ -233,12 +291,20 @@ namespace PSGraph.DesignStructureMatrix
                     }
 
                     svgDoc.Children.Add(rect);
-
+                    
+                    if (el > 0){
+                        var lbl = new Svg.SvgText(el.ToString());
+                        lbl.X.Add(rect.X + 1);
+                        lbl.Y.Add(rect.Y + itemSize - 1);
+                        lbl.FontSize = itemSize - 1;
+                        
+                        svgDoc.Children.Add(lbl);
+                    }
                 }
             }
 
             // cluster bondaries
-            foreach(var cluster in _clusters)
+            foreach (var cluster in _clusters)
             {
                 var row = _dsm.RowIndex[cluster.Objects.First()] * itemSize + textShift;
                 var w = cluster.Objects.Count * itemSize;
@@ -303,7 +369,7 @@ namespace PSGraph.DesignStructureMatrix
 
         private void RemoveEmptyClusters()
         {
-            var r = _clusters.RemoveAll( c => c.Objects.Count == 0);
+            var r = _clusters.RemoveAll(c => c.Objects.Count == 0);
         }
 
         private DSMCluster Move(PSVertex obj, DSMCluster bestBid)
@@ -324,15 +390,17 @@ namespace PSGraph.DesignStructureMatrix
             {
                 bid += cluster.Bid(obj, _dsm);
 
-                if (ret.ContainsKey(bid)) {
+                if (ret.ContainsKey(bid))
+                {
                     ret[bid].Add(cluster);
                 }
-                else {
+                else
+                {
                     var l = new List<DSMCluster>();
                     l.Add(cluster);
                     ret.Add(bid, l);
                 }
-                
+
             }
 
             return ret;
@@ -360,7 +428,7 @@ namespace PSGraph.DesignStructureMatrix
 
             //want to record the minimum cost to compare it to the selected one at the end of the run
             _minObservedtCCost = tcc < _minObservedtCCost ? tcc : _minObservedtCCost;
-            _historicalTCC.Push((tcc,_system));
+            _historicalTCC.Push((tcc, _system));
 
             return tcc;
         }
@@ -382,11 +450,11 @@ namespace PSGraph.DesignStructureMatrix
         }
 
         #region constructors
-        public Dsm(Dsm dsm, DsmStorage newStorage)
+        public Dsm(Dsm dsm, DsmStorage newStorage, bool emptyClusters = false)
         {
             _dsm = newStorage;
-            
-            _clusters = dsm._clusters;
+
+            _clusters = emptyClusters? new List<DSMCluster>(): dsm._clusters;
             _sourceGraph = dsm._sourceGraph;
             _pow_cc = dsm._pow_cc;
             _pow_bid = dsm._pow_bid;
@@ -395,9 +463,9 @@ namespace PSGraph.DesignStructureMatrix
             _rand_bid = dsm._rand_bid;
             _times = dsm._times;
             _stable_limit = dsm._stable_limit;
-            _minObservedtCCost = dsm._minObservedtCCost;
-            _rollbackCount = dsm._rollbackCount;
-            _runCount = dsm._runCount;
+            _minObservedtCCost = emptyClusters? 0: dsm._minObservedtCCost;
+            _rollbackCount = emptyClusters? 0: dsm._rollbackCount;
+            _runCount = emptyClusters? 0: dsm._runCount;
             //_system = dsm._system; do not copy to be abe to restart clustering process
 
             // TODO: need to get rid of cloning; perhaps it is better to reshuffle the matrix inplace
