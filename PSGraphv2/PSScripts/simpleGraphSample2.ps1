@@ -20,17 +20,6 @@ Add-Edge -From D -To B -Graph $g | Out-Null
 
 Add-Edge -From G -To D -Graph $g | Out-Null
 
-
-#Add-Edge -From I -To L -Graph $g | Out-Null
-#Add-Edge -From C -To J -Graph $g | Out-Null
-#Add-Edge -From J -To K -Graph $g | Out-Null
-#Add-Edge -From K -To L -Graph $g | Out-Null
-#Add-Edge -From O -To P -Graph $g | Out-Null
-
-#Add-Edge -From F -to B -Graph $g | Out-Null
-#Add-Edge -From P -To O -Graph $g | Out-Null
-#Add-Edge -From K -To C -Graph $g | Out-Null
-
 #tmpFileNames
 
 $dotFileName = "testGraph1.gv"
@@ -55,7 +44,7 @@ Export-Graph -Graph $g -Format MSAGL_MDS -Path $svgOutFile
 # $svgOutFile
 
 $d = New-DSM -Graph $g
-Start-DSMClustering -Dsm $d
+# Start-DSMClustering -Dsm $d
 Export-DSM -Dsm $d -Path $Env:TMPDIR/dsm.svg -Format SVG
 Export-DSM -Dsm $d -Path $Env:TMPDIR/dsm.txt -Format TEXT
 
