@@ -15,6 +15,7 @@ namespace PSGraph.Tests
         public static PSBidirectionalGraph SimpleTestGraph2 { get; private set; }
         public static PSBidirectionalGraph SimpleTestGraph3 { get; private set; }
         public static PSBidirectionalGraph SimpleTestGraph4 { get; private set; }
+        public static PSBidirectionalGraph DSMFull { get; private set; }
 
         static TestData()
         {
@@ -22,8 +23,41 @@ namespace PSGraph.Tests
             SimpleTestGraph2 = InitializeSimpleTestGraph2();
             SimpleTestGraph3 = InitializeSimpleTestGraph3();
             SimpleTestGraph4 = InitializeSimpleTestGraph4();
+            DSMFull = InitializeSimpleTestGraph5();
         }
 
+        
+        private static PSBidirectionalGraph? InitializeSimpleTestGraph5(){
+            var g = new PSBidirectionalGraph();
+
+            g.AddVertex(new PSVertex("A"));
+            g.AddVertex(new PSVertex("B"));
+            g.AddVertex(new PSVertex("C"));
+            g.AddVertex(new PSVertex("D"));
+            g.AddVertex(new PSVertex("E"));
+            g.AddVertex(new PSVertex("F"));
+            g.AddVertex(new PSVertex("G"));
+
+            g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("C"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("D"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("G"), new PSEdgeTag()));
+            
+            g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("A"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("B"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("F"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("G"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("B"), new PSEdgeTag()));
+            
+            g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("C"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("F"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("G"), new PSVertex("D"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("G"), new PSVertex("F"), new PSEdgeTag()));
+
+            return g;
+        }
         private static PSBidirectionalGraph? InitializeSimpleTestGraph4()
         {
             var d = System.IO.Directory.GetCurrentDirectory();
