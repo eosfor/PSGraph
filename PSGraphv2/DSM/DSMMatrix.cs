@@ -16,6 +16,11 @@ namespace PSGraph.DesignStructureMatrix
         Dictionary<PSVertex, int> _rowIndex = new Dictionary<PSVertex, int>();
         Dictionary<PSVertex, int> _colIndex = new Dictionary<PSVertex, int>();
 
+        public Dictionary<PSVertex, int> RowIndex { get => _rowIndex; }
+        public Dictionary<PSVertex, int> ColIndex { get => _colIndex; }
+
+        public Matrix<Single> Dsm { get => _dsm; }
+
 
         public Single this[PSVertex from, PSVertex to] { get => GetElementByVertex(from, to); set => SetElementByVertex(from, to, value); }
         public Single this[int row, int column] { get => _dsm[row, column]; set => _dsm[row, column] = value; }
@@ -24,15 +29,23 @@ namespace PSGraph.DesignStructureMatrix
         {
             var workingDsm = new DSMMatrix(this);
 
-            var indRowIdx = workingDsm.FindIndependentRows();
-            var indColumnIdx = workingDsm.FindIndependentColumns();
+            var indRowIdx = workingDsm.FindIndependentLines(DSMMatrixLineKind.ROW);
+            var indColumnIdx = workingDsm.FindIndependentLines(DSMMatrixLineKind.COLUMN);
+            var loops = ExtractLoops(workingDsm);
 
-            var loops = new List<List<PSVertex>>(); //count of the nested list shows the actual exponent
-            ExtractLoops(workingDsm, loops);
-            loops = loops.OrderByDescending( x => x.Count).ToList();
+            Dictionary<PSVertex, int> index = MakeIndexVector(indRowIdx, indColumnIdx, loops);
 
+            var graph = this.GraphFromDSM();
+            var newDsm = new DSMMatrix(graph, index, index);
+
+            return newDsm;
+        }
+
+        private static Dictionary<PSVertex, int> MakeIndexVector(List<PSVertex> indRowIdx, List<PSVertex> indColumnIdx, List<List<PSVertex>> loops)
+        {
             var vertexList = indRowIdx.Concat(loops[0]);
-            for (int i = 1; i < loops.Count; i++){
+            for (int i = 1; i < loops.Count; i++)
+            {
                 vertexList = vertexList.Concat(loops[i]);
             }
             vertexList = indRowIdx.Concat(vertexList);
@@ -47,110 +60,33 @@ namespace PSGraph.DesignStructureMatrix
                 index.Add(key, n++);
             }
 
-            var newDsm = new DSMMatrix(this._dsm.RowCount, this._dsm.ColumnCount, index, index);
-
-            var graph = this.GraphFromDSM();
-
-            foreach (var e in graph.Edges)
-            {
-                var from = e.Source;
-                var to = e.Target;
-                var linkWeight = 1;
-
-                var colIndex = newDsm._colIndex[to];//_rowIndex[from];
-                var rowIndex = newDsm._rowIndex[from];//_colIndex[to];
-                newDsm[rowIndex, colIndex] = linkWeight;
-            }
-
-            return newDsm;
+            return index;
         }
 
-        private static void ExtractLoops(DSMMatrix workingDsm, List<List<PSVertex>> loops, int power = 2)
+        private List<List<PSVertex>> ExtractLoops(DSMMatrix workingDsm, int power = 2)
         {
+            var loops = new List<List<PSVertex>>(); //count of the nested list shows the actual exponent
             for (int i = power; i <= workingDsm._dsm.RowCount; i++)
             {
                 var currentDsm = workingDsm.Power(i);
                 var loop = currentDsm.DetectLoops();
                 loops.Add(loop);
             }
+
+            loops = loops.OrderByDescending(x => x.Count).ToList();
+            return loops;
         }
 
-        private List<PSVertex> FindIndependentRows()
+
+        private List<PSVertex> FindIndependentLines(DSMMatrixLineKind kind)
         {
-            var retDsm = new DSMMatrix(this);
-
-            var rowSums = this._dsm.RowSums(); //assuming no negative elements
-
-            // int replaceIdx = 0;
-
-            // for (int currentIdx = 1; currentIdx < retDsm._dsm.RowCount; currentIdx ++){
-            //     if (rowSums[currentIdx] == 0) {
-            //         // c -> r
-            //         var c = retDsm._dsm.Row(currentIdx);
-            //         var r = retDsm._dsm.Row(replaceIdx);
-            //         retDsm._dsm.SetRow(replaceIdx, c);
-            //         retDsm._dsm.SetRow(currentIdx, r);
-            //         replaceIdx ++;
-            //     }
-            // }
+            var sums = kind == DSMMatrixLineKind.COLUMN ? this._dsm.ColumnSums() : this._dsm.RowSums(); //assuming no negative elements
 
             List<int> toBeDeleted = new List<int>();
             var ret = new List<PSVertex>();
             for (int currentIdx = 0; currentIdx < this._dsm.RowCount; currentIdx++)
             {
-                if (rowSums[currentIdx] == 0)
-                {
-                    toBeDeleted.Add(currentIdx);
-                }
-            }
-
-            foreach (int idx in toBeDeleted)
-            {
-                var r = _rowIndex.Where(x => x.Value == idx).First();
-                var c = _colIndex.Where(x => x.Value == idx).First();
-                ret.Add(r.Key);
-                _rowIndex.Remove(r.Key);
-                _colIndex.Remove(c.Key);
-                this._dsm = this._dsm.RemoveRow(idx);
-                this._dsm = this._dsm.RemoveColumn(idx);
-
-                foreach (var el in _rowIndex.Keys)
-                {
-                    if (_rowIndex[el] > r.Value) _rowIndex[el] -= 1;
-                }
-
-                foreach (var el in _colIndex.Keys)
-                {
-                    if (_colIndex[el] > r.Value) _colIndex[el] -= 1;
-                }
-            }
-            return ret;
-        }
-
-        private List<PSVertex> FindIndependentColumns()
-        {
-            var retDsm = new DSMMatrix(this);
-
-            var colSums = this._dsm.ColumnSums(); //assuming no negative elements
-
-            // int replaceIdx = 0;
-
-            // for (int currentIdx = 1; currentIdx < retDsm._dsm.ColumnCount; currentIdx ++){
-            //     if (colSums[currentIdx] == 0) {
-            //         // c -> r
-            //         var c = retDsm._dsm.Column(currentIdx);
-            //         var r = retDsm._dsm.Column(replaceIdx);
-            //         retDsm._dsm.SetColumn(replaceIdx, c);
-            //         retDsm._dsm.SetColumn(currentIdx, r);
-            //         replaceIdx ++;
-            //     }
-            // }
-
-            List<int> toBeDeleted = new List<int>();
-            var ret = new List<PSVertex>();
-            for (int currentIdx = 0; currentIdx < this._dsm.RowCount; currentIdx++)
-            {
-                if (colSums[currentIdx] == 0)
+                if (sums[currentIdx] == 0)
                 {
                     toBeDeleted.Add(currentIdx);
                 }
@@ -275,16 +211,35 @@ namespace PSGraph.DesignStructureMatrix
             _colIndex = new Dictionary<PSVertex, int>(dsm._colIndex);
         }
 
-        public DSMMatrix(int rows, int cols){
+        public DSMMatrix(int rows, int cols)
+        {
             _dsm = Matrix<Single>.Build.Dense(rows, cols);
             _rowIndex = new Dictionary<PSVertex, int>();
             _colIndex = new Dictionary<PSVertex, int>();
         }
 
-        public DSMMatrix(int rows, int cols, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex){
+        public DSMMatrix(int rows, int cols, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
+        {
             _dsm = Matrix<Single>.Build.Dense(rows, cols);
             _rowIndex = rowIndex;
             _colIndex = colIndex;
+        }
+
+        public DSMMatrix(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
+        {
+            _rowIndex = rowIndex;
+            _colIndex = colIndex;
+
+            _dsm = Matrix<Single>.Build.Dense(graph.VertexCount, graph.VertexCount);
+            
+            foreach (var e in graph.Edges)
+            {
+                var from = e.Source;
+                var to = e.Target;
+                var linkWeight = 1;
+
+                this[_rowIndex[from], _colIndex[to]] = linkWeight;
+            }
         }
 
         #endregion constructors
