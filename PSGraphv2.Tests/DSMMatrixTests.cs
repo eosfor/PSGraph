@@ -1,4 +1,5 @@
 using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Storage;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PSGraph.DesignStructureMatrix;
 using QuikGraph;
@@ -44,7 +45,28 @@ namespace PSGraph.Tests
         public void DsmMatrixPartition(){
             var dsm = new DSMMatrix(TestData.DSMFull);
             var partitioned = dsm.Partition();
-            Assert.IsNotNull(partitioned);
+
+            float[,] target = { {0,0,0,0,0,0,0},
+                                {0,0,0,1,0,0,0},
+                                {0,1,0,0,0,0,0},
+                                {1,0,1,0,0,0,0},
+                                {0,0,1,0,0,1,0},
+                                {1,1,0,1,1,0,0},
+                                {1,0,0,0,0,1,0}};
+            
+            var targetStore =  DenseColumnMajorMatrixStorage<Single>.OfArray(target);
+            var targetMatrix = Matrix<Single>.Build.Dense(targetStore);
+
+            var idx = 0;
+            string[] idx2 = {"F", "B", "D", "G", "A", "C", "E"};
+            foreach (var el in partitioned.RowIndex){
+                Assert.AreEqual(idx2[idx], el.Key.Name);
+                Assert.AreEqual(idx, el.Value);
+
+                idx++;
+            }
+
+            Assert.AreEqual(targetMatrix, partitioned.Dsm);
         }
 
     }
