@@ -13,8 +13,8 @@ namespace PSGraph.DesignStructureMatrix
     {
         private Matrix<Single> _dsm;
 
-        Dictionary<PSVertex, int> _rowIndex = new Dictionary<PSVertex, int>();
-        Dictionary<PSVertex, int> _colIndex = new Dictionary<PSVertex, int>();
+        protected Dictionary<PSVertex, int> _rowIndex = new Dictionary<PSVertex, int>();
+        protected Dictionary<PSVertex, int> _colIndex = new Dictionary<PSVertex, int>();
 
         public Dictionary<PSVertex, int> RowIndex { get => _rowIndex; }
         public Dictionary<PSVertex, int> ColIndex { get => _colIndex; }
@@ -27,6 +27,13 @@ namespace PSGraph.DesignStructureMatrix
 
         public DSMMatrix Partition()
         {
+            // this works as follows:
+            // 1. copy of the current DSM
+            // 2. detect and remove empty lines (rows, and columns). such rows will be moved up in the matrix, and columns will go right
+            // 3. identify loops by using using powers of a matrix
+            // 4. combine vertices from detected loops and empty lines into a single index string
+            // 5. reapply current graph to the new layout based on the index string
+
             var workingDsm = new DSMMatrix(this);
 
             var indRowIdx = workingDsm.FindIndependentLines(DSMMatrixLineKind.ROW);
@@ -41,7 +48,7 @@ namespace PSGraph.DesignStructureMatrix
             return newDsm;
         }
 
-        private static Dictionary<PSVertex, int> MakeIndexVector(List<PSVertex> indRowIdx, List<PSVertex> indColumnIdx, List<List<PSVertex>> loops)
+        private Dictionary<PSVertex, int> MakeIndexVector(List<PSVertex> indRowIdx, List<PSVertex> indColumnIdx, List<List<PSVertex>> loops)
         {
             var vertexList = indRowIdx.Concat(loops[0]);
             for (int i = 1; i < loops.Count; i++)

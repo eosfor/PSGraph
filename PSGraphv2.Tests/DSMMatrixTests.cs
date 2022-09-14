@@ -18,7 +18,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void CreateDsmMatrixFromGraph()
         {
-            var dsm = new DSMMatrix(TestData.SimpleTestGraph1);
+            var dsm = new DSMMatrixClassic(TestData.SimpleTestGraph1);
             Assert.IsNotNull(dsm);
             
             Assert.AreEqual(1, dsm[new PSVertex("A"), new PSVertex("C")]);
@@ -36,14 +36,14 @@ namespace PSGraph.Tests
 
         [TestMethod]
         public void CreateGraphFromDsmMatrix(){
-            var dsm = new DSMMatrix(TestData.SimpleTestGraph1);
+            var dsm = new DSMMatrixClassic(TestData.SimpleTestGraph1);
             var graph = dsm.GraphFromDSM();
             Assert.IsNotNull(graph);
         }
 
         [TestMethod]
         public void DsmMatrixPartition(){
-            var dsm = new DSMMatrix(TestData.DSMFull);
+            var dsm = new DSMMatrixClassic(TestData.DSMFull);
             var partitioned = dsm.Partition();
 
             float[,] target = { {0,0,0,0,0,0,0},
