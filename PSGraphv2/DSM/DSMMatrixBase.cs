@@ -95,10 +95,9 @@ namespace PSGraph.DesignStructureMatrix
 
         public SvgDocument ToSvg()
         {
-            int textShift = 45;
-            int itemSize = 45;
-            int h = _dsm.ColumnCount * itemSize + textShift;
-            int w = _dsm.RowCount * itemSize + textShift;
+            int itemSize = 45; // the size of a cell of a matrix
+            int h = _dsm.ColumnCount * itemSize + itemSize;
+            int w = _dsm.RowCount * itemSize + itemSize;
 
             var svgDoc = new SvgDocument()
             {
@@ -106,12 +105,12 @@ namespace PSGraph.DesignStructureMatrix
                 Height = h
             };
 
-            GenerateMatrixViewAnnotations(itemSize, textShift, svgDoc);
-            GenerateMatrixView(itemSize, textShift, svgDoc);
+            GenerateMatrixViewAnnotations(itemSize, svgDoc);
+            GenerateMatrixView(itemSize, svgDoc);
             return svgDoc;
         }
 
-        private void GenerateMatrixViewAnnotations(int itemSize, int textShift, SvgDocument svgDoc)
+        private void GenerateMatrixViewAnnotations(int itemSize, SvgDocument svgDoc)
         {
             int y = 0;
             int x = 0;
@@ -138,14 +137,14 @@ namespace PSGraph.DesignStructureMatrix
                 x++;
             }
         }
-        private void GenerateMatrixView(int itemSize, int textShift, SvgDocument svgDoc)
+        private void GenerateMatrixView(int itemSize, SvgDocument svgDoc)
         {
             for (int i = 0; i < _dsm.ColumnCount; i++)
             {
-                var x = i * itemSize + textShift;
+                var x = i * itemSize + itemSize;
                 for (int j = 0; j < _dsm.RowCount; j++)
                 {
-                    var y = j * itemSize + textShift;
+                    var y = j * itemSize + itemSize;
                     var rect = new SvgRectangle()
                     {
                         Width = itemSize,
