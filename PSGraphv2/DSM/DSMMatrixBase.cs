@@ -1,16 +1,19 @@
 using MathNet.Numerics.LinearAlgebra;
 using PSGraph.Model;
 using QuikGraph;
+using Svg;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.Data.Text;
+using Svg;
 
 
 namespace PSGraph.DesignStructureMatrix
 {
-    public class DSMMatrixBase : IDsmMatrix
+    public class DSMMatrixBase : IDsmMatrix, IDsmMatrixView
     {
         protected Matrix<Single> _dsm;
 
@@ -90,6 +93,79 @@ namespace PSGraph.DesignStructureMatrix
             return retDsm;
         }
 
+        public SvgDocument ToSvg()
+        {
+            int textShift = 45;
+            int itemSize = 45;
+            int h = _dsm.ColumnCount * itemSize + textShift;
+            int w = _dsm.RowCount * itemSize + textShift;
+
+            var svgDoc = new SvgDocument()
+            {
+                Width = w,
+                Height = h
+            };
+
+            GenerateMatrixViewAnnotations(itemSize, textShift, svgDoc);
+            GenerateMatrixView(itemSize, textShift, svgDoc);
+            return svgDoc;
+        }
+
+        private void GenerateMatrixViewAnnotations(int itemSize, int textShift, SvgDocument svgDoc)
+        {
+            int y = 0;
+            int x = 0;
+
+            foreach (var item in _rowIndex)
+            {
+                var el = new Svg.SvgText(item.Key.ToString());
+                x = itemSize - 15; // magic number as FontSize is not a square
+                el.X.Add(x);
+                el.Y.Add((y + 1) * itemSize + (int)itemSize/2);
+                svgDoc.Children.Add(el);
+                y++;
+            }
+
+            x = 0;
+            y = 0;
+            foreach (var item in _colIndex)
+            {
+                var el = new Svg.SvgText(item.Key.ToString());
+                y = itemSize - (int)el.FontSize - 5;
+                el.X.Add((x + 1) * itemSize + (int)itemSize/2);
+                el.Y.Add( y);
+                svgDoc.Children.Add(el);
+                x++;
+            }
+        }
+        private void GenerateMatrixView(int itemSize, int textShift, SvgDocument svgDoc)
+        {
+            for (int i = 0; i < _dsm.ColumnCount; i++)
+            {
+                var x = i * itemSize + textShift;
+                for (int j = 0; j < _dsm.RowCount; j++)
+                {
+                    var y = j * itemSize + textShift;
+                    var rect = new SvgRectangle()
+                    {
+                        Width = itemSize,
+                        Height = itemSize,
+                        X = x,
+                        Y = y,
+                        StrokeWidth = (float)0.5,
+                        Stroke = new SvgColourServer(System.Drawing.Color.DimGray),
+                        Fill = _dsm[j, i] == 1 ? new SvgColourServer(System.Drawing.Color.SlateBlue) : new SvgColourServer(System.Drawing.Color.White)
+                    };
+                    svgDoc.Children.Add(rect);
+                }
+
+            }
+        }
+
+        public void ExportText(string Path)
+        {
+            DelimitedWriter.Write(Path, _dsm, ",");
+        }
 
         #region constructors
         public DSMMatrixBase(PSBidirectionalGraph graph)

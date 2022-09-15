@@ -75,8 +75,11 @@ namespace PSGraph.Tests
         [TestMethod]
         public void ExportSvgTest()
         {
-            //var dsm = new DSMMatrixClassic(TestData.DSMFull);
-            //var dsmViewSimple = new DSMViewSimple<DSMMatrixClassic>(dsm);
+            var dsm = new DSMMatrixClassic(TestData.DSMFull);
+            var s = dsm.ToSvg();
+            var f = System.IO.Path.GetTempPath();
+            var p = System.IO.Path.Combine(f, "basictest.svg");
+            s.Write(p);
         }
     }
 
