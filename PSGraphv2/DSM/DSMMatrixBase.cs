@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PSGraph.DesignStructureMatrix
 {
-    public class DSMMatrixBase<T> where T : DSMMatrixBase<T>
+    public class DSMMatrixBase : IDsmMatrix
     {
         protected Matrix<Single> _dsm;
 
@@ -82,9 +82,9 @@ namespace PSGraph.DesignStructureMatrix
 
         }
 
-        public DSMMatrixBase<T> Power(int exponent)
+        public IDsmMatrix Power(int exponent)
         {
-            var retDsm = new DSMMatrixBase<T>(this);
+            var retDsm = new DSMMatrixBase(this);
             retDsm._dsm = this._dsm.Power(exponent);
 
             return retDsm;
@@ -97,7 +97,7 @@ namespace PSGraph.DesignStructureMatrix
             _dsm = GraphToDSM(graph);
         }
 
-        public DSMMatrixBase(DSMMatrixBase<T> dsm)
+        public DSMMatrixBase(DSMMatrixBase dsm)
         {
             this._dsm = Matrix<Single>.Build.Dense(dsm._dsm.RowCount, dsm._dsm.ColumnCount);
             dsm._dsm.CopyTo(this._dsm);

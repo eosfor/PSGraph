@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 
 namespace PSGraph.DesignStructureMatrix{
-    public interface IDSMPartitioningAlgorithm<T>{
-        public T Partition();
+    public interface IDSMPartitioningAlgorithm{
+        public IDsmMatrix Partition();
 
     }
 }

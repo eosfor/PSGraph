@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace PSGraph.DesignStructureMatrix
 {
-    public class DSMMatrixClassic : DSMMatrixBase<DSMMatrixClassic>, IDSMPartitioningAlgorithm<DSMMatrixClassic>
+    public class DSMMatrixClassic : DSMMatrixBase, IDSMPartitioningAlgorithm
     {
 
 
-        public DSMMatrixClassic Partition()
+        public IDsmMatrix Partition()
         {
             // this works as follows:
             // 1. copy of the current DSM
@@ -21,6 +21,7 @@ namespace PSGraph.DesignStructureMatrix
             // 3. identify loops by using using powers of a matrix
             // 4. combine vertices from detected loops and empty lines into a single index string
             // 5. reapply current graph to the new layout based on the index string
+            // https://dspace.mit.edu/bitstream/handle/1721.1/48382/methodsforanalyz00geba.pdf?sequence=1&isAllowed=y
 
             var workingDsm = new DSMMatrixClassic(this);
 
@@ -72,7 +73,7 @@ namespace PSGraph.DesignStructureMatrix
             return loops;
         }
 
-        private List<PSVertex> DetectLoops(DSMMatrixBase<DSMMatrixClassic> currentDsm)
+        private List<PSVertex> DetectLoops(IDsmMatrix currentDsm)
         {
             //TODO: assuming there is only one loop for a given power n
             var ret = new List<PSVertex>();
