@@ -20,7 +20,7 @@ namespace PSGraph.Tests
         {
             var dsm = new DSMMatrixClassic(TestData.SimpleTestGraph1);
             Assert.IsNotNull(dsm);
-            
+
             Assert.AreEqual(1, dsm[new PSVertex("A"), new PSVertex("C")]);
             Assert.AreEqual(1, dsm[new PSVertex("C"), new PSVertex("A")]);
 
@@ -35,14 +35,16 @@ namespace PSGraph.Tests
         }
 
         [TestMethod]
-        public void CreateGraphFromDsmMatrix(){
+        public void CreateGraphFromDsmMatrix()
+        {
             var dsm = new DSMMatrixClassic(TestData.SimpleTestGraph1);
             var graph = dsm.GraphFromDSM();
             Assert.IsNotNull(graph);
         }
 
         [TestMethod]
-        public void DsmMatrixPartition(){
+        public void DsmMatrixPartition()
+        {
             var dsm = new DSMMatrixClassic(TestData.DSMFull);
             var partitioned = dsm.Partition();
 
@@ -53,13 +55,14 @@ namespace PSGraph.Tests
                                 {0,0,1,0,0,1,0},
                                 {1,1,0,1,1,0,0},
                                 {1,0,0,0,0,1,0}};
-            
-            var targetStore =  DenseColumnMajorMatrixStorage<Single>.OfArray(target);
+
+            var targetStore = DenseColumnMajorMatrixStorage<Single>.OfArray(target);
             var targetMatrix = Matrix<Single>.Build.Dense(targetStore);
 
             var idx = 0;
-            string[] idx2 = {"F", "B", "D", "G", "A", "C", "E"};
-            foreach (var el in partitioned.RowIndex){
+            string[] idx2 = { "F", "B", "D", "G", "A", "C", "E" };
+            foreach (var el in partitioned.RowIndex)
+            {
                 Assert.AreEqual(idx2[idx], el.Key.Name);
                 Assert.AreEqual(idx, el.Value);
 
@@ -69,5 +72,13 @@ namespace PSGraph.Tests
             Assert.AreEqual(targetMatrix, partitioned.Dsm);
         }
 
+        [TestMethod]
+        public void ExportSvgTest()
+        {
+            //var dsm = new DSMMatrixClassic(TestData.DSMFull);
+            //var dsmViewSimple = new DSMViewSimple<DSMMatrixClassic>(dsm);
+        }
     }
+
+
 }
