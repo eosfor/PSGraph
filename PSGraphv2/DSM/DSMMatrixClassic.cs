@@ -196,7 +196,7 @@ namespace PSGraph.DesignStructureMatrix
         {
         }
 
-        public DSMMatrixClassic(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, 
+        public DSMMatrixClassic(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex,
                                 Dictionary<PSVertex, int> colIndex, List<List<PSVertex>> loops,
                                 List<PSVertex> indRowIdx, List<PSVertex> indColumnIdx) : base(graph, rowIndex, colIndex)
         {
