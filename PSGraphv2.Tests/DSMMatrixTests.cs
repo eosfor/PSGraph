@@ -81,6 +81,17 @@ namespace PSGraph.Tests
             var p = System.IO.Path.Combine(f, "basictest.svg");
             s.Write(p);
         }
+
+        [TestMethod]
+        public void ExportPartitionedSvgTest()
+        {
+            var dsm = new DSMMatrixClassic(TestData.DSMFull);
+            var partitioned = dsm.Partition();
+            var s = ((DSMMatrixClassic)partitioned).ToSvg();
+            var f = System.IO.Path.GetTempPath();
+            var p = System.IO.Path.Combine(f, "basictestClustered.svg");
+            s.Write(p);
+        }
     }
 
 

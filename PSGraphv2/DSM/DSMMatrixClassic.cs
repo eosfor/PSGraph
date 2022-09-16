@@ -1,6 +1,7 @@
 using MathNet.Numerics.LinearAlgebra;
 using PSGraph.Model;
 using QuikGraph;
+using Svg;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,13 @@ using System.Threading.Tasks;
 
 namespace PSGraph.DesignStructureMatrix
 {
-    public class DSMMatrixClassic : DSMMatrixBase, IDSMPartitioningAlgorithm
+    public class DSMMatrixClassic : DSMMatrixBase, IDsmPartitioningAlgorithm
     {
 
 
+        private List<List<PSVertex>> _clusters = new List<List<PSVertex>>();
+        private List<PSVertex> _indRowIdx;
+        private List<PSVertex> _indColumnIdx;
         public IDsmMatrix Partition()
         {
             // this works as follows:
@@ -25,16 +29,45 @@ namespace PSGraph.DesignStructureMatrix
 
             var workingDsm = new DSMMatrixClassic(this);
 
-            var indRowIdx = workingDsm.FindIndependentLines(DSMMatrixLineKind.ROW);
-            var indColumnIdx = workingDsm.FindIndependentLines(DSMMatrixLineKind.COLUMN);
+            _indRowIdx = workingDsm.FindIndependentLines(DSMMatrixLineKind.ROW);
+            _indColumnIdx = workingDsm.FindIndependentLines(DSMMatrixLineKind.COLUMN);
             var loops = ExtractLoops(workingDsm);
 
-            Dictionary<PSVertex, int> index = MakeIndexVector(indRowIdx, indColumnIdx, loops);
+            Dictionary<PSVertex, int> index = MakeIndexVector(_indRowIdx, _indColumnIdx, loops);
 
             var graph = this.GraphFromDSM();
-            var newDsm = new DSMMatrixClassic(graph, index, index);
+            var newDsm = new DSMMatrixClassic(graph, index, index, loops, _indRowIdx, _indColumnIdx);
 
             return newDsm;
+        }
+
+        public override SvgDocument ToSvg()
+        {
+            var svgDoc = base.ToSvg();
+            var itemSize = 45; // TODO: we need to pull this from base
+
+            foreach (var cluster in _clusters)
+            {
+                var w = cluster.Count * itemSize;
+                var h = cluster.Count * itemSize;
+                var row = RowIndex[cluster.First()] * itemSize + itemSize;
+
+                var rect = new SvgRectangle()
+                {
+                    Width = w,
+                    Height = h,
+                    X = row,
+                    Y = row, //top left corner
+                    StrokeWidth = (float)2.0,
+                    Stroke = new SvgColourServer(System.Drawing.Color.Black),
+                    FillOpacity = 0
+                };
+
+                svgDoc.Children.Add(rect);
+            }
+
+
+            return svgDoc;
         }
 
         private Dictionary<PSVertex, int> MakeIndexVector(List<PSVertex> indRowIdx, List<PSVertex> indColumnIdx, List<List<PSVertex>> loops)
@@ -66,7 +99,11 @@ namespace PSGraph.DesignStructureMatrix
             {
                 var currentDsm = workingDsm.Power(i);
                 var loop = DetectLoops(currentDsm);
-                loops.Add(loop);
+                if (loop.Count > 0)
+                {
+                    loops.Add(loop);
+                }
+
             }
 
             loops = loops.OrderByDescending(x => x.Count).ToList();
@@ -128,6 +165,16 @@ namespace PSGraph.DesignStructureMatrix
             return ret;
         }
 
+        private void InitClusters()
+        {
+            foreach (var item in RowIndex)
+            {
+                var el = new List<PSVertex>();
+                el.Add(item.Key);
+                _clusters.Add(el);
+            }
+        }
+
         #region constructors
         public DSMMatrixClassic(PSBidirectionalGraph graph) : base(graph)
         {
@@ -147,6 +194,30 @@ namespace PSGraph.DesignStructureMatrix
 
         public DSMMatrixClassic(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex) : base(graph, rowIndex, colIndex)
         {
+        }
+
+        public DSMMatrixClassic(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, 
+                                Dictionary<PSVertex, int> colIndex, List<List<PSVertex>> loops,
+                                List<PSVertex> indRowIdx, List<PSVertex> indColumnIdx) : base(graph, rowIndex, colIndex)
+        {
+            foreach (var r in indRowIdx)
+            {
+                var l = new List<PSVertex>();
+                l.Add(r);
+                _clusters.Add(l);
+            }
+
+            foreach (var r in loops)
+            {
+                _clusters.Add(r);
+            }
+
+            foreach (var r in indColumnIdx)
+            {
+                var l = new List<PSVertex>();
+                l.Add(r);
+                _clusters.Add(l);
+            }
         }
 
         #endregion constructors

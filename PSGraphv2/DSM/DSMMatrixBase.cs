@@ -93,7 +93,7 @@ namespace PSGraph.DesignStructureMatrix
             return retDsm;
         }
 
-        public SvgDocument ToSvg()
+        public virtual SvgDocument ToSvg()
         {
             int itemSize = 45; // the size of a cell of a matrix
             int h = _dsm.ColumnCount * itemSize + itemSize;
@@ -153,11 +153,17 @@ namespace PSGraph.DesignStructureMatrix
                         Y = y,
                         StrokeWidth = (float)0.5,
                         Stroke = new SvgColourServer(System.Drawing.Color.DimGray),
-                        Fill = _dsm[j, i] == 1 ? new SvgColourServer(System.Drawing.Color.SlateBlue) : new SvgColourServer(System.Drawing.Color.White)
+                        Fill = FillColor(i, j)
                     };
                     svgDoc.Children.Add(rect);
                 }
 
+            }
+
+            SvgColourServer FillColor(int i, int j)
+            {
+                if (i == j) return new SvgColourServer(System.Drawing.Color.DarkGray);
+                return _dsm[j, i] == 1 ? new SvgColourServer(System.Drawing.Color.SlateBlue) : new SvgColourServer(System.Drawing.Color.White);
             }
         }
 
