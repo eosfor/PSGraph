@@ -4,6 +4,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
+using PSGraph.DesignStructureMatrix;
 
 namespace PSGraph.Cmdlets
 {
@@ -11,14 +12,12 @@ namespace PSGraph.Cmdlets
     public class StartDSMClusteringCmdlet: PSCmdlet
     {
         [Parameter(Mandatory = true)]
-        public DesignStructureMatrix.Dsm Dsm;
+        public  IDsmMatrix Dsm;
 
         protected override void ProcessRecord()
         {
-            Dsm.Cluster();
-            Dsm.Order();
+            ((IDsmPartitioningAlgorithm)Dsm).Partition();
             WriteObject(Dsm);
-            //base.ProcessRecord();
         }
     }
 }

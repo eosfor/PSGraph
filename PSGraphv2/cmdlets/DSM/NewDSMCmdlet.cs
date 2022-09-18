@@ -1,4 +1,5 @@
-﻿using PSGraph.Model;
+﻿using PSGraph.DesignStructureMatrix;
+using PSGraph.Model;
 using QuikGraph;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace PSGraph.Cmdlets
         protected override void ProcessRecord()
         {
 
-            var d = new DesignStructureMatrix.Dsm(Graph);
+            var d = new DSMMatrixClassic(Graph);
             WriteObject(d);
         }
     }

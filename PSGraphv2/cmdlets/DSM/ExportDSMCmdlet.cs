@@ -14,7 +14,7 @@ namespace PSGraph.Cmdlets
     public class ExportDSMCmdlet : PSCmdlet
     {
         [Parameter(Position = 0, Mandatory = true)]
-        public DesignStructureMatrix.Dsm Dsm;
+        public IDsmMatrix Dsm;
 
         [Parameter(Mandatory = true)]
         public string Path;
@@ -40,14 +40,15 @@ namespace PSGraph.Cmdlets
         {
             //Dsm.Cluster();
             //var r = Dsm.Order();
-            DelimitedWriter.Write(Path, Dsm.DsmStorage , ",");
+            DelimitedWriter.Write(Path, Dsm.Dsm , ",");
         }
 
         private void ExportSVG()
         {
             //Dsm.Cluster();
             //var r = Dsm.Order();
-            Dsm.ExportSvg(Path);
+            var svgDoc = ((IDsmMatrixView)Dsm).ToSvg();
+            ((IDsmMatrixView)Dsm).ExportSvg(svgDoc, Path);
         }
     }
 }
