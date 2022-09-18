@@ -239,3 +239,7 @@ _Pvt_Extensions
 .fake/
 PSGraphv2/.DS_Store
 .DS_Store
+
+
+bin/
+obj/
