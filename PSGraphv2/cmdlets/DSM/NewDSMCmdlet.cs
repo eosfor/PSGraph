@@ -18,7 +18,7 @@ namespace PSGraph.Cmdlets
         protected override void ProcessRecord()
         {
 
-            var d = new DSMMatrixClassic(Graph);
+            var d = new DsmMatrixClassic(Graph);
             WriteObject(d);
         }
     }

@@ -13,7 +13,7 @@ using Svg;
 
 namespace PSGraph.DesignStructureMatrix
 {
-    public class DSMMatrixBase : IDsmMatrix, IDsmMatrixView
+    public class DsmMatrixBase : IDsmMatrix, IDsmMatrixView
     {
         protected Matrix<Single> _dsm;
 
@@ -87,7 +87,7 @@ namespace PSGraph.DesignStructureMatrix
 
         public IDsmMatrix Power(int exponent)
         {
-            var retDsm = new DSMMatrixBase(this);
+            var retDsm = new DsmMatrixBase(this);
             retDsm._dsm = this._dsm.Power(exponent);
 
             return retDsm;
@@ -173,12 +173,12 @@ namespace PSGraph.DesignStructureMatrix
         }
 
         #region constructors
-        public DSMMatrixBase(PSBidirectionalGraph graph)
+        public DsmMatrixBase(PSBidirectionalGraph graph)
         {
             _dsm = GraphToDSM(graph);
         }
 
-        public DSMMatrixBase(DSMMatrixBase dsm)
+        public DsmMatrixBase(DsmMatrixBase dsm)
         {
             this._dsm = Matrix<Single>.Build.Dense(dsm._dsm.RowCount, dsm._dsm.ColumnCount);
             dsm._dsm.CopyTo(this._dsm);
@@ -186,21 +186,21 @@ namespace PSGraph.DesignStructureMatrix
             _colIndex = new Dictionary<PSVertex, int>(dsm._colIndex);
         }
 
-        public DSMMatrixBase(int rows, int cols)
+        public DsmMatrixBase(int rows, int cols)
         {
             _dsm = Matrix<Single>.Build.Dense(rows, cols);
             _rowIndex = new Dictionary<PSVertex, int>();
             _colIndex = new Dictionary<PSVertex, int>();
         }
 
-        public DSMMatrixBase(int rows, int cols, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
+        public DsmMatrixBase(int rows, int cols, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
         {
             _dsm = Matrix<Single>.Build.Dense(rows, cols);
             _rowIndex = rowIndex;
             _colIndex = colIndex;
         }
 
-        public DSMMatrixBase(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
+        public DsmMatrixBase(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
         {
             _rowIndex = rowIndex;
             _colIndex = colIndex;

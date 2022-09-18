@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PSGraph.DesignStructureMatrix
 {
-    public class DSMMatrixClassic : DSMMatrixBase, IDsmPartitioningAlgorithm
+    public class DsmMatrixClassic : DsmMatrixBase, IDsmPartitioningAlgorithm
     {
 
 
@@ -27,7 +27,7 @@ namespace PSGraph.DesignStructureMatrix
             // 5. reapply current graph to the new layout based on the index string
             // https://dspace.mit.edu/bitstream/handle/1721.1/48382/methodsforanalyz00geba.pdf?sequence=1&isAllowed=y
 
-            var workingDsm = new DSMMatrixClassic(this);
+            var workingDsm = new DsmMatrixClassic(this);
 
             _indRowIdx = workingDsm.FindIndependentLines(DSMMatrixLineKind.ROW);
             _indColumnIdx = workingDsm.FindIndependentLines(DSMMatrixLineKind.COLUMN);
@@ -36,7 +36,7 @@ namespace PSGraph.DesignStructureMatrix
             Dictionary<PSVertex, int> index = MakeIndexVector(_indRowIdx, _indColumnIdx, loops);
 
             var graph = this.GraphFromDSM();
-            var newDsm = new DSMMatrixClassic(graph, index, index, loops, _indRowIdx, _indColumnIdx);
+            var newDsm = new DsmMatrixClassic(graph, index, index, loops, _indRowIdx, _indColumnIdx);
 
             return newDsm;
         }
@@ -92,7 +92,7 @@ namespace PSGraph.DesignStructureMatrix
             return index;
         }
 
-        private List<List<PSVertex>> ExtractLoops(DSMMatrixClassic workingDsm, int power = 2)
+        private List<List<PSVertex>> ExtractLoops(DsmMatrixClassic workingDsm, int power = 2)
         {
             var loops = new List<List<PSVertex>>(); //count of the nested list shows the actual exponent
             for (int i = power; i <= workingDsm._dsm.RowCount; i++)
@@ -176,27 +176,27 @@ namespace PSGraph.DesignStructureMatrix
         }
 
         #region constructors
-        public DSMMatrixClassic(PSBidirectionalGraph graph) : base(graph)
+        public DsmMatrixClassic(PSBidirectionalGraph graph) : base(graph)
         {
         }
 
-        public DSMMatrixClassic(DSMMatrixClassic dsm) : base(dsm)
+        public DsmMatrixClassic(DsmMatrixClassic dsm) : base(dsm)
         {
         }
 
-        public DSMMatrixClassic(int rows, int cols) : base(rows, cols)
+        public DsmMatrixClassic(int rows, int cols) : base(rows, cols)
         {
         }
 
-        public DSMMatrixClassic(int rows, int cols, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex) : base(rows, cols, rowIndex, colIndex)
+        public DsmMatrixClassic(int rows, int cols, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex) : base(rows, cols, rowIndex, colIndex)
         {
         }
 
-        public DSMMatrixClassic(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex) : base(graph, rowIndex, colIndex)
+        public DsmMatrixClassic(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex) : base(graph, rowIndex, colIndex)
         {
         }
 
-        public DSMMatrixClassic(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex,
+        public DsmMatrixClassic(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex,
                                 Dictionary<PSVertex, int> colIndex, List<List<PSVertex>> loops,
                                 List<PSVertex> indRowIdx, List<PSVertex> indColumnIdx) : base(graph, rowIndex, colIndex)
         {

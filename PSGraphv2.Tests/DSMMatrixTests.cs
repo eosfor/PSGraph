@@ -18,7 +18,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void CreateDsmMatrixFromGraph()
         {
-            var dsm = new DSMMatrixClassic(TestData.SimpleTestGraph1);
+            var dsm = new DsmMatrixClassic(TestData.SimpleTestGraph1);
             Assert.IsNotNull(dsm);
 
             Assert.AreEqual(1, dsm[new PSVertex("A"), new PSVertex("C")]);
@@ -37,7 +37,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void CreateGraphFromDsmMatrix()
         {
-            var dsm = new DSMMatrixClassic(TestData.SimpleTestGraph1);
+            var dsm = new DsmMatrixClassic(TestData.SimpleTestGraph1);
             var graph = dsm.GraphFromDSM();
             Assert.IsNotNull(graph);
         }
@@ -45,7 +45,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void DsmMatrixPartition()
         {
-            var dsm = new DSMMatrixClassic(TestData.DSMFull);
+            var dsm = new DsmMatrixClassic(TestData.DSMFull);
             var partitioned = dsm.Partition();
 
             float[,] target = { {0,0,0,0,0,0,0},
@@ -75,7 +75,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void ExportSvgTest()
         {
-            var dsm = new DSMMatrixClassic(TestData.DSMFull);
+            var dsm = new DsmMatrixClassic(TestData.DSMFull);
             var s = dsm.ToSvg();
             var f = System.IO.Path.GetTempPath();
             var p = System.IO.Path.Combine(f, "basictest.svg");
@@ -85,9 +85,9 @@ namespace PSGraph.Tests
         [TestMethod]
         public void ExportPartitionedSvgTest()
         {
-            var dsm = new DSMMatrixClassic(TestData.DSMFull);
+            var dsm = new DsmMatrixClassic(TestData.DSMFull);
             var partitioned = dsm.Partition();
-            var s = ((DSMMatrixClassic)partitioned).ToSvg();
+            var s = ((DsmMatrixClassic)partitioned).ToSvg();
             var f = System.IO.Path.GetTempPath();
             var p = System.IO.Path.Combine(f, "basictestClustered.svg");
             s.Write(p);
