@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PSGraph.DesignStructureMatrix
 {
-    public partial class DSMMatrix
+    public partial class DsmMatrix
     {
         private Matrix<Single> _dsm;
 
@@ -25,7 +25,7 @@ namespace PSGraph.DesignStructureMatrix
         public Single this[PSVertex from, PSVertex to] { get => GetElementByVertex(from, to); set => SetElementByVertex(from, to, value); }
         public Single this[int row, int column] { get => _dsm[row, column]; set => _dsm[row, column] = value; }
 
-        public DSMMatrix Partition()
+        public DsmMatrix Partition()
         {
             // this works as follows:
             // 1. copy of the current DSM
@@ -34,7 +34,7 @@ namespace PSGraph.DesignStructureMatrix
             // 4. combine vertices from detected loops and empty lines into a single index string
             // 5. reapply current graph to the new layout based on the index string
 
-            var workingDsm = new DSMMatrix(this);
+            var workingDsm = new DsmMatrix(this);
 
             var indRowIdx = workingDsm.FindIndependentLines(DSMMatrixLineKind.ROW);
             var indColumnIdx = workingDsm.FindIndependentLines(DSMMatrixLineKind.COLUMN);
@@ -43,7 +43,7 @@ namespace PSGraph.DesignStructureMatrix
             Dictionary<PSVertex, int> index = MakeIndexVector(indRowIdx, indColumnIdx, loops);
 
             var graph = this.GraphFromDSM();
-            var newDsm = new DSMMatrix(graph, index, index);
+            var newDsm = new DsmMatrix(graph, index, index);
 
             return newDsm;
         }
@@ -70,7 +70,7 @@ namespace PSGraph.DesignStructureMatrix
             return index;
         }
 
-        private List<List<PSVertex>> ExtractLoops(DSMMatrix workingDsm, int power = 2)
+        private List<List<PSVertex>> ExtractLoops(DsmMatrix workingDsm, int power = 2)
         {
             var loops = new List<List<PSVertex>>(); //count of the nested list shows the actual exponent
             for (int i = power; i <= workingDsm._dsm.RowCount; i++)
@@ -123,9 +123,9 @@ namespace PSGraph.DesignStructureMatrix
             return ret;
         }
 
-        private DSMMatrix Power(int exponent)
+        private DsmMatrix Power(int exponent)
         {
-            var retDsm = new DSMMatrix(this);
+            var retDsm = new DsmMatrix(this);
             retDsm._dsm = this._dsm.Power(exponent);
 
             return retDsm;
@@ -205,12 +205,12 @@ namespace PSGraph.DesignStructureMatrix
         }
 
         #region constructors
-        public DSMMatrix(PSBidirectionalGraph graph)
+        public DsmMatrix(PSBidirectionalGraph graph)
         {
             _dsm = GraphToDSM(graph);
         }
 
-        public DSMMatrix(DSMMatrix dsm)
+        public DsmMatrix(DsmMatrix dsm)
         {
             this._dsm = Matrix<Single>.Build.Dense(dsm._dsm.RowCount, dsm._dsm.ColumnCount);
             dsm._dsm.CopyTo(this._dsm);
@@ -218,21 +218,21 @@ namespace PSGraph.DesignStructureMatrix
             _colIndex = new Dictionary<PSVertex, int>(dsm._colIndex);
         }
 
-        public DSMMatrix(int rows, int cols)
+        public DsmMatrix(int rows, int cols)
         {
             _dsm = Matrix<Single>.Build.Dense(rows, cols);
             _rowIndex = new Dictionary<PSVertex, int>();
             _colIndex = new Dictionary<PSVertex, int>();
         }
 
-        public DSMMatrix(int rows, int cols, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
+        public DsmMatrix(int rows, int cols, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
         {
             _dsm = Matrix<Single>.Build.Dense(rows, cols);
             _rowIndex = rowIndex;
             _colIndex = colIndex;
         }
 
-        public DSMMatrix(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
+        public DsmMatrix(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
         {
             _rowIndex = rowIndex;
             _colIndex = colIndex;
