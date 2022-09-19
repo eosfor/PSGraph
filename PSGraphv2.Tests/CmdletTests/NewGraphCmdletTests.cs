@@ -38,7 +38,7 @@ namespace PSGraph.Tests
 				
 				Assert.IsTrue(result != null);
 				Assert.IsTrue(result.Count == 1);
-				Assert.IsTrue(result[0].ImmediateBaseObject.GetType() == typeof (PSBidirectionalGraph));
+				Assert.IsTrue(result[0].ImmediateBaseObject.GetType() == typeof (PsBidirectionalGraph));
 			}
 			finally
 			{

@@ -35,7 +35,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void TestGraphPropertyNoProcessing_Success()
         {
-            var graph = new PSBidirectionalGraph();
+            var graph = new PsBidirectionalGraph();
             PSGraph.Cmdlets.ExportGraphViewCmdLet export = new PSGraph.Cmdlets.ExportGraphViewCmdLet();
             PSGraph.GraphExportTypes expType = export.Format;
 

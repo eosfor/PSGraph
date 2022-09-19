@@ -12,7 +12,7 @@ using PSGraph.Model;
 namespace PSGraph.Tests
 {
     [TestClass]
-    public class DSMMatrixTests
+    public class DsmMatrixClassicTests
     {
 
         [TestMethod]

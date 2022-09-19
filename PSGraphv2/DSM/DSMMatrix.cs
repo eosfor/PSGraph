@@ -157,7 +157,7 @@ namespace PSGraph.DesignStructureMatrix
             return _dsm[_rowIndex[from], _colIndex[to]];
         }
 
-        private Matrix<float>? GraphToDSM(PSBidirectionalGraph graph)
+        private Matrix<float>? GraphToDSM(PsBidirectionalGraph graph)
         {
             Matrix<Single> dsm = Matrix<Single>.Build.Dense(graph.VertexCount, graph.VertexCount);
 
@@ -185,9 +185,9 @@ namespace PSGraph.DesignStructureMatrix
             return dsm;
         }
 
-        public PSBidirectionalGraph GraphFromDSM()
+        public PsBidirectionalGraph GraphFromDSM()
         {
-            var ret = new PSBidirectionalGraph();
+            var ret = new PsBidirectionalGraph();
 
             foreach (var row in _rowIndex)
             {
@@ -205,7 +205,7 @@ namespace PSGraph.DesignStructureMatrix
         }
 
         #region constructors
-        public DsmMatrix(PSBidirectionalGraph graph)
+        public DsmMatrix(PsBidirectionalGraph graph)
         {
             _dsm = GraphToDSM(graph);
         }
@@ -232,7 +232,7 @@ namespace PSGraph.DesignStructureMatrix
             _colIndex = colIndex;
         }
 
-        public DsmMatrix(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
+        public DsmMatrix(PsBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
         {
             _rowIndex = rowIndex;
             _colIndex = colIndex;

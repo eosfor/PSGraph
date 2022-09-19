@@ -21,7 +21,7 @@ namespace PSGraph.Cmdlets
 
         [Parameter(Mandatory = true)]
         [ValidateNotNullOrEmpty]
-        public PSBidirectionalGraph Graph;
+        public PsBidirectionalGraph Graph;
 
         [Parameter(Mandatory = false)]
         public object Tag;

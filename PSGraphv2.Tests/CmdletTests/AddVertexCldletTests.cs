@@ -34,7 +34,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void AddVertex_Success()
         {
-            var graph = new PSBidirectionalGraph();
+            var graph = new PsBidirectionalGraph();
 
             try
             {
@@ -58,7 +58,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void AddArbitratyObjectVertex_Success()
         {
-            var graph = new PSBidirectionalGraph();
+            var graph = new PsBidirectionalGraph();
 
             try
             {
@@ -83,7 +83,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void AddIdenticalArbitratyObjectVertex_Success()
         {
-            var graph = new PSBidirectionalGraph();
+            var graph = new PsBidirectionalGraph();
 
             try
             {
@@ -116,7 +116,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void AddIdenticalVertex_Success()
         {
-            var graph = new PSBidirectionalGraph();
+            var graph = new PsBidirectionalGraph();
 
             try
             {

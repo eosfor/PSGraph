@@ -8,10 +8,15 @@ using System.Threading.Tasks;
 
 namespace PSGraph.Model
 {
-    public class PSBidirectionalGraph : BidirectionalGraph<PSVertex, PSEdge>
+    public class PsBidirectionalGraph : BidirectionalGraph<PSVertex, PSEdge>
     {
-        public PSBidirectionalGraph(bool allowParallelEdges = false) : base(allowParallelEdges)
+        public PsBidirectionalGraph(bool allowParallelEdges = false) : base(allowParallelEdges)
         {
+        }
+        
+        public PsBidirectionalGraph(PsBidirectionalGraph g) : base(g)
+        {
+            
         }
     }
 }

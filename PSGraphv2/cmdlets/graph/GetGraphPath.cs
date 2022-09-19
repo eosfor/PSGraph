@@ -23,7 +23,7 @@ namespace PSGraph.Cmdlets
 
         [Parameter(Mandatory = true)]
         [ValidateNotNullOrEmpty]
-        public PSBidirectionalGraph Graph;
+        public PsBidirectionalGraph Graph;
 
         protected override void ProcessRecord()
         {

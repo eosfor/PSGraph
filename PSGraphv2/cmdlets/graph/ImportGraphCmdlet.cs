@@ -15,10 +15,10 @@ namespace PSGraph.Cmdlets
         public string Path;
         protected override void ProcessRecord()
         {
-            var graph = new PSBidirectionalGraph(false);
+            var graph = new PsBidirectionalGraph(false);
             using (var xmlReader = XmlReader.Create(Path))
             {
-                graph.DeserializeFromGraphML<PSVertex, PSEdge, PSBidirectionalGraph>(
+                graph.DeserializeFromGraphML<PSVertex, PSEdge, PsBidirectionalGraph>(
                     xmlReader,
                     id => new PSVertex(id),
                     (source, target, id) => new PSEdge(source, target, new PSEdgeTag()));

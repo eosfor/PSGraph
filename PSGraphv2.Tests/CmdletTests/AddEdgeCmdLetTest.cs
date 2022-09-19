@@ -36,7 +36,7 @@ namespace PSGraph.Tests
         [TestMethod]
         public void TestGraphPropertyNoProcessing_Success()
         {
-            var graph = new PSBidirectionalGraph();
+            var graph = new PsBidirectionalGraph();
             PSGraph.Cmdlets.AddEdgeCmdLet psGraph = new PSGraph.Cmdlets.AddEdgeCmdLet() { Graph = graph };
 
             Assert.IsTrue(Object.Equals(psGraph.Graph, graph));
@@ -112,7 +112,7 @@ namespace PSGraph.Tests
         {
             try
             {
-                var graph = new PSBidirectionalGraph();
+                var graph = new PsBidirectionalGraph();
                 Object to = null;
                 Object from = new Object();
                 Object attr = new Object();
@@ -136,7 +136,7 @@ namespace PSGraph.Tests
         {
             try
             {
-                var graph = new PSBidirectionalGraph();
+                var graph = new PsBidirectionalGraph();
                 Object to = new Object();
                 Object from = null;
                 Object attr = new Object();
@@ -159,7 +159,7 @@ namespace PSGraph.Tests
         {
             try
             {
-                var graph = new PSBidirectionalGraph();
+                var graph = new PsBidirectionalGraph();
                 Object to = new Object();
                 Object from = new Object();
                 Object tag = new Object();
@@ -182,7 +182,7 @@ namespace PSGraph.Tests
         {
             try
             {
-                var graph = new PSBidirectionalGraph();
+                var graph = new PsBidirectionalGraph();
                 string to = "to";
                 string from = "from";
                 _powershell.AddCommand("Add-Edge");

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PSGraph.Model
 {
-    public class PSVertex
+    public class PSVertex: IComparable<PSVertex>
     {
         private string label;
         public string Name => Label;
@@ -33,6 +33,12 @@ namespace PSGraph.Model
             Label = label;
         }
 
+        public PSVertex(PSVertex v)
+        {
+            string l = new string(v.label.ToCharArray()); //copy?
+            var copy = new PSVertex(l);
+        }
+
         public PSVertex(string label, object source)
         {
             Label = label;
@@ -43,6 +49,11 @@ namespace PSGraph.Model
         //{
         //    return new PSVertex(obj.ToString());
         //}
+
+        public int CompareTo(PSVertex? other)
+        {
+            return this.Label.CompareTo(other.Label);
+        }
 
         public override bool Equals(object? obj)
         {

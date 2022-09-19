@@ -176,7 +176,7 @@ namespace PSGraph.DesignStructureMatrix
         }
 
         #region constructors
-        public DsmMatrixClassic(PSBidirectionalGraph graph) : base(graph)
+        public DsmMatrixClassic(PsBidirectionalGraph graph) : base(graph)
         {
         }
 
@@ -192,11 +192,11 @@ namespace PSGraph.DesignStructureMatrix
         {
         }
 
-        public DsmMatrixClassic(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex) : base(graph, rowIndex, colIndex)
+        public DsmMatrixClassic(PsBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex) : base(graph, rowIndex, colIndex)
         {
         }
 
-        public DsmMatrixClassic(PSBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex,
+        public DsmMatrixClassic(PsBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex,
                                 Dictionary<PSVertex, int> colIndex, List<List<PSVertex>> loops,
                                 List<PSVertex> indRowIdx, List<PSVertex> indColumnIdx) : base(graph, rowIndex, colIndex)
         {

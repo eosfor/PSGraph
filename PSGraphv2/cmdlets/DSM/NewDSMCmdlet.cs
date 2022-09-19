@@ -14,7 +14,7 @@ namespace PSGraph.Cmdlets
     public  class NewDSMCmdlet: PSCmdlet
     {
         [Parameter(Mandatory = true)]
-        public PSBidirectionalGraph Graph;
+        public PsBidirectionalGraph Graph;
         protected override void ProcessRecord()
         {
 

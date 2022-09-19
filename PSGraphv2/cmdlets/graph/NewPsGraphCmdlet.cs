@@ -11,7 +11,7 @@ namespace PSGraph.Cmdlets
     {
         protected override void ProcessRecord()
         {
-            var newGraph = new PSBidirectionalGraph(false);
+            var newGraph = new PsBidirectionalGraph(false);
             WriteObject(newGraph);
         }
     }

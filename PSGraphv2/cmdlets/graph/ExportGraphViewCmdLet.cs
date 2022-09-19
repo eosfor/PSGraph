@@ -27,7 +27,7 @@ namespace PSGraph.Cmdlets
     {
         [Parameter(Mandatory = true)]
         [ValidateNotNullOrEmpty]
-        public PSBidirectionalGraph Graph;
+        public PsBidirectionalGraph Graph;
 
         [Parameter(Mandatory = true)]
         [ValidateNotNullOrEmpty]
@@ -121,7 +121,7 @@ namespace PSGraph.Cmdlets
         {
             using (var xmlWriter = XmlWriter.Create(Path))
             {
-                Graph.SerializeToGraphML<PSVertex, PSEdge, PSBidirectionalGraph>(xmlWriter,
+                Graph.SerializeToGraphML<PSVertex, PSEdge, PsBidirectionalGraph>(xmlWriter,
                     v => v.Label,
                     Graph.GetEdgeIdentity());
             }

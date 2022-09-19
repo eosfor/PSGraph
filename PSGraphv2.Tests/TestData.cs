@@ -11,11 +11,11 @@ namespace PSGraph.Tests
 {
     public static class TestData
     {
-        public static PSBidirectionalGraph SimpleTestGraph1 { get; private set; }
-        public static PSBidirectionalGraph SimpleTestGraph2 { get; private set; }
-        public static PSBidirectionalGraph SimpleTestGraph3 { get; private set; }
-        public static PSBidirectionalGraph SimpleTestGraph4 { get; private set; }
-        public static PSBidirectionalGraph DSMFull { get; private set; }
+        public static PsBidirectionalGraph SimpleTestGraph1 { get; private set; }
+        public static PsBidirectionalGraph SimpleTestGraph2 { get; private set; }
+        public static PsBidirectionalGraph SimpleTestGraph3 { get; private set; }
+        public static PsBidirectionalGraph SimpleTestGraph4 { get; private set; }
+        public static PsBidirectionalGraph DSMFull { get; private set; }
 
         static TestData()
         {
@@ -27,8 +27,8 @@ namespace PSGraph.Tests
         }
 
         
-        private static PSBidirectionalGraph? InitializeSimpleTestGraph5(){
-            var g = new PSBidirectionalGraph();
+        private static PsBidirectionalGraph? InitializeSimpleTestGraph5(){
+            var g = new PsBidirectionalGraph();
 
             g.AddVertex(new PSVertex("A"));
             g.AddVertex(new PSVertex("B"));
@@ -58,14 +58,14 @@ namespace PSGraph.Tests
 
             return g;
         }
-        private static PSBidirectionalGraph? InitializeSimpleTestGraph4()
+        private static PsBidirectionalGraph? InitializeSimpleTestGraph4()
         {
             var d = System.IO.Directory.GetCurrentDirectory();
             var testGraphPath = System.IO.Path.Combine(d, "vms.graphml");
-            var graph = new PSBidirectionalGraph(false);
+            var graph = new PsBidirectionalGraph(false);
             using (var xmlReader = XmlReader.Create(testGraphPath))
             {
-                graph.DeserializeFromGraphML<PSVertex, PSEdge, PSBidirectionalGraph>(
+                graph.DeserializeFromGraphML<PSVertex, PSEdge, PsBidirectionalGraph>(
                     xmlReader,
                     id => new PSVertex(id),
                     (source, target, id) => new PSEdge(source, target, new PSEdgeTag()));
@@ -74,9 +74,9 @@ namespace PSGraph.Tests
         }
 
 
-        private static PSBidirectionalGraph InitializeSimpleTestGraph1()
+        private static PsBidirectionalGraph InitializeSimpleTestGraph1()
         {
-            var g = new PSBidirectionalGraph();
+            var g = new PsBidirectionalGraph();
 
             g.AddVertex(new PSVertex("A"));
             g.AddVertex(new PSVertex("B"));
@@ -97,9 +97,9 @@ namespace PSGraph.Tests
             return g;
         }
 
-        private static PSBidirectionalGraph InitializeSimpleTestGraph2()
+        private static PsBidirectionalGraph InitializeSimpleTestGraph2()
         {
-            var g = new PSBidirectionalGraph();
+            var g = new PsBidirectionalGraph();
 
             g.AddVertex(new PSVertex("A"));
             g.AddVertex(new PSVertex("B"));
@@ -142,9 +142,9 @@ namespace PSGraph.Tests
             return g;
         }
 
-        private static PSBidirectionalGraph InitializeSimpleTestGraph3()
+        private static PsBidirectionalGraph InitializeSimpleTestGraph3()
         {
-            var g = new PSBidirectionalGraph();
+            var g = new PsBidirectionalGraph();
 
             g.AddVertex(new PSVertex("A"));
             g.AddVertex(new PSVertex("B"));

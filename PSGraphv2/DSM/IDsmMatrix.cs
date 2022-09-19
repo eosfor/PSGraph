@@ -18,7 +18,7 @@ namespace PSGraph.DesignStructureMatrix {
         public Single this[PSVertex from, PSVertex to] { get; set; }
         public Single this[int row, int column] { get; set; }
 
-        public PSBidirectionalGraph GraphFromDSM();
+        public PsBidirectionalGraph GraphFromDSM();
 
         public IDsmMatrix Power(int exponent);
     }
