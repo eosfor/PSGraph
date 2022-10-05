@@ -6,7 +6,7 @@ using Svg;
 
 namespace PSGraph.DesignStructureMatrix;
 
-public class DsmView : IDsmMatrixView
+public class DsmView : IDsmView
 {
     private readonly List<List<PSVertex>>? _partitions;
     private readonly IDsm _dsm;

@@ -11,7 +11,7 @@ using Svg;
 
 namespace PSGraph.DesignStructureMatrix
 {
-    public interface IDsmMatrixView
+    public interface IDsmView
     {
 
         public void ExportSvg(SvgDocument svgDoc, string Path)

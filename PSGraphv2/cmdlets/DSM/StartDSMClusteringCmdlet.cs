@@ -5,6 +5,7 @@ using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
 using PSGraph.DesignStructureMatrix;
+using PSGraph.Model;
 
 namespace PSGraph.Cmdlets
 {
@@ -12,12 +13,32 @@ namespace PSGraph.Cmdlets
     public class StartDSMClusteringCmdlet: PSCmdlet
     {
         [Parameter(Mandatory = true)]
-        public  IDsmMatrix Dsm;
+        public  IDsm Dsm;
+        
+        [Parameter(Mandatory = false)]
+        public  DsmPartitioningAlgorithms ClusteringAlgorithm = DsmPartitioningAlgorithms.Classic;
 
         protected override void ProcessRecord()
         {
-            ((IDsmPartitioningAlgorithm)Dsm).Partition();
-            WriteObject(Dsm);
+            IDsm ret;
+            IDsmPartitionAlgorithm algo;
+            switch (ClusteringAlgorithm)
+            {
+                default:
+                case DsmPartitioningAlgorithms.Classic:
+                    algo = new DsmClassicPartitioningAlgorithm((DsmClassic)Dsm);
+                    break;
+                case DsmPartitioningAlgorithms.GraphBased:
+                    algo = new DsmClassicPartitioningAlgorithm((DsmClassic)Dsm);
+                    break;
+                    
+            }
+            
+            ret = algo.Partition();
+
+            var result = new PartitioningResult() { Dsm = ret, Algorithm = algo };
+            
+            WriteObject(result);
         }
     }
 }

@@ -13,8 +13,7 @@ public class DsmClassicPartitioningAlgorithm: IDsmPartitionAlgorithm
 
 
     public IDsm Partition()
-    {
-        var noOutput = FindTasksWithNoOutput(_dsmObj);
+    { var noOutput = FindTasksWithNoOutput(_dsmObj);
         var noInput = FindTasksWithNoInput(_dsmObj);
 
         var noEmptyLines = _dsmObj.Remove(noOutput);

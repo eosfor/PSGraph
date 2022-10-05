@@ -17,8 +17,7 @@ namespace PSGraph.Cmdlets
         public PsBidirectionalGraph Graph;
         protected override void ProcessRecord()
         {
-
-            var d = new DsmMatrixClassic(Graph);
+            var d = new DsmClassic(Graph);
             WriteObject(d);
         }
     }
