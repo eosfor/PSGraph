@@ -172,6 +172,11 @@ namespace PSGraph.DesignStructureMatrix
             DelimitedWriter.Write(Path, _dsm, ",");
         }
 
+        public string ExportGraphViz()
+        {
+            throw new NotImplementedException();
+        }
+
         #region constructors
         public DsmMatrixBase(PsBidirectionalGraph graph)
         {

@@ -20,5 +20,6 @@ namespace PSGraph.DesignStructureMatrix
         }
         public abstract SvgDocument ToSvg();
         public abstract void ExportText(string Path);
+        public string ExportGraphViz();
     }
 }

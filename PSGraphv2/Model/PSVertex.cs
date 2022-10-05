@@ -74,5 +74,20 @@ namespace PSGraph.Model
         {
             return Label;
         }
+
+        // private class SortByDegree: IComparer<PSVertex>
+        // {
+        //     private readonly PsBidirectionalGraph _graph;
+        //
+        //     public int Compare(PSVertex? x, PSVertex? y)
+        //     {
+        //         return _graph.Degree(x) - _graph.Degree(y);
+        //     }
+        //
+        //     public SortByDegree(PsBidirectionalGraph g)
+        //     {
+        //         _graph = g;
+        //     }
+        // }
     }
 }
