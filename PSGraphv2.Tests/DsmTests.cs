@@ -69,13 +69,41 @@ namespace PSGraph.Tests
         }
         
         [TestMethod]
-        public void Graph5PartitioningTest()
+        public void Graph5ClassicPartitioningTest()
         {
             var dsm = new DsmClassic(TestData.SimpleTestGraph5);
             Assert.IsNotNull(dsm);
 
             var algo = new DsmClassicPartitioningAlgorithm(dsm);
-            var ret = algo.Partition();
+            var part = algo.Partition();
+            
+            Assert.AreEqual(algo.Partitioned.RowIndex.Count, algo.Partitioned.DsmMatrixView.RowCount);
+            Assert.AreEqual(algo.Partitioned.ColIndex.Count, algo.Partitioned.DsmMatrixView.ColumnCount);
+            
+            var view = new DsmView(part, algo.Partitions);
+            var s = view.ToSvg();
+            var f = System.IO.Path.GetTempPath();
+            var p = System.IO.Path.Combine(f, "dsmViewPartitionedGraph5Test.svg");
+            s.Write(p);
+        }
+        
+        [TestMethod]
+        public void Graph5GraphBasedPartitioningTest()
+        {
+            var dsm = new DsmClassic(TestData.SimpleTestGraph5);
+            Assert.IsNotNull(dsm);
+
+            var algo = new DsmGraphPartitioningAlgorithm(dsm);
+            var part = algo.Partition();
+            
+            Assert.AreEqual(algo.Partitioned.RowIndex.Count, algo.Partitioned.DsmMatrixView.RowCount);
+            Assert.AreEqual(algo.Partitioned.ColIndex.Count, algo.Partitioned.DsmMatrixView.ColumnCount);
+            
+            var view = new DsmView(part, algo.Partitions);
+            var s = view.ToSvg();
+            var f = System.IO.Path.GetTempPath();
+            var p = System.IO.Path.Combine(f, "dsmViewPartitionedGraph5Test.svg");
+            s.Write(p);
         }
     }
 }

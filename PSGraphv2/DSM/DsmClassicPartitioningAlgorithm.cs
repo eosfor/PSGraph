@@ -36,6 +36,12 @@ public class DsmClassicPartitioningAlgorithm: IDsmPartitionAlgorithm
             order = order.Concat(p).ToList();
         }
         order = order.Concat(noInput).ToList();
+
+        var diff = _dsmObj.RowIndex.Select( r => r.Key).Except(order).ToList();
+        if (diff.Count > 0)
+        {
+            order = order.Concat(diff).ToList();
+        }
         
         _partitionedObj = (IDsm)_dsmObj.Order(order);
 

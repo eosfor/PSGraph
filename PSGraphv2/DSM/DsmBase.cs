@@ -86,10 +86,10 @@ public class DsmBase: IDsm
 
     public IDsm Remove(List<PSVertex> vertex)
     {
-        IDsm ret = null;
+        IDsm ret = this;
         foreach (var v in vertex)
         {
-            ret = this.Remove(v);
+            ret = ret.Remove(v);
         }
 
         return ret;
