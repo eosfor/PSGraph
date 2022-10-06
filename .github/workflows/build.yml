@@ -29,11 +29,11 @@ jobs:
       - name: Test
         run: dotnet test --verbosity normal
       - name: dotnet publish
-        run: dotnet publish --self-contained --use-current-runtime -c Debug -o "($env:GITHUB_WORKSPACE)/PSQuickGraph"
+        run: dotnet publish --self-contained --use-current-runtime -c Debug -o "$($env:GITHUB_WORKSPACE)/PSQuickGraph"
       - name: psgallery publish
         run: |
           $env:GITHUB_WORKSPACE
-          Publish-Module -Path "($env:GITHUB_WORKSPACE)/PSQuickGraph" -NuGetApiKey ${{ secrets.PS_GALLERY_SECRET }}
+          Publish-Module -Path "$($env:GITHUB_WORKSPACE)/PSQuickGraph" -NuGetApiKey ${{ secrets.PS_GALLERY_SECRET }}
         shell: pwsh
         
 
