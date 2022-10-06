@@ -13,11 +13,6 @@ namespace PSGraph.DesignStructureMatrix
 {
     public interface IDsmView
     {
-
-        public void ExportSvg(SvgDocument svgDoc, string Path)
-        {
-            svgDoc.Write(Path);
-        }
         public abstract SvgDocument ToSvg();
         public abstract void ExportText(string Path);
         public string ExportGraphViz();

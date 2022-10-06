@@ -54,6 +54,30 @@ namespace PSGraph.Tests
 
             Assert.IsTrue(graph.VertexCount == 1);
         }
+        
+        [TestMethod]
+        public void AddPSVertex_Success()
+        {
+            var graph = new PsBidirectionalGraph();
+
+            try
+            {
+                var vertex = new PSVertex("A");
+                _powershell.AddCommand("Add-Vertex");
+                _powershell.AddParameters(new Dictionary<String, Object>
+                {
+                    {"Vertex", vertex}, { "Graph", graph }
+                });
+                Collection<PSObject> result = _powershell.Invoke();
+
+            }
+            finally
+            {
+                _powershell.Commands.Clear();
+            }
+
+            Assert.IsTrue(graph.VertexCount == 1);
+        }
 
         [TestMethod]
         public void AddArbitratyObjectVertex_Success()
