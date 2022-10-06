@@ -67,5 +67,15 @@ namespace PSGraph.Tests
                 idx++;
             }
         }
+        
+        [TestMethod]
+        public void Graph5PartitioningTest()
+        {
+            var dsm = new DsmClassic(TestData.SimpleTestGraph5);
+            Assert.IsNotNull(dsm);
+
+            var algo = new DsmClassicPartitioningAlgorithm(dsm);
+            var ret = algo.Partition();
+        }
     }
 }
