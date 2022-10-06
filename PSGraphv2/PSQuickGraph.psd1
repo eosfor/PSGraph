@@ -12,7 +12,7 @@
 RootModule = "PSGraph.dll"
 
 # Version number of this module.
-ModuleVersion = '2.0.2'
+ModuleVersion = '2.1.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
