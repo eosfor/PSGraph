@@ -2,9 +2,9 @@ name: psgraph-build
 
 on:
   push:
-    branches: [ "master", "dev" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "master", "dev" ]
+    branches: [ "dev" ]
 
   workflow_dispatch:
 
@@ -28,4 +28,12 @@ jobs:
         run: dotnet build --configuration Debug
       - name: Test
         run: dotnet test --verbosity normal
+      - name: dotnet publish
+        run: dotnet publish --self-contained --use-current-runtime -c Debug -o ${{ process.env['RUNNER_TEMP'] }}/PSQuickGraph
+      - name: psgallery publish
+        run: |
+          $env:GITHUB_WORKSPACE
+          Publish-Module -Path "($env:GITHUB_WORKSPACE)/PSQuickGraph" -NuGetApiKey ${{ secrets.PS_GALLERY_SECRET }}
+        shell: pwsh
+        
 
