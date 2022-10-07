@@ -29,7 +29,7 @@ jobs:
       - name: Test
         run: dotnet test --verbosity normal
       - name: dotnet publish
-        run: dotnet publish --self-contained --use-current-runtime -c Debug -o "./PSQuickGraph"
+        run: dotnet publish -c Debug -o "./PSQuickGraph"
       - name: psgallery publish
         run: |
           $env:GITHUB_WORKSPACE
