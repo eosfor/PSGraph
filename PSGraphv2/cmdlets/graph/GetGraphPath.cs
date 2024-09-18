@@ -33,7 +33,8 @@ namespace PSGraph.Cmdlets
             IEnumerable<PSEdge>? result = null;
             tryFunc.Invoke(To, out result);
 
-            WriteObject(result);
+            if (null != result) 
+                WriteObject(result);
         }
     }
 }
