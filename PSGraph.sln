@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSGraph", "PSGraphv2\PSGrap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSGraph.Tests", "PSGraphv2.Tests\PSGraph.Tests.csproj", "{726B4CA8-BF11-450F-80AC-A0E50CE90339}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSGraph.Tests", "PSGraph.Tests\PSGraph.Tests.csproj", "{51E06FE7-F681-4378-B4DD-5C53F385428F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,12 @@ Global
 		{726B4CA8-BF11-450F-80AC-A0E50CE90339}.Release|Any CPU.Build.0 = Release|Any CPU
 		{726B4CA8-BF11-450F-80AC-A0E50CE90339}.Release20|Any CPU.ActiveCfg = Release|Any CPU
 		{726B4CA8-BF11-450F-80AC-A0E50CE90339}.Release20|Any CPU.Build.0 = Release|Any CPU
+		{51E06FE7-F681-4378-B4DD-5C53F385428F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51E06FE7-F681-4378-B4DD-5C53F385428F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51E06FE7-F681-4378-B4DD-5C53F385428F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51E06FE7-F681-4378-B4DD-5C53F385428F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51E06FE7-F681-4378-B4DD-5C53F385428F}.Release20|Any CPU.ActiveCfg = Debug|Any CPU
+		{51E06FE7-F681-4378-B4DD-5C53F385428F}.Release20|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
