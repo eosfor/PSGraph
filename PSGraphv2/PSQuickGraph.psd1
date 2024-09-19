@@ -12,7 +12,7 @@
 RootModule = "PSGraph.dll"
 
 # Version number of this module.
-ModuleVersion = '2.1.1'
+ModuleVersion = '2.1.2'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -94,7 +94,7 @@ AliasesToExport = @()
 PrivateData = @{
 
     PSData = @{
-        Prerelease = 'alpha'
+        # Prerelease = 'alpha'
         # Tags applied to this module. These help with module discovery in online galleries.
         # Tags = @()
 
