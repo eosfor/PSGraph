@@ -26,6 +26,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PSGraphv2\PSGraph.csproj" />
+    <ProjectReference Include="..\PSGraph.Common\PSGraph.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Data/vms.graphml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

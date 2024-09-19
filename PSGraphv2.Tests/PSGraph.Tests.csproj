@@ -11,15 +11,11 @@
     <PackageReference Include="AutomaticGraphLayout" Version="1.1.12" />
     <PackageReference Include="AutomaticGraphLayout.Drawing" Version="1.1.12" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-    <PackageReference Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.2.1" />
-    <PackageReference Include="Microsoft.PowerShell.Commands.Management" Version="7.2.1" />
-    <PackageReference Include="Microsoft.PowerShell.Commands.Utility" Version="7.2.1" />
-    <PackageReference Include="Microsoft.PowerShell.ConsoleHost" Version="7.2.1" />
-    <PackageReference Include="Microsoft.WSMan.Management" Version="7.2.1" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.2" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
     <PackageReference Include="coverlet.collector" Version="3.1.0" />
-    <PackageReference Include="System.Management.Automation" Version="7.2.1" />
+    <PackageReference Include="System.Management.Automation" Version="7.4.2" />
   </ItemGroup>
 
   <ItemGroup>
