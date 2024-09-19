@@ -1,4 +1,4 @@
-﻿using QuickGraph.Graphviz.Dot;
+﻿using QuikGraph.Graphviz.Dot;
 using System.Collections.Generic;
 
 namespace PSGraph
