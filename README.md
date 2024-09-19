@@ -1,6 +1,6 @@
-### What is this repository for? ###
+### What is this repository for?
 
-The idea is to have a tool to analyze dependencies of objects in a scripted way. This module is a wrapper on [QuickGraph](https://quickgraph.codeplex.com/) library
+The idea is to have a tool to analyze dependencies between objects in a scripted way. This module is a wrapper on [QuickGraph](), using its successor [QuikGraph](https://github.com/KeRNeLith/QuikGraph) library
 
 ### Documentation
 [Documentaion is here](https://github.com/eosfor/PSGraph/wiki)
