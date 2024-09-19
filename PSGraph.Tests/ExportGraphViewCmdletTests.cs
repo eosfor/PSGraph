@@ -122,8 +122,8 @@ namespace PSGraph.Tests
             Action act = () => _powershell.Invoke();
 
             // Assert
-            act.Should().Throw<CmdletInvocationException>()
-                .WithMessage("*Cannot bind argument to parameter 'Graph'*");
+            act.Should().Throw<Exception>()
+                .WithMessage("*Cannot validate argument on parameter 'Graph'. The argument is null or empty*");
         }
 
         [Fact]
@@ -179,12 +179,10 @@ namespace PSGraph.Tests
                 .AddParameter("Path", invalidFilePath);
 
             // Act
-            _powershell.Invoke();
+            Action act = () => _powershell.Invoke();
 
             // Assert
-            _powershell.Streams.Error.Should().NotBeEmpty();
-            var error = _powershell.Streams.Error.First();
-            error.Exception.Should().BeOfType<ArgumentException>();
+            act.Should().Throw<Exception>().WithMessage("*Null character in path*");
         }
 
         [Fact]
@@ -244,12 +242,10 @@ namespace PSGraph.Tests
                 .AddParameter("Format", "Graphviz");
 
             // Act
-            _powershell.Invoke();
+            Action act = () => _powershell.Invoke();
 
             // Assert
-            _powershell.Streams.Error.Should().NotBeEmpty();
-            var error = _powershell.Streams.Error.First();
-            error.Exception.Should().BeOfType<ParameterBindingException>();
+            act.Should().Throw<ParameterBindingException>();
         }
 
         private PsBidirectionalGraph CreateSampleGraph()
