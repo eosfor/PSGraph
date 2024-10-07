@@ -16,8 +16,9 @@ namespace PSGraph.Tests
         public static PsBidirectionalGraph SimpleTestGraph3 { get; private set; }
         public static PsBidirectionalGraph SimpleTestGraph4 { get; private set; }
         public static PsBidirectionalGraph DSMFull { get; private set; }
-        
+
         public static PsBidirectionalGraph SimpleTestGraph5 { get; private set; }
+        public static PsBidirectionalGraph SimpleTestGraph6 { get; private set; }
 
         static GraphTestData()
         {
@@ -26,6 +27,7 @@ namespace PSGraph.Tests
             SimpleTestGraph3 = InitializeSimpleTestGraph3();
             SimpleTestGraph4 = InitializeSimpleTestGraph4();
             SimpleTestGraph5 = InitializeSimpleTestGraph5();
+            SimpleTestGraph6 = InitializeSimpleTestGraph6();
             DSMFull = InitializeDSMFull();
         }
 
@@ -42,41 +44,87 @@ namespace PSGraph.Tests
             g.AddVertex(new PSVertex("B"));
             g.AddVertex(new PSVertex("H"));
             g.AddVertex(new PSVertex("I"));
-            
-            
-//             Add-Edge -From A -To D -Graph $g | Out-Null
-//             Add-Edge -From A -To E -Graph $g | Out-Null
-//             Add-Edge -From D -to F -Graph $g | Out-Null
-//             Add-Edge -From E -To F -Graph $g | Out-Null
-//             Add-Edge -From G -To M -Graph $g | Out-Null
-//             Add-Edge -From B -To E -Graph $g | Out-Null
-//             Add-Edge -From B -To G -Graph $g | Out-Null
-//             Add-Edge -From B -To H -Graph $g | Out-Null
-//             Add-Edge -From H -To I -Graph $g | Out-Null
-//             Add-Edge -From M -To B -Graph $g | Out-Null
 
-            
+
+            //             Add-Edge -From A -To D -Graph $g | Out-Null
+            //             Add-Edge -From A -To E -Graph $g | Out-Null
+            //             Add-Edge -From D -to F -Graph $g | Out-Null
+            //             Add-Edge -From E -To F -Graph $g | Out-Null
+            //             Add-Edge -From G -To M -Graph $g | Out-Null
+            //             Add-Edge -From B -To E -Graph $g | Out-Null
+            //             Add-Edge -From B -To G -Graph $g | Out-Null
+            //             Add-Edge -From B -To H -Graph $g | Out-Null
+            //             Add-Edge -From H -To I -Graph $g | Out-Null
+            //             Add-Edge -From M -To B -Graph $g | Out-Null
+
+
             g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("D"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("E"), new PSEdgeTag()));
-            
+
             g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("F"), new PSEdgeTag()));
-            
+
             g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("F"), new PSEdgeTag()));
-            
+
             g.AddEdge(new PSEdge(new PSVertex("G"), new PSVertex("M"), new PSEdgeTag()));
-            
+
             g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("E"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("G"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("H"), new PSEdgeTag()));
-            
+
             g.AddEdge(new PSEdge(new PSVertex("H"), new PSVertex("I"), new PSEdgeTag()));
-            
+
             g.AddEdge(new PSEdge(new PSVertex("M"), new PSVertex("B"), new PSEdgeTag()));
-            
+
             return g;
         }
-        
-        private static PsBidirectionalGraph? InitializeDSMFull(){
+
+        private static PsBidirectionalGraph InitializeSimpleTestGraph6()
+        {
+            var g = new PsBidirectionalGraph();
+
+            g.AddVertex(new PSVertex("A"));
+            g.AddVertex(new PSVertex("D"));
+            g.AddVertex(new PSVertex("E"));
+            g.AddVertex(new PSVertex("F"));
+            g.AddVertex(new PSVertex("G"));
+            g.AddVertex(new PSVertex("M"));
+            g.AddVertex(new PSVertex("B"));
+            g.AddVertex(new PSVertex("H"));
+            g.AddVertex(new PSVertex("I"));
+
+
+            //             Add-Edge -From A -To D -Graph $g | Out-Null
+            //             Add-Edge -From A -To E -Graph $g | Out-Null
+            //             Add-Edge -From D -to F -Graph $g | Out-Null
+            //             Add-Edge -From E -To F -Graph $g | Out-Null
+            //             Add-Edge -From G -To M -Graph $g | Out-Null
+            //             Add-Edge -From B -To E -Graph $g | Out-Null
+            //             Add-Edge -From B -To G -Graph $g | Out-Null
+            //             Add-Edge -From B -To H -Graph $g | Out-Null
+            //             Add-Edge -From H -To I -Graph $g | Out-Null
+            //             Add-Edge -From M -To B -Graph $g | Out-Null
+
+
+            g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("D"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("E"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("F"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("F"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("G"), new PSVertex("M"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("E"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("G"), new PSEdgeTag()));
+            g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("H"), new PSEdgeTag()));
+
+            g.AddEdge(new PSEdge(new PSVertex("H"), new PSVertex("I"), new PSEdgeTag()));
+
+            return g;
+        }
+
+        private static PsBidirectionalGraph? InitializeDSMFull()
+        {
             var g = new PsBidirectionalGraph();
 
             g.AddVertex(new PSVertex("A"));
@@ -91,14 +139,14 @@ namespace PSGraph.Tests
             g.AddEdge(new PSEdge(new PSVertex("A"), new PSVertex("D"), new PSEdgeTag()));
 
             g.AddEdge(new PSEdge(new PSVertex("B"), new PSVertex("G"), new PSEdgeTag()));
-            
+
             g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("A"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("B"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("F"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("C"), new PSVertex("G"), new PSEdgeTag()));
 
             g.AddEdge(new PSEdge(new PSVertex("D"), new PSVertex("B"), new PSEdgeTag()));
-            
+
             g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("C"), new PSEdgeTag()));
             g.AddEdge(new PSEdge(new PSVertex("E"), new PSVertex("F"), new PSEdgeTag()));
 
@@ -110,7 +158,7 @@ namespace PSGraph.Tests
         private static PsBidirectionalGraph InitializeSimpleTestGraph4()
         {
             var d = System.IO.Directory.GetCurrentDirectory();
-            var testGraphPath = System.IO.Path.Combine(d, "Data" ,"vms.graphml");
+            var testGraphPath = System.IO.Path.Combine(d, "Data", "vms.graphml");
             var graph = new PsBidirectionalGraph(false);
             using (var xmlReader = XmlReader.Create(testGraphPath))
             {
