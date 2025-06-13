@@ -1,5 +1,4 @@
 using MathNet.Numerics.LinearAlgebra;
-using Microsoft.PowerShell.Commands;
 using PSGraph.Model;
 
 namespace PSGraph.DesignStructureMatrix;

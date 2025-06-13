@@ -1,4 +1,3 @@
-using System;
 using PSGraph.Model;
 
 namespace PSGraph.Common.Model;
