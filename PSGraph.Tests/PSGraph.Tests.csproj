@@ -33,6 +33,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PSGraphv2\PSGraph.csproj" />
     <ProjectReference Include="..\PSGraph.Common\PSGraph.Common.csproj" />
+    <ProjectReference Include="..\PSGraph.Vega.Extensions\PSGraph.Vega.Extensions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +44,10 @@
     <None Update="Data/vms.graphml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="..\PSGraph.Vega.Extensions\Assets\**\*.*">
+      <Link>Assets\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
