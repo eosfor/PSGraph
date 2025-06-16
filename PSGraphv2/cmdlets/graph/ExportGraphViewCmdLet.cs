@@ -1,13 +1,8 @@
-﻿using System;
-using System.Management.Automation;
-using QuikGraph;
+﻿using System.Management.Automation;
 using QuikGraph.Graphviz;
 using System.Reflection;
 using System.Xml;
 using QuikGraph.Serialization;
-using System.IO;
-using System.Text;
-using System.Linq;
 using PSGraph.Model;
 using QuikGraph.Algorithms;
 using Microsoft.Msagl.Drawing;
@@ -19,6 +14,8 @@ using QuikGraph.MSAGL;
 using Microsoft.Msagl.Layout.MDS;
 using Microsoft.Msagl.Layout.Incremental;
 using Microsoft.Msagl.Core.Layout;
+using PSGraph.Vega.Extensions;
+using PSGraph.Vega.Spec;
 
 namespace PSGraph.Cmdlets
 {
@@ -52,10 +49,59 @@ namespace PSGraph.Cmdlets
                 case GraphExportTypes.MSAGL_SUGIYAMA:
                     ExportMSAGL();
                     break;
+                case GraphExportTypes.Vega_ForceDirected:
+                    ExportVegaForceDirected();
+                    break;
+                case GraphExportTypes.Vega_AdjacencyMatrix:
+                    ExportVegaAdjacencyMatrix();
+                    break;
+                case GraphExportTypes.Vega_TreeLayout:
+                    ExportVegaTreeLayout();
+                    break;
                 default:
                     ExportGraphViz();
                     break;
             }
+        }
+
+        private void ExportVegaTreeLayout()
+        {
+            var modulePath = MyInvocation.MyCommand.Module?.ModuleBase;
+            var records = Graph.ConvertToParentChildList();
+            var vega = VegaHelper.GetVegaTemplateObjectFromModulePath(modulePath, "vega.tree.layout.json");
+            vega.Data[0].Values = records.ToList<object>();
+
+            string html = VegaHelper.RenderHtml(vega);
+
+            File.WriteAllText(Path, html);
+        }
+
+        private void ExportVegaAdjacencyMatrix()
+        {
+            var modulePath = MyInvocation.MyCommand.Module?.ModuleBase;
+            var records = Graph.ConvertToVegaNodeLink();
+            var vega = VegaHelper.GetVegaTemplateObjectFromModulePath(modulePath, "vega.adj.matrix.json");
+
+            vega.Data[0].Values = records.nodes.ToList<object>();
+            vega.Data[1].Values = records.links.ToList<object>();
+
+            string html = VegaHelper.RenderHtml(vega);
+
+            File.WriteAllText(Path, html);
+        }
+
+        private void ExportVegaForceDirected()
+        {
+            var modulePath = MyInvocation.MyCommand.Module?.ModuleBase;
+            var records = Graph.ConvertToVegaNodeLink();
+            var vega = VegaHelper.GetVegaTemplateObjectFromModulePath(modulePath, "vega.force.directed.layout.json");
+
+            vega.Data[0].Values = records.nodes.ToList<object>();
+            vega.Data[1].Values = records.links.ToList<object>();
+
+            string html = VegaHelper.RenderHtml(vega);
+
+            File.WriteAllText(Path, html);
         }
 
         private void ExportMSAGL()
@@ -87,7 +133,7 @@ namespace PSGraph.Cmdlets
                     las = new FastIncrementalLayoutSettings();
                     break;
             }
-            
+
             LayoutHelpers.CalculateLayout(drawingGraph.GeometryGraph, las, null);
             PrintSvgAsString(drawingGraph);
         }
@@ -99,7 +145,7 @@ namespace PSGraph.Cmdlets
             {
                 n.Label.Width = n.Width * 0.99;
                 n.Label.Height = 40;
-                n.Attr.FillColor = Color.Azure;
+                n.Attr.FillColor = Microsoft.Msagl.Drawing.Color.Azure;
             }
         }
 

@@ -1,43 +1,106 @@
-using PSGraph.Model.VegaDataModels;
-using Newtonsoft.Json.Linq;
 using PSGraph.Vega.Extensions;
 using FluentAssertions;
+using PSGraph.Vega.Spec;
 
 namespace PSGraph.Tests
 {
     public class VegaDataConverterTests
     {
+
         [Fact]
-        public async Task ShouldEmbedGraphRecordsIntoVegaTemplate()
+        public void ShouldEmbedNodeLinkIntoVegaForceLayoutTemplate()
         {
-            var graph = GraphTestData.SimpleTestGraph5;
+            var graph = GraphTestData.DSMFull;
+            var records = graph.ConvertToVegaNodeLink();
+            var vega = VegaHelper.GetVegaTemplateObject("vega.force.directed.layout.json");
 
-            List<GraphRecord> records = graph.ConvertToParentChildList();
+            vega.Data[0].Values = records.nodes.ToList<object>();
+            vega.Data[1].Values = records.links.ToList<object>();
 
-            var currentDir = System.IO.Directory.GetCurrentDirectory();
-            var testTemplatePath = System.IO.Path.Combine(currentDir, "Assets", "vega.tree.layout.json");
-            string template = File.ReadAllText(testTemplatePath);
+            string json = vega.ToJson();
+            File.WriteAllText("x.force.directed.layout.vega.json", json);
+        }
 
-            var vega = JObject.Parse(template);
+        [Fact]
+        public void ShouldEmbedNodeLinkIntoVegaAdjMatrixTemplate()
+        {
+            var graph = GraphTestData.DSMFull;
+            var records = graph.ConvertToVegaNodeLink();
+            var vega = VegaHelper.GetVegaTemplateObject("vega.adj.matrix.json");
 
-            var dataToken = vega["data"];
+            vega.Data[0].Values = records.nodes.ToList<object>();
+            vega.Data[1].Values = records.links.ToList<object>();
 
-            if (dataToken is JArray dataArray &&
-                dataArray.Count > 0 &&
-                dataArray[0] is JObject firstData &&
-                firstData["values"] != null)
-            {
-                firstData["values"] = JArray.FromObject(records);
-            }
-            else
-            {
-                Console.WriteLine("Поле 'values' отсутствует.");
-            }
+            string json = vega.ToJson();
+            File.WriteAllText("x.adj.matrix.vega.json", json);
+        }
 
-            string json = vega.ToString(Newtonsoft.Json.Formatting.Indented);
+        [Fact]
+        public void ShouldEmbedParentChildIntoTreeLayoutTemplate()
+        {
+            var graph = GraphTestData.DSMFull;
+            var records = graph.ConvertToParentChildList();
+            var vega = VegaHelper.GetVegaTemplateObject("vega.tree.layout.json");
 
-            // Сохранение в файл
-            File.WriteAllText("vega.json", json);
+            vega.Data[0].Values = records.ToList<object>();
+
+            string json = vega.ToJson();
+            File.WriteAllText("x.tree.layout.vega.json", json);
+        }
+
+        [Fact]
+        public void ShouldRenderAdjMatrixHtmlWithVegaSpec()
+        {
+            var graph = GraphTestData.DSMFull;
+            var records = graph.ConvertToVegaNodeLink();
+            var vega = VegaHelper.GetVegaTemplateObject("vega.adj.matrix.json");
+            vega.Data[0].Values = records.nodes.ToList<object>();
+            vega.Data[1].Values = records.links.ToList<object>();
+            string html = VegaHelper.RenderHtml(vega);
+
+            html.Should().Contain("<html>");
+            html.Should().Contain("vegaEmbed");
+            html.Should().Contain("\"values\"");
+
+            File.WriteAllText("x.vega.adj.matrix.html", html);
+        }
+
+        [Fact]
+        public void ShouldRenderForceDirectedHtmlWithVegaSpec()
+        {
+            // Arrange: создаем простой граф и данные
+            var graph = GraphTestData.DSMFull;
+            var records = graph.ConvertToVegaNodeLink();
+            var vega = VegaHelper.GetVegaTemplateObject("vega.force.directed.layout.json");
+            vega.Data[0].Values = records.nodes.ToList<object>();
+            vega.Data[1].Values = records.links.ToList<object>();
+            string html = VegaHelper.RenderHtml(vega);
+
+            html.Should().Contain("<html>");
+            html.Should().Contain("vegaEmbed");
+            html.Should().Contain("\"values\"");
+
+            // Записываем для ручного просмотра, если нужно
+            File.WriteAllText("x.vega.force.directed.layout.html", html);
+        }
+
+        [Fact]
+        public void ShouldRenderTreelayoutHtmlWithVegaSpec()
+        {
+            var graph = GraphTestData.DSMFull;
+            var records = graph.ConvertToParentChildList();
+            var vega = VegaHelper.GetVegaTemplateObject("vega.tree.layout.json");
+            vega.Data[0].Values = records.ToList<object>();
+
+            string html = VegaHelper.RenderHtml(vega);
+
+            html.Should().Contain("<html>");
+            html.Should().Contain("vegaEmbed");
+            html.Should().Contain("\"values\"");
+
+            // Записываем для ручного просмотра, если нужно
+            File.WriteAllText("x.vega.tree.layout.html", html);
         }
     }
+
 }
