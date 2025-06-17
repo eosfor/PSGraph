@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PSGraphv2\PSGraph.csproj" />
+    <ProjectReference Include="..\PSGraph\PSGraph.csproj" />
     <ProjectReference Include="..\PSGraph.Common\PSGraph.Common.csproj" />
     <ProjectReference Include="..\PSGraph.Vega.Extensions\PSGraph.Vega.Extensions.csproj" />
   </ItemGroup>
