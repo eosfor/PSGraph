@@ -1,9 +1,4 @@
-﻿using PSGraph.Model;
-using System;
-using System.Management.Automation;
-using System.Reflection;
-
-namespace PSGraph.Cmdlets
+﻿namespace PSGraph.Cmdlets
 {
     [Cmdlet(VerbsCommon.Add, "Vertex")]
     public class AddVertexCmdlet : PSCmdlet

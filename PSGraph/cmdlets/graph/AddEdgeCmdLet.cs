@@ -1,10 +1,4 @@
-﻿using System;
-using System.Management.Automation;
-using QuikGraph;
-using System.Globalization;
-using PSGraph.Model;
-
-//add-edge -from $nodeFrom -to $nodeTo -attributes $attr -graph $g
+﻿//add-edge -from $nodeFrom -to $nodeTo -attributes $attr -graph $g
 
 namespace PSGraph.Cmdlets
 {
