@@ -1,4 +1,5 @@
 ﻿using PSGraph.Model;
+using QuikGraph;
 using System;
 using System.Management.Automation;
 using System.Reflection;
@@ -14,7 +15,7 @@ namespace PSGraph.Cmdlets
 
         [Parameter(Mandatory = true)]
         [ValidateNotNullOrEmpty]
-        public PsBidirectionalGraph Graph;
+        public IMutableVertexAndEdgeListGraph<PSVertex, PSEdge> Graph;
 
         protected override void ProcessRecord()
         {
