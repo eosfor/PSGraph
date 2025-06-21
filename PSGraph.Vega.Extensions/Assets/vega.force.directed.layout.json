@@ -1,25 +1,240 @@
 {
-  "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "A node-link diagram with force-directed layout, depicting character co-occurrence in the novel Les Misérables.",
-  "width": 1000,
-  "height": 1000,
-  "padding": 0,
-  "autosize": "none",
-
+  "data": [
+    {
+      "name": "node-data",
+      "values": []
+    },
+    {
+      "name": "link-data",
+      "values": []
+    },
+    {
+      "name": "adj-nodes",
+      "source": "link-data",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.src === hoverIndex || datum.tgt === hoverIndex"
+        }
+      ]
+    },
+    {
+      "name": "adjacentIndices",
+      "source": "adj-nodes",
+      "transform": [
+        {
+          "type": "formula",
+          "as": "adj",
+          "expr": "datum.src === hoverIndex ? datum.tgt : datum.src"
+        },
+        {
+          "type": "project",
+          "fields": [
+            "adj"
+          ],
+          "as": [
+            "adj"
+          ]
+        }
+      ]
+    }
+  ],
+  "marks": [
+    {
+      "from": {
+        "data": "node-data"
+      },
+      "type": "symbol",
+      "encode": {
+        "enter": {
+          "fill": {
+            "scale": "color",
+            "field": "group"
+          },
+          "stroke": {
+            "value": "white"
+          }
+        },
+        "update": {
+          "cursor": {
+            "value": "pointer"
+          },
+          "size": {
+            "signal": "(hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index)) ? 2.5 * nodeRadius * nodeRadius : 2 * nodeRadius * nodeRadius"
+          },
+          "fill": {
+            "signal": "hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index) ? 'red' : scale('color', datum.group)"
+          },
+          "tooltip": {
+            "signal": "{ name: datum.name }"
+          }
+        }
+      },
+      "name": "nodes",
+      "on": [
+        {
+          "modify": "node",
+          "trigger": "fix",
+          "values": "fix === true ? {fx: node.x, fy: node.y} : {fx: fix[0], fy: fix[1]}"
+        },
+        {
+          "modify": "node",
+          "trigger": "!fix",
+          "values": "{fx: null, fy: null}"
+        }
+      ],
+      "transform": [
+        {
+          "signal": "force",
+          "type": "force",
+          "forces": [
+            {
+              "force": "center",
+              "x": {
+                "signal": "cx"
+              },
+              "y": {
+                "signal": "cy"
+              }
+            },
+            {
+              "force": "collide",
+              "radius": {
+                "signal": "nodeRadius"
+              }
+            },
+            {
+              "force": "nbody",
+              "strength": {
+                "signal": "nodeCharge"
+              }
+            },
+            {
+              "force": "link",
+              "distance": {
+                "signal": "linkDistance"
+              },
+              "links": "link-data"
+            }
+          ],
+          "iterations": 300,
+          "restart": {
+            "signal": "restart"
+          },
+          "static": {
+            "signal": "static"
+          }
+        }
+      ],
+      "zindex": 1
+    },
+    {
+      "from": {
+        "data": "link-data"
+      },
+      "type": "path",
+      "encode": {
+        "update": {
+          "stroke": {
+            "value": "#ccc"
+          },
+          "strokeWidth": {
+            "signal": "datum.src === hoverIndex || datum.tgt === hoverIndex ? 2 : 0.5"
+          }
+        }
+      },
+      "interactive": false,
+      "transform": [
+        {
+          "type": "linkpath",
+          "require": {
+            "signal": "force"
+          },
+          "shape": "line",
+          "sourceX": "datum.source.x",
+          "sourceY": "datum.source.y",
+          "targetX": "datum.target.x",
+          "targetY": "datum.target.y"
+        }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "domain": {
+        "data": "node-data",
+        "field": "group"
+      },
+      "name": "color",
+      "type": "ordinal",
+      "range": {
+        "scheme": "category20c"
+      }
+    }
+  ],
   "signals": [
-    { "name": "cx", "update": "width / 2" },
-    { "name": "cy", "update": "height / 2" },
-    { "name": "nodeRadius", "value": 8,
-      "bind": {"input": "range", "min": 1, "max": 50, "step": 1} },
-    { "name": "nodeCharge", "value": -30,
-      "bind": {"input": "range", "min":-100, "max": 10, "step": 1} },
-    { "name": "linkDistance", "value": 30,
-      "bind": {"input": "range", "min": 5, "max": 100, "step": 1} },
-    { "name": "static", "value": true,
-      "bind": {"input": "checkbox"} },
+    {
+      "name": "hoverIndex",
+      "value": -1,
+      "on": [
+        {
+          "events": "symbol:mouseover",
+          "update": "datum.index"
+        },
+        {
+          "events": "symbol:mouseout",
+          "update": "-1"
+        }
+      ]
+    },
+    {
+      "name": "cx",
+      "update": "width / 2"
+    },
+    {
+      "name": "cy",
+      "update": "height / 2"
+    },
+    {
+      "name": "nodeRadius",
+      "bind": {
+        "input": "range",
+        "max": 50,
+        "min": 1,
+        "step": 1
+      },
+      "value": 8
+    },
+    {
+      "name": "nodeCharge",
+      "bind": {
+        "input": "range",
+        "max": 10,
+        "min": -100,
+        "step": 1
+      },
+      "value": -30
+    },
+    {
+      "name": "linkDistance",
+      "bind": {
+        "input": "range",
+        "max": 100,
+        "min": 5,
+        "step": 1
+      },
+      "value": 30
+    },
+    {
+      "name": "static",
+      "bind": {
+        "input": "checkbox"
+      },
+      "value": true
+    },
     {
       "description": "State variable for active node fix status.",
-      "name": "fix", "value": false,
+      "name": "fix",
       "on": [
         {
           "events": "symbol:pointerout[!event.buttons], window:pointerup",
@@ -31,14 +246,15 @@
         },
         {
           "events": "[symbol:pointerdown, window:pointerup] > window:pointermove!",
-          "update": "xy()",
-          "force": true
+          "force": true,
+          "update": "xy()"
         }
-      ]
+      ],
+      "value": false
     },
     {
       "description": "Graph node most recently interacted with.",
-      "name": "node", "value": null,
+      "name": "node",
       "on": [
         {
           "events": "symbol:pointerover",
@@ -48,98 +264,22 @@
     },
     {
       "description": "Flag to restart Force simulation upon data changes.",
-      "name": "restart", "value": false,
-      "on": [
-        {"events": {"signal": "fix"}, "update": "fix && fix.length"}
-      ]
-    }
-  ],
-
-  "data": [
-    {
-      "name": "node-data",
-      "values": []
-    },
-    {
-      "name": "link-data",
-      "values": []
-    }
-  ],
-
-  "scales": [
-    {
-      "name": "color",
-      "type": "ordinal",
-      "domain": {"data": "node-data", "field": "group"},
-      "range": {"scheme": "category20c"}
-    }
-  ],
-
-  "marks": [
-    {
-      "name": "nodes",
-      "type": "symbol",
-      "zindex": 1,
-
-      "from": {"data": "node-data"},
+      "name": "restart",
       "on": [
         {
-          "trigger": "fix",
-          "modify": "node",
-          "values": "fix === true ? {fx: node.x, fy: node.y} : {fx: fix[0], fy: fix[1]}"
-        },
-        {
-          "trigger": "!fix",
-          "modify": "node", "values": "{fx: null, fy: null}"
+          "events": {
+            "signal": "fix"
+          },
+          "update": "fix && fix.length"
         }
       ],
-
-      "encode": {
-        "enter": {
-          "fill": {"scale": "color", "field": "group"},
-          "stroke": {"value": "white"}
-        },
-        "update": {
-          "size": {"signal": "2 * nodeRadius * nodeRadius"},
-          "cursor": {"value": "pointer"}
-        }
-      },
-
-      "transform": [
-        {
-          "type": "force",
-          "iterations": 300,
-          "restart": {"signal": "restart"},
-          "static": {"signal": "static"},
-          "signal": "force",
-          "forces": [
-            {"force": "center", "x": {"signal": "cx"}, "y": {"signal": "cy"}},
-            {"force": "collide", "radius": {"signal": "nodeRadius"}},
-            {"force": "nbody", "strength": {"signal": "nodeCharge"}},
-            {"force": "link", "links": "link-data", "distance": {"signal": "linkDistance"}}
-          ]
-        }
-      ]
-    },
-    {
-      "type": "path",
-      "from": {"data": "link-data"},
-      "interactive": false,
-      "encode": {
-        "update": {
-          "stroke": {"value": "#ccc"},
-          "strokeWidth": {"value": 0.5}
-        }
-      },
-      "transform": [
-        {
-          "type": "linkpath",
-          "require": {"signal": "force"},
-          "shape": "line",
-          "sourceX": "datum.source.x", "sourceY": "datum.source.y",
-          "targetX": "datum.target.x", "targetY": "datum.target.y"
-        }
-      ]
+      "value": false
     }
-  ]
+  ],
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "autosize": "none",
+  "description": "A node-link diagram with force-directed layout, depicting character co-occurrence in the novel Les Misérables.",
+  "height": 800,
+  "padding": 0,
+  "width": 800
 }

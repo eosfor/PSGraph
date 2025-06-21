@@ -29,7 +29,7 @@ namespace PSGraph.Vega.Extensions
                 if (vertexLookup.TryGetValue(edge.Source, out int sourceId) &&
                     vertexLookup.TryGetValue(edge.Target, out int targetId))
                 {
-                    links.Add(new LinkRecord(sourceId, targetId, 1));
+                    links.Add(new LinkRecord(sourceId, targetId, 1, sourceId, targetId));
                 }
             }
 

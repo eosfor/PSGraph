@@ -17,4 +17,4 @@ public class GraphRecord : GraphRootRecord
 }
 
 public record NodeRecord(string name, int group, int index);
-public record LinkRecord(int source, int target, int value);
+public record LinkRecord(int source, int target, int value, int src, int tgt); //dirty hack to make vega visuals work
