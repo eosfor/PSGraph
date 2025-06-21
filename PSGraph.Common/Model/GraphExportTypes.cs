@@ -1,7 +1,4 @@
-﻿using QuikGraph.Graphviz.Dot;
-using System.Collections.Generic;
-
-namespace PSGraph
+﻿namespace PSGraph
 {
     public enum GraphExportTypes
     {
@@ -9,6 +6,9 @@ namespace PSGraph
         GraphML,
         MSAGL_MDS,
         MSAGL_SUGIYAMA,
-        MSAGL_FASTINCREMENTAL
+        MSAGL_FASTINCREMENTAL,
+        Vega_ForceDirected,
+        Vega_AdjacencyMatrix,
+        Vega_TreeLayout
     }
 }

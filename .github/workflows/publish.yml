@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ['8.0.x' ]
+        dotnet-version: ['9.0.x' ]
 
     steps:
       - uses: actions/checkout@v3
@@ -25,11 +25,11 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build --configuration Debug
+        run: dotnet build
       - name: Test
         run: dotnet test --verbosity normal
       - name: dotnet publish
-        run: dotnet publish -c Debug -o "./PSQuickGraph"
+        run: dotnet publish -o "./PSQuickGraph"
       - name: psgallery publish
         run: |
           $env:GITHUB_WORKSPACE
