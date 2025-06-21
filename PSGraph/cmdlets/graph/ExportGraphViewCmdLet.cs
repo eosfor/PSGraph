@@ -34,49 +34,98 @@ namespace PSGraph.Cmdlets
         [ValidateNotNullOrEmpty]
         public string Path;
 
+        private VegaExportTypes _vegaExportType = VegaExportTypes.JSON;
+
+
+        protected override void BeginProcessing()
+        {
+            base.BeginProcessing();
+
+            if (MyInvocation.BoundParameters.ContainsKey("Path"))
+            {
+                var extension = System.IO.Path.GetExtension(Path);
+
+                switch (extension)
+                {
+                    case "html":
+                        _vegaExportType = VegaExportTypes.HTML;
+                        break;
+                    case "json":
+                        _vegaExportType = VegaExportTypes.JSON;
+                        break;
+                    default:
+                        WriteAndAbort();
+                        break;
+                }
+            }
+
+        }
+
         protected override void ProcessRecord()
         {
+            string result = string.Empty;
+
             switch (Format)
             {
                 case GraphExportTypes.Graphviz:
-                    ExportGraphViz();
+                    result = ExportGraphViz();
                     break;
                 case GraphExportTypes.GraphML:
-                    ExportGraphML();
+                    result = ExportGraphMLAsString();
                     break;
                 case GraphExportTypes.MSAGL_FASTINCREMENTAL:
                 case GraphExportTypes.MSAGL_MDS:
                 case GraphExportTypes.MSAGL_SUGIYAMA:
-                    ExportMSAGL();
+                    result = ExportMSAGL();
                     break;
                 case GraphExportTypes.Vega_ForceDirected:
-                    ExportVegaForceDirected();
+                    result = ExportVegaForceDirected(_vegaExportType);
                     break;
                 case GraphExportTypes.Vega_AdjacencyMatrix:
-                    ExportVegaAdjacencyMatrix();
+                    result = ExportVegaAdjacencyMatrix(_vegaExportType);
                     break;
                 case GraphExportTypes.Vega_TreeLayout:
-                    ExportVegaTreeLayout();
+                    result = ExportVegaTreeLayout(_vegaExportType);
                     break;
                 default:
-                    ExportGraphViz();
+                    result = ExportGraphViz();
                     break;
+            }
+
+            if (MyInvocation.BoundParameters.ContainsKey("Path"))
+            {
+                File.WriteAllText(Path, result);
+            }
+            else
+            {
+                WriteObject(result);
             }
         }
 
-        private void ExportVegaTreeLayout()
+        private string ExportVegaTreeLayout(VegaExportTypes exportType)
         {
             var modulePath = MyInvocation.MyCommand.Module?.ModuleBase;
             var records = Graph.ConvertToParentChildList();
             var vega = VegaHelper.GetVegaTemplateObjectFromModulePath(modulePath, "vega.tree.layout.json");
             vega.Data[0].Values = records.ToList<object>();
 
-            string html = VegaHelper.RenderHtml(vega);
+            switch (exportType)
+            {
+                case VegaExportTypes.HTML:
+                    return VegaHelper.RenderHtml(vega);
+                default:
+                case VegaExportTypes.JSON:
+                    return vega.ToJson();
+            }
 
-            File.WriteAllText(Path, html);
+            //string html = VegaHelper.RenderHtml(vega);
+
+            //return html;
+
+            //File.WriteAllText(Path, html);
         }
 
-        private void ExportVegaAdjacencyMatrix()
+        private string ExportVegaAdjacencyMatrix(VegaExportTypes exportType)
         {
             var modulePath = MyInvocation.MyCommand.Module?.ModuleBase;
             var records = Graph.ConvertToVegaNodeLink();
@@ -85,12 +134,20 @@ namespace PSGraph.Cmdlets
             vega.Data[0].Values = records.nodes.ToList<object>();
             vega.Data[1].Values = records.links.ToList<object>();
 
-            string html = VegaHelper.RenderHtml(vega);
+            switch (exportType)
+            {
+                case VegaExportTypes.HTML:
+                    return VegaHelper.RenderHtml(vega);
+                default:
+                case VegaExportTypes.JSON:
+                    return vega.ToJson();
 
-            File.WriteAllText(Path, html);
+            }
+
+            //File.WriteAllText(Path, html);
         }
 
-        private void ExportVegaForceDirected()
+        private string ExportVegaForceDirected(VegaExportTypes exportType)
         {
             var modulePath = MyInvocation.MyCommand.Module?.ModuleBase;
             var records = Graph.ConvertToVegaNodeLink();
@@ -99,12 +156,19 @@ namespace PSGraph.Cmdlets
             vega.Data[0].Values = records.nodes.ToList<object>();
             vega.Data[1].Values = records.links.ToList<object>();
 
-            string html = VegaHelper.RenderHtml(vega);
+            switch (exportType)
+            {
+                case VegaExportTypes.HTML:
+                    return VegaHelper.RenderHtml(vega);
+                default:
+                case VegaExportTypes.JSON:
+                    return vega.ToJson();
 
-            File.WriteAllText(Path, html);
+            }
+            //File.WriteAllText(Path, html);
         }
 
-        private void ExportMSAGL()
+        private string ExportMSAGL()
         {
             var drawingGraph = Graph.ToMsaglGraph();
             drawingGraph.CreateGeometryGraph();
@@ -135,7 +199,7 @@ namespace PSGraph.Cmdlets
             }
 
             LayoutHelpers.CalculateLayout(drawingGraph.GeometryGraph, las, null);
-            PrintSvgAsString(drawingGraph);
+            return PrintSvgAsString(drawingGraph);
         }
 
         void AssignLabelsDimensions(Graph drawingGraph)
@@ -149,7 +213,7 @@ namespace PSGraph.Cmdlets
             }
         }
 
-        void PrintSvgAsString(Graph drawingGraph)
+        string PrintSvgAsString(Graph drawingGraph)
         {
             var ms = new MemoryStream();
             var writer = new StreamWriter(ms);
@@ -160,7 +224,9 @@ namespace PSGraph.Cmdlets
             var sr = new StreamReader(ms);
             var myStr = sr.ReadToEnd();
 
-            System.IO.File.WriteAllText(Path, myStr);
+            return myStr;
+
+            //System.IO.File.WriteAllText(Path, myStr);
         }
 
         private void ExportGraphML()
@@ -173,20 +239,28 @@ namespace PSGraph.Cmdlets
             }
         }
 
-        private void ExportGraphViz()
+        private string ExportGraphMLAsString()
+        {
+            using (var stringWriter = new StringWriter())
+            using (var xmlWriter = XmlWriter.Create(stringWriter, new XmlWriterSettings { Indent = true }))
+            {
+                Graph.SerializeToGraphML<PSVertex, PSEdge, PsBidirectionalGraph>(
+                    xmlWriter,
+                    v => v.Label,
+                    Graph.GetEdgeIdentity()
+                );
+                xmlWriter.Flush();
+                return stringWriter.ToString();
+            }
+        }
+
+        private string ExportGraphViz()
         {
             var graphviz = new GraphvizAlgorithm<PSVertex, PSEdge>(Graph);
             graphviz.FormatVertex += Graphviz_FormatVertex;
             var result = graphviz.Generate();
 
-            if (Path != null)
-            {
-                File.WriteAllText(Path, result);
-            }
-            else
-            {
-                WriteObject(result);
-            }
+            return result;
         }
 
         private void Graphviz_FormatVertex(object sender, FormatVertexEventArgs<PSVertex> args)
@@ -199,6 +273,19 @@ namespace PSGraph.Cmdlets
                     destProperty.SetValue(args.VertexFormat, p.GetValue(args.Vertex.GVertexParameters));
                 }
             }
+        }
+
+        private void WriteAndAbort()
+        {
+            var errorRecord = new ErrorRecord(
+                new ArgumentException("Unsupported file extension. Use .html or .json"),
+                "UnsupportedExtension",
+                ErrorCategory.InvalidArgument,
+                Path
+            );
+
+            WriteError(errorRecord);
+            return; // прерывает дальнейшее выполнение ProcessRecord / BeginProcessing
         }
     }
 }

@@ -11,4 +11,10 @@
         Vega_AdjacencyMatrix,
         Vega_TreeLayout
     }
+
+    public enum VegaExportTypes
+    {
+        HTML,
+        JSON
+    }
 }

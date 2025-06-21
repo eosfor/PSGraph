@@ -8,6 +8,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using QuikGraph.Graphviz;
 using QuikGraph.Serialization;
+using System.Text.Json;
+using PSGraph.Vega.Extensions;
 
 namespace PSGraph.Tests
 {
@@ -164,6 +166,41 @@ namespace PSGraph.Tests
             var output = results[0].BaseObject as string;
             output.Should().NotBeNullOrWhiteSpace("because the output should be a non-empty string");
             output.Should().Contain("digraph", "because the output should be Graphviz DOT format");
+        }
+
+        [Fact]
+        public void ExportGraph_NoPathProvided_ReturnsVegaString()
+        {
+            // Arrange
+            var graph = CreateSampleGraph();
+
+            var records = graph.ConvertToVegaNodeLink();
+
+            var vegaNames = Enum.GetNames(typeof(GraphExportTypes))
+                                .Where(name => name.StartsWith("Vega"))
+                                .ToList();
+
+            foreach (var vegaName in vegaNames)
+            {
+                _powershell.AddCommand("Export-Graph")
+                    .AddParameter("Graph", graph)
+                    .AddParameter("Format", $"{vegaName}");
+
+                // Act
+                var results = _powershell.Invoke();
+
+                // Assert
+                results.Should().NotBeNullOrEmpty("because output should be returned when Path is not provided");
+                var output = results[0].BaseObject as string;
+                output.Should().NotBeNullOrWhiteSpace("because valid JSON should be returned");
+
+                // Try parsing the result as JSON
+                Action act = () => JsonDocument.Parse(output);
+                act.Should().NotThrow("because the output should be a valid JSON string");
+
+                _powershell.Commands.Clear();
+            }
+
         }
 
         [Fact]
