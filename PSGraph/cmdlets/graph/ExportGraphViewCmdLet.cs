@@ -47,11 +47,20 @@ namespace PSGraph.Cmdlets
 
                 switch (extension)
                 {
-                    case "html":
+                    case ".html":
                         _vegaExportType = VegaExportTypes.HTML;
                         break;
-                    case "json":
+                    case ".json":
                         _vegaExportType = VegaExportTypes.JSON;
+                        break;
+                    case ".graphml":
+                        _vegaExportType = VegaExportTypes.GRAPHML;
+                        break;
+                    case ".svg":
+                        _vegaExportType = VegaExportTypes.SVG;
+                        break;
+                    case ".dot":
+                        _vegaExportType = VegaExportTypes.DOT;
                         break;
                     default:
                         WriteAndAbort();
@@ -285,6 +294,7 @@ namespace PSGraph.Cmdlets
             );
 
             WriteError(errorRecord);
+            ThrowTerminatingError(errorRecord);
             return; // прерывает дальнейшее выполнение ProcessRecord / BeginProcessing
         }
     }

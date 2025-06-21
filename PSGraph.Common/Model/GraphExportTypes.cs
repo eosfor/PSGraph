@@ -15,6 +15,9 @@
     public enum VegaExportTypes
     {
         HTML,
-        JSON
+        JSON,
+        SVG,
+        DOT,
+        GRAPHML
     }
 }
