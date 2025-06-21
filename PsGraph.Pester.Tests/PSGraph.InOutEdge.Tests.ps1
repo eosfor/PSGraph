@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "/workspaces/PSGraph/PSGraph.Tests/bin/Debug/net8.0/PSQuickGraph.psd1"
+    Import-Module "./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1"
 }
 
 Describe 'Get-InEdge' {
