@@ -26,7 +26,7 @@ Describe 'Vega Tests' {
         Add-Edge -From H -To I -Graph $graph | Out-Null
         Add-Edge -From M -To B -Graph $graph | Out-Null
 
-        Export-Graph -Graph $graph -Format Vega_ForceDirected -Path /tmp/x.force.html
+        Export-Graph -Graph $graph -Format Vega_ForceDirected -Path '/tmp/x.force.html'
     }
 
     It 'Vega Tree Layout' {
@@ -51,7 +51,7 @@ Describe 'Vega Tests' {
         Add-Edge -From B -To E -Graph $graph | Out-Null
         Add-Edge -From C -To F -Graph $graph | Out-Null
 
-        Export-Graph -Graph $graph -Format Vega_TreeLayout -Path /tmp/x.tree.htmlß
+        Export-Graph -Graph $graph -Format Vega_TreeLayout -Path /tmp/x.tree.html
     }
 
     It 'Vega Adjacency Matrix' {

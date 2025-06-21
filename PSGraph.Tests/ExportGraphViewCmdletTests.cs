@@ -10,6 +10,7 @@ using QuikGraph.Graphviz;
 using QuikGraph.Serialization;
 using System.Text.Json;
 using PSGraph.Vega.Extensions;
+using System.Runtime.CompilerServices;
 
 namespace PSGraph.Tests
 {
@@ -199,6 +200,38 @@ namespace PSGraph.Tests
                 act.Should().NotThrow("because the output should be a valid JSON string");
 
                 _powershell.Commands.Clear();
+            }
+
+        }
+
+
+        [Fact]
+        public void ExportGraph_PathProvided_DoesNotThrow()
+        {
+            // Arrange
+            var graph = CreateSampleGraph();
+
+            var records = graph.ConvertToVegaNodeLink();
+
+            var vegaNames = Enum.GetNames(typeof(GraphExportTypes))
+                                .Where(name => name.StartsWith("Vega"))
+                                .ToList();
+
+            foreach (var vegaName in vegaNames)
+            {
+                foreach (var ext in new string[] { "html", "json" })
+                {
+                    var filePath = Path.Combine(_tempDirectory, $"{vegaName}.{ext}");
+                    _powershell.AddCommand("Export-Graph")
+                        .AddParameter("Graph", graph)
+                        .AddParameter("Format", $"{vegaName}")
+                        .AddParameter("Path", filePath);
+
+                    // Act
+                    var results = _powershell.Invoke();
+
+                    _powershell.Commands.Clear();
+                }
             }
 
         }

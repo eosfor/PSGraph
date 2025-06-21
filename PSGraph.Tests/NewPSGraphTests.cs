@@ -44,6 +44,24 @@ namespace PSGraph.Tests
         }
 
         [Fact]
+        public void NewGraph_CreatesEmptyAdjGraph()
+        {
+            // Arrange
+            _powershell.AddCommand("New-AdjacencyGraph");
+
+            // Act
+            var results = _powershell.Invoke();
+
+            // Assert
+            results.Should().NotBeNullOrEmpty();
+            results.Count.Should().Be(1);
+            var graph = results[0].BaseObject as PsAdjacencyGraph;
+            graph.Should().NotBeNull();
+            graph.VertexCount.Should().Be(0);
+            graph.EdgeCount.Should().Be(0);
+        }
+
+        [Fact]
         public void NewGraph_WithInvalidParameter_ThrowsException()
         {
             // Arrange
