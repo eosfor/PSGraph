@@ -21,7 +21,14 @@ namespace PSGraph.Vega.Extensions
                 {
                     vertexLookup[vertex] = idCounter;
                 }
-                nodes.Add(new NodeRecord(vertex.Label, 1, idCounter++));
+                var group = 1;
+                if (((IDictionary<string, object?>)vertex.Metadata).ContainsKey("group"))
+                {
+                    var groupObj = ((IDictionary<string, object?>)vertex.Metadata)["group"];
+                    if (groupObj != null && int.TryParse(groupObj.ToString(), out int parsedGroup))
+                        group = parsedGroup;
+                }
+                nodes.Add(new NodeRecord(vertex.Label, group, idCounter++));
             }
 
             foreach (var edge in graph.Edges)
