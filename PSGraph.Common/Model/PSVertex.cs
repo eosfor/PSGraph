@@ -13,7 +13,7 @@ namespace PSGraph.Model
 
         public GraphvizVertex GVertexParameters = new GraphvizVertex();
         public object? OriginalObject;
-        public List<ExpandoObject>? Metadata;
+        public ExpandoObject Metadata;
 
 
         private void SetLabel(string value)
