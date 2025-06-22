@@ -1,4 +1,5 @@
-﻿using QuikGraph.Graphviz.Dot;
+﻿using System.Dynamic;
+using QuikGraph.Graphviz.Dot;
 
 namespace PSGraph.Model
 {
@@ -12,7 +13,7 @@ namespace PSGraph.Model
 
         public GraphvizVertex GVertexParameters = new GraphvizVertex();
         public object? OriginalObject;
-        public List<object>? Metadata;
+        public List<ExpandoObject>? Metadata;
 
 
         private void SetLabel(string value)
