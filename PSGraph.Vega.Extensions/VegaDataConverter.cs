@@ -28,15 +28,22 @@ namespace PSGraph.Vega.Extensions
                     if (groupObj != null && int.TryParse(groupObj.ToString(), out int parsedGroup))
                         group = parsedGroup;
                 }
-                nodes.Add(new NodeRecord(vertex.Label, group, idCounter++));
+                string nodeType = vertex.OriginalObject != null ? vertex.OriginalObject.GetType().ToString() : "";
+                nodes.Add(new NodeRecord(vertex.Label, group, nodeType, idCounter++));
             }
 
             foreach (var edge in graph.Edges)
             {
+                int value = 1;
                 if (vertexLookup.TryGetValue(edge.Source, out int sourceId) &&
                     vertexLookup.TryGetValue(edge.Target, out int targetId))
                 {
-                    links.Add(new LinkRecord(sourceId, targetId, 1, sourceId, targetId));
+                {
+                    var groupObj = ((IDictionary<string, object?>)edge.Target.Metadata)["group"];
+                    if (groupObj != null && int.TryParse(groupObj.ToString(), out int parsedGroup))
+                        value = parsedGroup;
+                }                    
+                    links.Add(new LinkRecord(sourceId, targetId, value, sourceId, targetId));
                 }
             }
 

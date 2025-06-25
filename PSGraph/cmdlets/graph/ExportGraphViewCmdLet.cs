@@ -162,8 +162,9 @@ namespace PSGraph.Cmdlets
             var records = Graph.ConvertToVegaNodeLink();
             var vega = VegaHelper.GetVegaTemplateObjectFromModulePath(modulePath, "vega.force.directed.layout.json");
 
-            vega.Data[0].Values = records.nodes.ToList<object>();
-            vega.Data[1].Values = records.links.ToList<object>();
+            //TODO: make these indices somehow configurable or more smart
+            vega.Data[2].Values = records.nodes.ToList<object>();
+            vega.Data[0].Values = records.links.ToList<object>();
 
             switch (exportType)
             {

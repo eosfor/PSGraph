@@ -1,143 +1,79 @@
 {
   "data": [
     {
-      "name": "node-data",
+      "name": "link-data-raw",
       "values": []
     },
+    {"name": "link-data", "source": "link-data-raw"},
     {
-      "name": "link-data",
-      "values": []
+      "name": "node-data",
+      "values": [],
+      "transform": [
+        {
+          "type": "force",
+          "iterations": 300,
+          "restart": {"signal": "restart"},
+          "signal": "force",
+          "forces": [
+            {"force": "center", "x": {"signal": "cx"}, "y": {"signal": "cy"}},
+            {
+              "force": "collide",
+              "radius": {"signal": "2 * nodeRadius"},
+              "iterations": 1,
+              "strength": 0.7
+            },
+            {"force": "nbody", "strength": {"signal": "nodeCharge"}},
+            {
+              "force": "link",
+              "links": "link-data-raw",
+              "distance": {"signal": "linkDistance"},
+              "id": "index"
+            }
+          ]
+        },
+        {
+          "type": "formula",
+          "as": "fx",
+          "expr": "fix[0]!=null && node==datum.index ?invert('xscale',fix[0]):null"
+        },
+        {
+          "type": "formula",
+          "as": "fy",
+          "expr": "fix[1]!=null && node==datum.index ?invert('yscale',fix[1]):null"
+        }
+      ]
     },
     {
       "name": "adj-nodes",
-      "source": "link-data",
       "transform": [
         {
           "type": "filter",
           "expr": "datum.src === hoverIndex || datum.tgt === hoverIndex"
         }
-      ]
+      ],
+      "source": "link-data"
     },
     {
       "name": "adjacentIndices",
-      "source": "adj-nodes",
       "transform": [
         {
           "type": "formula",
           "as": "adj",
           "expr": "datum.src === hoverIndex ? datum.tgt : datum.src"
         },
-        {
-          "type": "project",
-          "fields": [
-            "adj"
-          ],
-          "as": [
-            "adj"
-          ]
-        }
-      ]
+        {"fields": ["adj"], "type": "project", "as": ["adj"]}
+      ],
+      "source": "adj-nodes"
     }
   ],
   "marks": [
     {
-      "from": {
-        "data": "node-data"
-      },
-      "type": "symbol",
-      "encode": {
-        "enter": {
-          "fill": {
-            "scale": "color",
-            "field": "group"
-          },
-          "stroke": {
-            "value": "white"
-          }
-        },
-        "update": {
-          "cursor": {
-            "value": "pointer"
-          },
-          "size": {
-            "signal": "(hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index)) ? 2.5 * nodeRadius * nodeRadius : 2 * nodeRadius * nodeRadius"
-          },
-          "fill": {
-            "signal": "hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index) ? 'red' : scale('color', datum.group)"
-          },
-          "tooltip": {
-            "signal": "{ name: datum.name }"
-          }
-        }
-      },
-      "name": "nodes",
-      "on": [
-        {
-          "modify": "node",
-          "trigger": "fix",
-          "values": "fix === true ? {fx: node.x, fy: node.y} : {fx: fix[0], fy: fix[1]}"
-        },
-        {
-          "modify": "node",
-          "trigger": "!fix",
-          "values": "{fx: null, fy: null}"
-        }
-      ],
-      "transform": [
-        {
-          "signal": "force",
-          "type": "force",
-          "forces": [
-            {
-              "force": "center",
-              "x": {
-                "signal": "cx"
-              },
-              "y": {
-                "signal": "cy"
-              }
-            },
-            {
-              "force": "collide",
-              "radius": {
-                "signal": "nodeRadius"
-              }
-            },
-            {
-              "force": "nbody",
-              "strength": {
-                "signal": "nodeCharge"
-              }
-            },
-            {
-              "force": "link",
-              "distance": {
-                "signal": "linkDistance"
-              },
-              "links": "link-data"
-            }
-          ],
-          "iterations": 300,
-          "restart": {
-            "signal": "restart"
-          },
-          "static": {
-            "signal": "static"
-          }
-        }
-      ],
-      "zindex": 1
-    },
-    {
-      "from": {
-        "data": "link-data"
-      },
+      "name": "links",
+      "from": {"data": "link-data"},
       "type": "path",
       "encode": {
         "update": {
-          "stroke": {
-            "value": "#ccc"
-          },
+          "stroke": {"value": "#ccc"},
           "strokeWidth": {
             "signal": "datum.src === hoverIndex || datum.tgt === hoverIndex ? 2 : 0.5"
           }
@@ -147,139 +83,284 @@
       "transform": [
         {
           "type": "linkpath",
-          "require": {
-            "signal": "force"
-          },
+          "require": {"signal": "force"},
           "shape": "line",
-          "sourceX": "datum.source.x",
-          "sourceY": "datum.source.y",
-          "targetX": "datum.target.x",
-          "targetY": "datum.target.y"
+          "sourceX": {"expr": "scale('xscale', datum.datum.source.x)"},
+          "sourceY": {"expr": "scale('yscale', datum.datum.source.y)"},
+          "targetX": {"expr": "scale('xscale', datum.datum.target.x)"},
+          "targetY": {"expr": "scale('yscale', datum.datum.target.y)"}
         }
       ]
+    },
+    {
+      "from": {"data": "node-data"},
+      "type": "symbol",
+      "encode": {
+        "enter": {
+          "fill": {"scale": "color", "field": "group"},
+          "stroke": {"value": "white"}
+        },
+        "update": {
+          "cursor": {"value": "pointer"},
+          "fill": {
+            "signal": "hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index) ? 'red' : scale('color', datum.group)"
+          },
+          "size": {
+            "signal": "(hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index)) ? 2.5 * nodeRadius * nodeRadius : 2 * nodeRadius * nodeRadius"
+          },
+          "zindex": {
+            "signal": "(hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index)) ? 10 : 1"
+          },
+          "x": {
+            "signal": "fix[0]!=null && node===datum.index ?fix[0]:scale('xscale', datum.x)"
+          },
+          "y": {
+            "signal": "fix[1]!=null && node===datum.index ?fix[1]:scale('yscale', datum.y)"
+          },
+          "tooltip": {"signal": "{ name: datum.name }"}
+        }
+      },
+      "name": "nodes",
+      "zindex": 1
     }
   ],
   "scales": [
     {
-      "domain": {
-        "data": "node-data",
-        "field": "group"
-      },
+      "domain": {"data": "node-data", "field": "group"},
       "name": "color",
       "type": "ordinal",
-      "range": {
-        "scheme": "category20c"
-      }
+      "range": {"scheme": "category10"}
+    },
+    {
+      "name": "xscale",
+      "zero": false,
+      "domain": {"signal": "xdom"},
+      "range": {"signal": "xrange"}
+    },
+    {
+      "name": "yscale",
+      "zero": false,
+      "domain": {"signal": "ydom"},
+      "range": {"signal": "yrange"}
     }
   ],
   "signals": [
+    {"name": "xrange", "update": "[0, width]"},
+    {"name": "yrange", "update": "[height, 0]"},
+    {"name": "xext", "update": "[0, width]"},
+    {"name": "yext", "update": "[height, 0]"},
     {
-      "name": "hoverIndex",
-      "value": -1,
+      "name": "down",
+      "value": null,
+      "on": [
+        {"events": "mouseup,touchend", "update": "null"},
+        {"events": "mousedown, touchstart", "update": "xy()"},
+        {"events": "symbol:mousedown, symbol:touchstart", "update": "null"}
+      ]
+    },
+    {
+      "name": "xcur",
+      "value": null,
+      "on": [{"events": "mousedown, touchstart, touchend", "update": "xdom"}]
+    },
+    {
+      "name": "ycur",
+      "value": null,
+      "on": [{"events": "mousedown, touchstart, touchend", "update": "ydom"}]
+    },
+    {
+      "name": "delta",
+      "value": [0, 0],
       "on": [
         {
-          "events": "symbol:mouseover",
-          "update": "datum.index"
-        },
-        {
-          "events": "symbol:mouseout",
-          "update": "-1"
+          "events": [
+            {
+              "source": "window",
+              "type": "mousemove",
+              "consume": true,
+              "between": [
+                {"type": "mousedown"},
+                {"source": "window", "type": "mouseup"}
+              ]
+            },
+            {
+              "type": "touchmove",
+              "consume": true,
+              "filter": "event.touches.length === 1"
+            }
+          ],
+          "update": "down ? [down[0]-x(), y()-down[1]] : [0,0]"
         }
       ]
     },
     {
-      "name": "cx",
-      "update": "width / 2"
+      "name": "anchor",
+      "value": [0, 0],
+      "on": [
+        {
+          "events": "wheel",
+          "update": "[invert('xscale', x()), invert('yscale', y())]"
+        },
+        {
+          "events": {
+            "type": "touchstart",
+            "filter": "event.touches.length===2"
+          },
+          "update": "[(xdom[0] + xdom[1]) / 2, (ydom[0] + ydom[1]) / 2]"
+        }
+      ]
     },
     {
-      "name": "cy",
-      "update": "height / 2"
+      "name": "zoom",
+      "value": 1,
+      "on": [
+        {
+          "events": "wheel!",
+          "force": true,
+          "update": "pow(1.001, event.deltaY * pow(16, event.deltaMode))"
+        },
+        {
+          "events": {"signal": "dist2"},
+          "force": true,
+          "update": "dist1 / dist2"
+        },
+        {"events": [{"source": "view", "type": "dblclick"}], "update": "1"}
+      ]
+    },
+    {
+      "name": "dist1",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "type": "touchstart",
+            "filter": "event.touches.length===2"
+          },
+          "update": "pinchDistance(event)"
+        },
+        {"events": {"signal": "dist2"}, "update": "dist2"}
+      ]
+    },
+    {
+      "name": "dist2",
+      "value": 0,
+      "on": [
+        {
+          "events": {
+            "type": "touchmove",
+            "consume": true,
+            "filter": "event.touches.length===2"
+          },
+          "update": "pinchDistance(event)"
+        }
+      ]
+    },
+    {
+      "name": "xdom",
+      "update": "xext",
+      "on": [
+        {
+          "events": {"signal": "delta"},
+          "update": "[xcur[0] + span(xcur) * delta[0] / width, xcur[1] + span(xcur) * delta[0] / width]"
+        },
+        {
+          "events": {"signal": "zoom"},
+          "update": "[anchor[0] + (xdom[0] - anchor[0]) * zoom, anchor[0] + (xdom[1] - anchor[0]) * zoom]"
+        },
+        {"events": [{"source": "view", "type": "dblclick"}], "update": "xrange"}
+      ]
+    },
+    {
+      "name": "ydom",
+      "update": "yext",
+      "on": [
+        {
+          "events": {"signal": "delta"},
+          "update": "[ycur[0] + span(ycur) * delta[1] / height, ycur[1] + span(ycur) * delta[1] / height]"
+        },
+        {
+          "events": {"signal": "zoom"},
+          "update": "[anchor[1] + (ydom[0] - anchor[1]) * zoom, anchor[1] + (ydom[1] - anchor[1]) * zoom]"
+        },
+        {"events": [{"source": "view", "type": "dblclick"}], "update": "yrange"}
+      ]
+    },
+    {"name": "size", "update": "clamp(20 / span(xdom), 1, 1000)"},
+    {
+      "name": "cx",
+      "update": "width / 2",
+      "on": [
+        {
+          "events": "[symbol:mousedown, window:mouseup] > window:mousemove",
+          "update": " cx==width/2?cx+0.001:width/2"
+        }
+      ]
+    },
+    {"name": "cy", "update": "height / 2"},
+    {"name": "w", "value": 1200},
+    {"name": "h", "value": 800},
+    {
+      "name": "hoverIndex",
+      "on": [
+        {"events": "symbol:mouseover", "update": "datum.index"},
+        {"events": "symbol:mouseout", "update": "-1"}
+      ],
+      "value": -1
     },
     {
       "name": "nodeRadius",
-      "bind": {
-        "input": "range",
-        "max": 50,
-        "min": 1,
-        "step": 1
-      },
-      "value": 8
+      "bind": {"input": "range", "max": 50, "min": 1, "step": 1},
+      "value": 5
     },
     {
       "name": "nodeCharge",
-      "bind": {
-        "input": "range",
-        "max": 10,
-        "min": -100,
-        "step": 1
-      },
+      "bind": {"input": "range", "max": 10, "min": -100, "step": 1},
       "value": -30
     },
     {
       "name": "linkDistance",
-      "bind": {
-        "input": "range",
-        "max": 100,
-        "min": 5,
-        "step": 1
-      },
+      "bind": {"input": "range", "max": 200, "min": 5, "step": 1},
       "value": 30
     },
-    {
-      "name": "static",
-      "bind": {
-        "input": "checkbox"
-      },
-      "value": true
-    },
+    {"name": "static", "value": false},
     {
       "description": "State variable for active node fix status.",
       "name": "fix",
+      "value": false,
       "on": [
         {
-          "events": "symbol:pointerout[!event.buttons], window:pointerup",
+          "events": "symbol:mouseout[!event.buttons], window:mouseup",
           "update": "false"
         },
+        {"events": "symbol:mouseover", "update": "fix || true", "force": true},
         {
-          "events": "symbol:pointerover",
-          "update": "fix || true"
-        },
-        {
-          "events": "[symbol:pointerdown, window:pointerup] > window:pointermove!",
-          "force": true,
-          "update": "xy()"
+          "events": "[symbol:mousedown, window:mouseup] > window:mousemove!",
+          "update": "xy()",
+          "force": true
         }
-      ],
-      "value": false
+      ]
     },
     {
       "description": "Graph node most recently interacted with.",
       "name": "node",
+      "value": null,
       "on": [
         {
-          "events": "symbol:pointerover",
-          "update": "fix === true ? item() : node"
+          "events": "symbol:mouseover",
+          "update": "fix === true ? datum.index : node"
         }
       ]
     },
     {
       "description": "Flag to restart Force simulation upon data changes.",
       "name": "restart",
-      "on": [
-        {
-          "events": {
-            "signal": "fix"
-          },
-          "update": "fix && fix.length"
-        }
-      ],
-      "value": false
+      "value": false,
+      "on": [{"events": {"signal": "fix"}, "update": "fix && fix.length"}]
     }
   ],
-  "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "autosize": "none",
-  "description": "A node-link diagram with force-directed layout, depicting character co-occurrence in the novel Les Misérables.",
-  "height": 800,
-  "padding": 0,
-  "width": 800
+  "$schema": "https://vega.github.io/schema/vega/v6.json",
+  "autosize": {"type": "none"},
+  "description": "A node-link diagram with force-directed layout",
+  "height": {"signal": "h"},
+  "width": {"signal": "w"}
 }
