@@ -97,13 +97,13 @@
       "type": "symbol",
       "encode": {
         "enter": {
-          "fill": {"scale": "color", "field": "group"},
+          "fill": { "signal": "datum.nodeType === 'BaristaLabs.ChromeDevTools.Runtime.Network.RequestWillBeSentEvent'? '#e0e1dd' : scale('color', datum.group)" },
           "stroke": {"value": "white"}
         },
         "update": {
           "cursor": {"value": "pointer"},
           "fill": {
-            "signal": "hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index) ? 'red' : scale('color', datum.group)"
+            "signal": "hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index) ? 'red' :  datum.nodeType === 'BaristaLabs.ChromeDevTools.Runtime.Network.RequestWillBeSentEvent'? '#e0e1dd' : scale('color', datum.group)"
           },
           "size": {
             "signal": "(hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index)) ? 2.5 * nodeRadius * nodeRadius : 2 * nodeRadius * nodeRadius"
@@ -310,7 +310,7 @@
     {
       "name": "nodeRadius",
       "bind": {"input": "range", "max": 50, "min": 1, "step": 1},
-      "value": 5
+      "value": 8
     },
     {
       "name": "nodeCharge",
