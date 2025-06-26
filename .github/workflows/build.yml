@@ -28,4 +28,7 @@ jobs:
         run: dotnet build --configuration Debug
       - name: Test
         run: dotnet test --verbosity normal
-
+      - name: Pester tests
+        shell: pwsh
+        run: |
+          Invoke-Pester -Path ./PsGraph.Pester.Tests/
