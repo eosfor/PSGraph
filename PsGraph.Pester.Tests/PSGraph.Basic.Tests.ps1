@@ -1,4 +1,5 @@
 BeforeAll {
+    Get-ChildItem
     Import-Module "./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1"
 }
 
