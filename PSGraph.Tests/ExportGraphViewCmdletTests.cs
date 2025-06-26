@@ -153,7 +153,7 @@ namespace PSGraph.Tests
         public void ExportGraph_NoPathProvided_ReturnsOutput()
         {
             // Arrange
-            var graph = CreateSampleGraph();
+            var graph = CreateSampleGraphWithMetadata();
 
             _powershell.AddCommand("Export-Graph")
                 .AddParameter("Graph", graph)
@@ -173,7 +173,7 @@ namespace PSGraph.Tests
         public void ExportGraph_NoPathProvided_ReturnsVegaString()
         {
             // Arrange
-            var graph = CreateSampleGraph();
+            var graph = CreateSampleGraphWithMetadata();
 
             var records = graph.ConvertToVegaNodeLink();
 
@@ -325,6 +325,28 @@ namespace PSGraph.Tests
             var vertexA = new PSVertex("A");
             var vertexB = new PSVertex("B");
             var vertexC = new PSVertex("C");
+
+            graph.AddVertexRange(new[] { vertexA, vertexB, vertexC });
+
+            var edgeAB = new PSEdge(vertexA, vertexB, new PSEdgeTag());
+            var edgeBC = new PSEdge(vertexB, vertexC, new PSEdgeTag());
+
+            graph.AddEdgeRange(new[] { edgeAB, edgeBC });
+
+            return graph;
+        }
+
+        private PsBidirectionalGraph CreateSampleGraphWithMetadata()
+        {
+            var graph = new PsBidirectionalGraph();
+
+            var vertexA = new PSVertex("A");
+            vertexA.Metadata.TryAdd("group", 1);
+            var vertexB = new PSVertex("B");
+            vertexB.Metadata.TryAdd("group", 1);
+            var vertexC = new PSVertex("C");
+            vertexB.Metadata.TryAdd("group", 2);
+
 
             graph.AddVertexRange(new[] { vertexA, vertexB, vertexC });
 

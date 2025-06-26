@@ -38,11 +38,15 @@ namespace PSGraph.Vega.Extensions
                 if (vertexLookup.TryGetValue(edge.Source, out int sourceId) &&
                     vertexLookup.TryGetValue(edge.Target, out int targetId))
                 {
-                {
-                    var groupObj = ((IDictionary<string, object?>)edge.Target.Metadata)["group"];
-                    if (groupObj != null && int.TryParse(groupObj.ToString(), out int parsedGroup))
-                        value = parsedGroup;
-                }                    
+                    {
+                        if (((IDictionary<string, object?>)edge.Target.Metadata).ContainsKey("group"))
+                        {
+                            var groupObj = ((IDictionary<string, object?>)edge.Target.Metadata)["group"];
+                            if (groupObj != null && int.TryParse(groupObj.ToString(), out int parsedGroup))
+                                value = parsedGroup;
+                        }
+
+                    }
                     links.Add(new LinkRecord(sourceId, targetId, value, sourceId, targetId));
                 }
             }
