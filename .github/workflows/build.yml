@@ -43,4 +43,5 @@ jobs:
       - name: Pester tests
         shell: pwsh
         run: |
+          Get-ChildItem
           Invoke-Pester -Path ./PsGraph.Pester.Tests/
