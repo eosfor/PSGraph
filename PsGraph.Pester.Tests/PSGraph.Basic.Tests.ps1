@@ -1,6 +1,15 @@
 BeforeAll {
-    Get-ChildItem
-    Import-Module "./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1"
+    if (Test-Path "./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1")
+    {
+        Write-Host "Importing from ./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1"
+        Import-Module "./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1"
+    }
+
+    if (Test-Path "../PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1")
+    {
+        Write-Host "Importing from ../PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1"
+        Import-Module "../PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1"
+    }
 }
 
 Describe 'New-Graph' {
