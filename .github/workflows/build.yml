@@ -38,6 +38,8 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Debug
+      - name: dotnet publish
+        run: dotnet publish -o "./PSQuickGraph"
       - name: Test
         run: dotnet test --verbosity normal
       - name: Pester tests
