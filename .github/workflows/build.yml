@@ -3,8 +3,20 @@ name: psgraph-dev-build
 on:
   push:
     branches: [ "dev" ]
+    paths-ignore:
+      - '**/README.md'
+      - '**/.gitignore'
+      - 'docs/**'
+      - '.devcontainer/**'
+      - '.github/**'
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "master" ]
+    paths-ignore:
+      - '**/README.md'
+      - '**/.gitignore'
+      - 'docs/**'
+      - '.devcontainer/**'
+      - '.github/**'
 
   workflow_dispatch:
 
@@ -26,6 +38,18 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Debug
+      - name: dotnet publish
+        run: dotnet publish -o "./PSQuickGraph"
       - name: Test
         run: dotnet test --verbosity normal
-
+      
+      - name: Install PowerShell
+        uses: PSModule/install-powershell@v1
+        with:
+          Version: latest
+      - name: Pester tests
+        shell: pwsh
+        run: |
+          $PSVersionTable
+          Get-ChildItem
+          Invoke-Pester -Path ./PsGraph.Pester.Tests/
