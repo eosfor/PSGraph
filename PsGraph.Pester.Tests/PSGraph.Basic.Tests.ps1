@@ -1,9 +1,5 @@
 BeforeAll {
-    if (Test-Path "./PSQuickGraph/PSQuickGraph.psd1")
-    {
-        Write-Host "Importing from ./PSQuickGraph/PSQuickGraph.psd1"
-        Import-Module "./PSQuickGraph"
-    }
+    Import-Module "./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1"
 }
 
 Describe 'New-Graph' {
