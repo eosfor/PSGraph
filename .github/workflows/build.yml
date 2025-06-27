@@ -41,7 +41,6 @@ jobs:
       - name: Test
         run: dotnet test --verbosity normal
       - name: Pester tests
-        working-directory: '../'
         shell: pwsh
         run: |
           Get-ChildItem
