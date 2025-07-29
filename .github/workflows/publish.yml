@@ -40,7 +40,7 @@ jobs:
           $dateSuffix = Get-Date -Format "yyyyMMdd-HHmm"
           $newVersion = if ($isPrerelease) { "$tag-prerelease-$dateSuffix" } else { $tag }
 
-          $psd1 = Get-ChildItem -Path ./PSQuickGraph -Filter *.psd1 | Select-Object -First 1
+          $psd1 = Get-Item ./PSGraph/PSQuickGraph.psd1
           if (-not $psd1) {
             Write-Error "Module manifest (.psd1) not found!"
             exit 1
