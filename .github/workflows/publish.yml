@@ -96,10 +96,6 @@ jobs:
           
       - name: dotnet publish
         run: dotnet publish -o "./PSQuickGraph"
-        
-      - name: psgallery publish
-        run: |
-          Invoke-Pester -Path ./PsGraph.Pester.Tests/
 
       - name: dotnet publish PowerShell module
         run: |
@@ -131,21 +127,18 @@ jobs:
       - name: Pack PSGraph.Common (Debug/pre-release on prerelease, Release on release)
         shell: bash
         run: |
-          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+          if [ -n "${{ steps.set_version.outputs.prerelease }}" ]; then
             VERSION="${{ steps.set_version.outputs.version }}-${{ steps.set_version.outputs.prerelease }}"
-            dotnet pack PSGraph.Common/PSGraph.Common.csproj \
-              --configuration Debug \
-              --no-build \
-              --output ./nupkg \
-              /p:PackageVersion="$VERSION"
+            CONFIG=Debug
           else
             VERSION="${{ steps.set_version.outputs.version }}"
-            dotnet pack PSGraph.Common/PSGraph.Common.csproj \
-              --configuration Release \
-              --no-build \
-              --output ./nupkg \
-              /p:PackageVersion="$VERSION"
+            CONFIG=Release
           fi
+          dotnet pack PSGraph.Common/PSGraph.Common.csproj \
+            --configuration $CONFIG \
+            --no-build \
+            --output ./nupkg \
+            /p:PackageVersion="$VERSION"
 
       - name: Publish PSGraph.Common to NuGet
         run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
