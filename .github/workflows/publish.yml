@@ -71,6 +71,7 @@ jobs:
           }
           Set-Content -Path $psd1.FullName -Value $content
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "prerelease=$prerelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       # --- PowerShell Module Build/Test/Publish ---
       - name: Install dependencies
@@ -109,8 +110,7 @@ jobs:
       - name: Set Version Suffix for Pre-release (Common)
         if: github.event.release.prerelease == true
         run: |
-          VERSION_SUFFIX="${{ steps.set_version.outputs.version }}"
-          echo "VERSION_SUFFIX=$VERSION_SUFFIX" >> $GITHUB_ENV
+          echo "VERSION_SUFFIX=${{ steps.set_version.outputs.prerelease }}" >> $GITHUB_ENV
 
       - name: Build PSGraph.Common (Debug on prerelease, Release on release)
         run: |
