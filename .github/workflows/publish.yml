@@ -39,7 +39,14 @@ jobs:
           # Удаляем префикс v, если он есть
           $tag = $tag -replace '^v', ''
 
-          $newVersion = $tag
+          # Разделяем версию и prerelease-суффикс (если есть)
+          if ($tag -match '^([0-9]+\.[0-9]+\.[0-9]+)(?:-([A-Za-z0-9\.\-]+))?$') {
+            $version = $matches[1]
+            $prerelease = $matches[2]
+          } else {
+            Write-Error "Tag format invalid. Should be X.Y.Z or X.Y.Z-suffix"
+            exit 1
+          }
 
           $psd1 = Get-Item ./PSGraph/PSQuickGraph.psd1
           if (-not $psd1) {
@@ -48,11 +55,29 @@ jobs:
           }
 
           $content = Get-Content $psd1.FullName
+
+          # Обновляем ModuleVersion
           $versionPattern = 'ModuleVersion\s*=\s*''[^'']*'''
-          $newContent = $content -replace $versionPattern, "ModuleVersion = '$newVersion'"
+          $newContent = $content -replace $versionPattern, "ModuleVersion = '$version'"
+
+          # Обновляем или добавляем Prerelease
+          $prPattern = '^\s*Prerelease\s*=\s*''[^'']*''\s*$'
+          if ($prerelease) {
+            if ($newContent -match $prPattern) {
+              $newContent = $newContent -replace $prPattern, "Prerelease = '$prerelease'"
+            } else {
+              # Добавляем Prerelease после ModuleVersion
+              $mvPattern = 'ModuleVersion\s*=\s*''[^'']*'''
+              $newContent = $newContent -replace $mvPattern, "ModuleVersion = '$version'`nPrerelease = '$prerelease'"
+            }
+          } else {
+            # Удаляем Prerelease если был
+            $newContent = $newContent -replace $prPattern, ''
+          }
+
           Set-Content -Path $psd1.FullName -Value $newContent
 
-          "version=$newVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
         uses: actions/setup-dotnet@v3
