@@ -36,9 +36,10 @@ jobs:
             exit 1
           }
 
-          $isPrerelease = "${{ github.event.release.prerelease }}" -eq "true"
-          $dateSuffix = Get-Date -Format "yyyyMMdd-HHmm"
-          $newVersion = if ($isPrerelease) { "$tag-prerelease-$dateSuffix" } else { $tag }
+          # Удаляем префикс v, если он есть
+          $tag = $tag -replace '^v', ''
+
+          $newVersion = $tag
 
           $psd1 = Get-Item ./PSGraph/PSQuickGraph.psd1
           if (-not $psd1) {
