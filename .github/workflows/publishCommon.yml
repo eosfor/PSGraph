@@ -1,0 +1,54 @@
+name: Publish PSGraph.Common NuGet Package
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore PSGraph.Common/PSGraph.Common.csproj
+
+      - name: Set Version Suffix for Pre-release
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          VERSION_SUFFIX="beta-$(date +%Y%m%d%H%M%S)"
+          echo "VERSION_SUFFIX=$VERSION_SUFFIX" >> $GITHUB_ENV
+
+      - name: Build (Debug on dev, Release on main)
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+            dotnet build PSGraph.Common/PSGraph.Common.csproj --configuration Debug --no-restore
+          else
+            dotnet build PSGraph.Common/PSGraph.Common.csproj --configuration Release --no-restore
+          fi
+
+      - name: Pack (Debug/pre-release on dev, Release on main)
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+            dotnet pack PSGraph.Common/PSGraph.Common.csproj \
+              --configuration Debug \
+              --no-build \
+              --output ./nupkg \
+              --version-suffix $VERSION_SUFFIX
+          else
+            dotnet pack PSGraph.Common/PSGraph.Common.csproj \
+              --configuration Release \
+              --no-build \
+              --output ./nupkg
+          fi
+
+      - name: Publish to NuGet
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

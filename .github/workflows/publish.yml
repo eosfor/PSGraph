@@ -3,39 +3,175 @@ name: psgraph-publish
 on:
   release:
     types: [published]
-
+  
   workflow_dispatch:
 
 jobs:
-
   publish:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ['9.0.x' ]
+        dotnet-version: ['9.0.x']
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
+
+      - name: Install PowerShell
+        uses: PSModule/install-powershell@v1
+        with:
+          Version: latest
+
+      # --- PowerShell Module Versioning ---
+      - name: Ensure release tag exists
+        id: ensure_tag
+        run: |
+          if [ -z "${GITHUB_REF##refs/tags/}" ]; then
+            echo "Error: Release must have a tag."
+            exit 1
+          fi
+
+      - name: Extract version from tag and update module manifest
+        id: set_version
+        shell: pwsh
+        run: |
+          $tag = "${env:GITHUB_REF}" -replace '^refs/tags/', ''
+          if (-not $tag) {
+            Write-Error "Tag not found. Failing."
+            exit 1
+          }
+          $tag = $tag -replace '^v', ''
+          if ($tag -match '^([0-9]+\.[0-9]+\.[0-9]+)(?:-([A-Za-z0-9\-]+))?$') {
+            $version = $matches[1]
+            $prerelease = $matches[2]
+          } else {
+            Write-Error "Tag format invalid. Should be X.Y.Z or X.Y.Z-suffix"
+            exit 1
+          }
+          if ($prerelease -and ($prerelease -notmatch '^(?:-)?[a-zA-Z0-9\-]+$')) {
+            Write-Error "Prerelease string '$prerelease' contains invalid characters. Only a-z, A-Z, 0-9, and hyphen (-) at the beginning are allowed."
+            exit 1
+          }
+          $psd1 = Get-Item ./PSGraph/PSQuickGraph.psd1
+          if (-not $psd1) {
+            Write-Error "Module manifest (.psd1) not found!"
+            exit 1
+          }
+          $content = Get-Content $psd1.FullName
+          $versionPattern = 'ModuleVersion\s*=\s*''[^'']*'''
+          $content = $content -replace $versionPattern, "ModuleVersion = '$version'"
+          if ($prerelease) {
+            $content = $content -replace '^\s*#\s*Prerelease\s*=\s*''[^'']*''', "Prerelease = '$prerelease'"
+          }
+          Set-Content -Path $psd1.FullName -Value $content
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "prerelease=$prerelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      # --- PowerShell Module Build/Test/Publish ---
       - name: Install dependencies
         run: dotnet restore
-      - name: Build
-        run: dotnet build
-      - name: Test
+
+      - name: Build PowerShell module
+        run: |
+          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            dotnet build -c Debug
+          else
+            dotnet build -c Release
+          fi
+
+      - name: Run .NET tests
         run: dotnet test --verbosity normal
+
       - name: Pester tests
         shell: pwsh
         run: |
           Invoke-Pester -Path ./PsGraph.Pester.Tests/
+          
       - name: dotnet publish
         run: dotnet publish -o "./PSQuickGraph"
+        
       - name: psgallery publish
         run: |
-          $env:GITHUB_WORKSPACE
-          Publish-Module -Path "./PSQuickGraph" -NuGetApiKey ${{ secrets.PS_GALLERY_SECRET }}
-        shell: pwsh
-        
+          Invoke-Pester -Path ./PsGraph.Pester.Tests/
 
+      - name: dotnet publish PowerShell module
+        run: |
+          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            dotnet publish -c Debug -o "./PSQuickGraph"
+          else
+            dotnet publish -c Release -o "./PSQuickGraph"
+          fi
+
+      - name: Publish PowerShell module to PSGallery
+        shell: pwsh
+        run: |
+          Publish-Module -Path "./PSQuickGraph" -NuGetApiKey ${{ secrets.PS_GALLERY_SECRET }}
+
+      # --- NuGet Common Package Build/Publish ---
+      - name: Set Version Suffix for Pre-release (Common)
+        if: github.event.release.prerelease == true
+        run: |
+          echo "VERSION_SUFFIX=${{ steps.set_version.outputs.prerelease }}" >> $GITHUB_ENV
+
+      - name: Build PSGraph.Common (Debug on prerelease, Release on release)
+        run: |
+          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            dotnet build PSGraph.Common/PSGraph.Common.csproj --configuration Debug --no-restore
+          else
+            dotnet build PSGraph.Common/PSGraph.Common.csproj --configuration Release --no-restore
+          fi
+
+      - name: Pack PSGraph.Common (Debug/pre-release on prerelease, Release on release)
+        shell: bash
+        run: |
+          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            VERSION="${{ steps.set_version.outputs.version }}-${{ steps.set_version.outputs.prerelease }}"
+            dotnet pack PSGraph.Common/PSGraph.Common.csproj \
+              --configuration Debug \
+              --no-build \
+              --output ./nupkg \
+              /p:PackageVersion="$VERSION"
+          else
+            VERSION="${{ steps.set_version.outputs.version }}"
+            dotnet pack PSGraph.Common/PSGraph.Common.csproj \
+              --configuration Release \
+              --no-build \
+              --output ./nupkg \
+              /p:PackageVersion="$VERSION"
+          fi
+
+      - name: Publish PSGraph.Common to NuGet
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+      # --- Commit manifest changes ---
+      - name: Commit and push updated manifest
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          SOURCE_BRANCH="${{ github.event.release.target_commitish }}"
+          if [ -z "$SOURCE_BRANCH" ]; then
+            echo "Could not determine source branch. Exiting."
+            exit 1
+          fi
+          if [[ "$SOURCE_BRANCH" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Commitish is a SHA, not a branch name. Aborting."
+            exit 1
+          fi
+          git fetch origin "$SOURCE_BRANCH"
+          git switch "$SOURCE_BRANCH"
+          git pull origin "$SOURCE_BRANCH"
+          git add ./PSQuickGraph/*.psd1
+          git commit -m "ci: update module version to ${{ steps.set_version.outputs.version }}" || echo "Nothing to commit"
+          git push origin "$SOURCE_BRANCH"
