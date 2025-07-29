@@ -58,6 +58,12 @@ jobs:
             exit 1
           }
 
+          # Проверка prerelease-суффикса на допустимые символы
+          if ($prerelease -and ($prerelease -notmatch '^(?:-)?[a-zA-Z0-9\-]+$')) {
+            Write-Error "Prerelease string '$prerelease' contains invalid characters. Only a-z, A-Z, 0-9, and hyphen (-) at the beginning are allowed."
+            exit 1
+          }
+
           $psd1 = Get-Item ./PSGraph/PSQuickGraph.psd1
           if (-not $psd1) {
             Write-Error "Module manifest (.psd1) not found!"
