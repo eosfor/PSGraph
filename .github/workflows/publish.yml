@@ -3,7 +3,7 @@ name: psgraph-publish
 on:
   release:
     types: [published]
-  
+
   workflow_dispatch:
 
 jobs:
@@ -93,29 +93,12 @@ jobs:
         shell: pwsh
         run: |
           Invoke-Pester -Path ./PsGraph.Pester.Tests/
-          
-      - name: dotnet publish
-        run: dotnet publish -o "./PSQuickGraph"
 
-      - name: dotnet publish PowerShell module
-        run: |
-          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
-            dotnet publish -c Debug -o "./PSQuickGraph"
-          else
-            dotnet publish -c Release -o "./PSQuickGraph"
-          fi
-
-      - name: Publish PowerShell module to PSGallery
-        shell: pwsh
+      - name: psgallery publish
         run: |
           Publish-Module -Path "./PSQuickGraph" -NuGetApiKey ${{ secrets.PS_GALLERY_SECRET }}
 
       # --- NuGet Common Package Build/Publish ---
-      - name: Set Version Suffix for Pre-release (Common)
-        if: github.event.release.prerelease == true
-        run: |
-          echo "VERSION_SUFFIX=${{ steps.set_version.outputs.prerelease }}" >> $GITHUB_ENV
-
       - name: Build PSGraph.Common (Debug on prerelease, Release on release)
         run: |
           if [ "${{ github.event.release.prerelease }}" = "true" ]; then
