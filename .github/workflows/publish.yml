@@ -127,12 +127,13 @@ jobs:
               --configuration Debug \
               --no-build \
               --output ./nupkg \
-              --version-suffix $VERSION_SUFFIX
+              --version ${{ steps.set_version.outputs.version }}${{ steps.set_version.outputs.prerelease && format('-{0}', steps.set_version.outputs.prerelease) }}
           else
             dotnet pack PSGraph.Common/PSGraph.Common.csproj \
               --configuration Release \
               --no-build \
-              --output ./nupkg
+              --output ./nupkg \
+              --version ${{ steps.set_version.outputs.version }}
           fi
 
       - name: Publish PSGraph.Common to NuGet
