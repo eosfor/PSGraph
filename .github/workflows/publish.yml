@@ -129,13 +129,14 @@ jobs:
               --configuration Debug \
               --no-build \
               --output ./nupkg \
-              --version "$VERSION"
+              /p:PackageVersion="$VERSION"
           else
+            VERSION="${{ steps.set_version.outputs.version }}"
             dotnet pack PSGraph.Common/PSGraph.Common.csproj \
               --configuration Release \
               --no-build \
               --output ./nupkg \
-              --version "${{ steps.set_version.outputs.version }}"
+              /p:PackageVersion="$VERSION"
           fi
 
       - name: Publish PSGraph.Common to NuGet
