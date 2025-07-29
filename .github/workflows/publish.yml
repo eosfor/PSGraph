@@ -3,6 +3,7 @@ name: psgraph-publish
 on:
   release:
     types: [published]
+  
   workflow_dispatch:
 
 jobs:
@@ -88,8 +89,15 @@ jobs:
       - name: Run .NET tests
         run: dotnet test --verbosity normal
 
-      - name: Run Pester tests
+      - name: Pester tests
         shell: pwsh
+        run: |
+          Invoke-Pester -Path ./PsGraph.Pester.Tests/
+          
+      - name: dotnet publish
+        run: dotnet publish -o "./PSQuickGraph"
+        
+      - name: psgallery publish
         run: |
           Invoke-Pester -Path ./PsGraph.Pester.Tests/
 
