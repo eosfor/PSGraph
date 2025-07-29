@@ -23,6 +23,11 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
 
+      - name: Install PowerShell
+        uses: PSModule/install-powershell@v1
+        with:
+          Version: latest
+
       - name: Ensure release tag exists
         id: ensure_tag
         run: |
