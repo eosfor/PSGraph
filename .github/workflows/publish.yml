@@ -121,19 +121,21 @@ jobs:
           fi
 
       - name: Pack PSGraph.Common (Debug/pre-release on prerelease, Release on release)
+        shell: bash
         run: |
           if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            VERSION="${{ steps.set_version.outputs.version }}-${{ steps.set_version.outputs.prerelease }}"
             dotnet pack PSGraph.Common/PSGraph.Common.csproj \
               --configuration Debug \
               --no-build \
               --output ./nupkg \
-              --version ${{ steps.set_version.outputs.version }}${{ steps.set_version.outputs.prerelease && format('-{0}', steps.set_version.outputs.prerelease) }}
+              --version "$VERSION"
           else
             dotnet pack PSGraph.Common/PSGraph.Common.csproj \
               --configuration Release \
               --no-build \
               --output ./nupkg \
-              --version ${{ steps.set_version.outputs.version }}
+              --version "${{ steps.set_version.outputs.version }}"
           fi
 
       - name: Publish PSGraph.Common to NuGet
