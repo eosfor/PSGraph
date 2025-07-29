@@ -18,6 +18,11 @@ jobs:
         with:
           fetch-depth: 0 # требуется для корректной работы с git и ветками
 
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+
       - name: Ensure release tag exists
         id: ensure_tag
         run: |
