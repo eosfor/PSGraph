@@ -58,24 +58,17 @@ jobs:
 
           # Обновляем ModuleVersion
           $versionPattern = 'ModuleVersion\s*=\s*''[^'']*'''
-          $newContent = $content -replace $versionPattern, "ModuleVersion = '$version'"
+          $content = $content -replace $versionPattern, "ModuleVersion = '$version'"
 
-          # Обновляем или добавляем Prerelease
-          $prPattern = '^\s*Prerelease\s*=\s*''[^'']*''\s*$'
+          # Обработка Prerelease
           if ($prerelease) {
-            if ($newContent -match $prPattern) {
-              $newContent = $newContent -replace $prPattern, "Prerelease = '$prerelease'"
-            } else {
-              # Добавляем Prerelease после ModuleVersion
-              $mvPattern = 'ModuleVersion\s*=\s*''[^'']*'''
-              $newContent = $newContent -replace $mvPattern, "ModuleVersion = '$version'`nPrerelease = '$prerelease'"
-            }
+            # Раскомментируем и задаём значение
+            $content = $content -replace '^\s*#\s*Prerelease\s*=\s*''[^'']*''', "Prerelease = '$prerelease'"
           } else {
-            # Удаляем Prerelease если был
-            $newContent = $newContent -replace $prPattern, ''
+            # Оставляем строку закомментированной (ничего не делаем)
           }
 
-          Set-Content -Path $psd1.FullName -Value $newContent
+          Set-Content -Path $psd1.FullName -Value $content
 
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
