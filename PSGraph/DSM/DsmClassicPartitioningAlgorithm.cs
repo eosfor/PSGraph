@@ -2,7 +2,7 @@ using PSGraph.Model;
 
 namespace PSGraph.DesignStructureMatrix;
 
-public class DsmClassicPartitioningAlgorithm: IDsmPartitionAlgorithm
+public class DsmClassicPartitioningAlgorithm : IDsmPartitionAlgorithm
 {
     private DsmClassic _dsmObj;
     private IDsm _partitionedObj;
@@ -13,12 +13,14 @@ public class DsmClassicPartitioningAlgorithm: IDsmPartitionAlgorithm
 
 
     public IDsm Partition()
-    { var noOutput = FindTasksWithNoOutput(_dsmObj);
+    {
+        var noOutput = FindTasksWithNoOutput(_dsmObj);
         var noInput = FindTasksWithNoInput(_dsmObj);
 
-        var noEmptyLines = _dsmObj.Remove(noOutput);
-        noEmptyLines = noEmptyLines.Remove(noInput);
-
+        // Удаляем каждую вершину только один раз
+        // TODO: add tests to check that no-input + no-output nodes do not crash and processed correctly
+        var toRemove = noOutput.Union(noInput).Distinct().ToList();
+        var noEmptyLines = _dsmObj.Remove(toRemove);
 
         HashSet<List<PSVertex>> tempPart = new(new ListEqualityComparer());
         foreach (List<PSVertex> p in PartitionInternal(noEmptyLines))
@@ -30,19 +32,19 @@ public class DsmClassicPartitioningAlgorithm: IDsmPartitionAlgorithm
 
 
         List<PSVertex> order = new();
-        order = order.Concat(noOutput).ToList();
+        order = order.Concat(toRemove).ToList();
         foreach (var p in _partitions)
         {
             order = order.Concat(p).ToList();
         }
-        order = order.Concat(noInput).ToList();
+        //order = order.Concat(noInput).ToList();
 
-        var diff = _dsmObj.RowIndex.Select( r => r.Key).Except(order).ToList();
+        var diff = _dsmObj.RowIndex.Select(r => r.Key).Except(order).ToList();
         if (diff.Count > 0)
         {
             order = order.Concat(diff).ToList();
         }
-        
+
         _partitionedObj = (IDsm)_dsmObj.Order(order);
 
         return Partitioned;
@@ -81,21 +83,21 @@ public class DsmClassicPartitioningAlgorithm: IDsmPartitionAlgorithm
     private IEnumerable<List<PSVertex>> PartitionInternal(IDsm dsmObj)
     {
         int power = 2;
-        
+
         // raising matrix to a consecutive powers from 2 to matrix size -1
         for (int i = power; i <= dsmObj.DsmMatrixView.RowCount; i++)
         {
             var t = dsmObj.DsmMatrixView.Power(i);
-            
+
             // if diagonal is non-zero -> there are loops
             if (t.Diagonal().Sum() > 0)
             {
                 List<PSVertex> partition = new();
-                
+
                 // skimming through matrix to detect rows where diagonal element > 0
                 for (int j = 0; j < dsmObj.DsmMatrixView.RowCount; j++)
                 {
-                    if (t.Diagonal()[j]> 0)
+                    if (t.Diagonal()[j] > 0)
                     {
                         partition.Add(dsmObj.RowIndex.Where(v => v.Value == j).First().Key);
                     }

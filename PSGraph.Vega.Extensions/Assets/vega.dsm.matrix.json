@@ -1,24 +1,25 @@
 {
-  "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "A re-orderable adjacency matrix.",
+  "$schema": "https://vega.github.io/schema/vega/v6.json",
+  "description": "A re-orderable DSM matrix.",
   "width": 1000,
   "height": 1000,
   "padding": 2,
-
   "signals": [
-    { "name": "cellSize", "value": 10 },
-    { "name": "count", "update": "length(data('nodes'))" },
-    { "name": "width", "update": "span(range('position'))" },
-    { "name": "height", "update": "width" },
+    {"name": "cellSize", "value": 10},
+    {"name": "count", "update": "length(data('nodes'))"},
+    {"name": "width", "update": "span(range('position'))"},
+    {"name": "height", "update": "width"},
     {
-      "name": "src", "value": {},
+      "name": "src",
+      "value": {},
       "on": [
         {"events": "text:pointerdown", "update": "datum"},
         {"events": "window:pointerup", "update": "{}"}
       ]
     },
     {
-      "name": "dest", "value": -1,
+      "name": "dest",
+      "value": -1,
       "on": [
         {
           "events": "[@columns:pointerdown, window:pointerup] > window:pointermove",
@@ -32,49 +33,45 @@
       ]
     }
   ],
-
   "data": [
     {
       "name": "nodes",
       "values": [],
       "transform": [
+        {"type": "formula", "as": "order", "expr": "datum.group"},
         {
-          "type": "formula", "as": "order",
-          "expr": "datum.group"
-        },
-        {
-          "type": "formula", "as": "score",
+          "type": "formula",
+          "as": "score",
           "expr": "dest >= 0 && datum === src ? dest : datum.order"
         },
         {
-          "type": "window", "sort": {"field": "score"},
-          "ops": ["row_number"], "as": ["order"]
+          "type": "window",
+          "sort": {"field": "score"},
+          "ops": ["row_number"],
+          "as": ["order"]
         }
       ]
     },
     {
       "name": "edges",
-      "values" : [],
+      "values": [],
       "transform": [
         {
-          "type": "lookup", "from": "nodes", "key": "index",
-          "fields": ["source", "target"], "as": ["sourceNode", "targetNode"]
+          "type": "lookup",
+          "from": "nodes",
+          "key": "index",
+          "fields": ["source", "target"],
+          "as": ["sourceNode", "targetNode"]
         },
         {
-          "type": "formula", "as": "group",
+          "type": "formula",
+          "as": "group",
           "expr": "datum.sourceNode.group === datum.targetNode.group ? datum.sourceNode.group : count"
         }
       ]
     },
-    {
-      "name": "cross",
-      "source": "nodes",
-      "transform": [
-        { "type": "cross" }
-      ]
-    }
+    {"name": "cross", "source": "nodes", "transform": [{"type": "cross"}]}
   ],
-
   "scales": [
     {
       "name": "position",
@@ -87,45 +84,12 @@
       "type": "ordinal",
       "range": "category",
       "domain": {
-        "fields": [
-          {"data": "nodes", "field": "group"},
-          {"signal": "count"}
-        ],
+        "fields": [{"data": "nodes", "field": "group"}, {"signal": "count"}],
         "sort": true
       }
     }
   ],
-
   "marks": [
-    {
-      "type": "rect",
-      "from": {"data": "cross"},
-      "encode": {
-        "update": {
-          "x": {"scale": "position", "field": "a.order"},
-          "y": {"scale": "position", "field": "b.order"},
-          "width": {"scale": "position", "band": 1, "offset": -1},
-          "height": {"scale": "position", "band": 1, "offset": -1},
-          "fill": [
-            {"test": "datum.a === src || datum.b === src", "value": "#ddd"},
-            {"value": "#f5f5f5"}
-          ]
-        }
-      }
-    },
-    {
-      "type": "rect",
-      "from": {"data": "edges"},
-      "encode": {
-        "update": {
-          "x": {"scale": "position", "field": "sourceNode.order"},
-          "y": {"scale": "position", "field": "targetNode.order"},
-          "width": {"scale": "position", "band": 1, "offset": -1},
-          "height": {"scale": "position", "band": 1, "offset": -1},
-          "fill": {"scale": "color", "field": "group"}
-        }
-      }
-    },
     {
       "type": "rect",
       "from": {"data": "edges"},

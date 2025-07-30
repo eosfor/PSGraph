@@ -3,6 +3,10 @@ using MathNet.Numerics.Data.Text;
 using PSGraph.Model;
 using QuikGraph.Graphviz;
 using Svg;
+using PSGraph.Vega.Extensions;
+using Newtonsoft.Json.Linq;
+using PSGraph.Vega.Spec;
+using System.Text;
 
 namespace PSGraph.DesignStructureMatrix;
 
@@ -19,9 +23,10 @@ public class DsmView : IDsmView
 
     public string ExportGraphViz()
     {
-        return _dsm.DsmGraphView.ToGraphviz( a => a.FormatVertex += (sender, args) =>
+        return _dsm.DsmGraphView.ToGraphviz(a => a.FormatVertex += (sender, args) =>
         {
-            args.VertexFormat.Label = args.Vertex.Label; });
+            args.VertexFormat.Label = args.Vertex.Label;
+        });
     }
 
     public void ExportText(string Path)
@@ -29,9 +34,16 @@ public class DsmView : IDsmView
         DelimitedWriter.Write(Path, _dsm.DsmMatrixView, ",");
     }
 
-    public virtual SvgDocument ToSvg()
+    public string ExportText()
     {
-        var itemSize = 45; // the size of a cell of a matrix
+        using var sw = new StringWriter();
+        DelimitedWriter.Write(sw, _dsm.DsmMatrixView, ",");
+        return sw.ToString();
+    }
+
+    private SvgDocument BuildSvgDocument()
+    {
+        var itemSize = 45;
         var h = _dsm.DsmMatrixView.ColumnCount * itemSize + itemSize;
         var w = _dsm.DsmMatrixView.RowCount * itemSize + itemSize;
 
@@ -43,8 +55,43 @@ public class DsmView : IDsmView
 
         GenerateMatrixViewAnnotations(itemSize, svgDoc);
         GenerateMatrixView(itemSize, svgDoc);
-        if (null != _partitions) GeneratePartitionBoundaries(itemSize, svgDoc);
+        if (_partitions != null)
+            GeneratePartitionBoundaries(itemSize, svgDoc);
+
         return svgDoc;
+    }
+
+    public virtual SvgDocument ToSvg()
+    {
+        return BuildSvgDocument();
+    }
+
+    public virtual string ToSvgString()
+    {
+        var svgDoc = BuildSvgDocument();
+
+        using var ms = new MemoryStream();
+        svgDoc.Write(ms, useBom: false);
+        ms.Position = 0;
+
+        using var reader = new StreamReader(ms, Encoding.UTF8);
+        return reader.ReadToEnd();
+    }
+
+    public string ToVegaSpec(VegaExportTypes exportType, string modulePath)
+    {
+        var (nodes, edges) = _dsm.ToVegaReorderableMatrix();
+        var vega = VegaHelper.GetVegaTemplateObjectFromModulePath(modulePath, "vega.dsm.matrix.json");
+
+        // assuming these indices are correct for the matrix template
+        vega.Data[0].Values = nodes.ToList<object>();
+        vega.Data[1].Values = edges.ToList<object>();
+
+        return exportType switch
+        {
+            VegaExportTypes.HTML => VegaHelper.RenderHtml(vega),
+            _ => vega.ToJson()
+        };
     }
 
     private void GeneratePartitionBoundaries(int itemSize, SvgDocument svgDoc)
@@ -62,7 +109,7 @@ public class DsmView : IDsmView
                 X = row,
                 Y = row, //top left corner
                 StrokeWidth = (float)2.0,
-                Stroke = new SvgColourServer(Color.Black),
+                Stroke = new SvgColourServer(System.Drawing.Color.Black),
                 FillOpacity = 0
             };
 
@@ -113,7 +160,7 @@ public class DsmView : IDsmView
                     X = x,
                     Y = y,
                     StrokeWidth = (float)0.5,
-                    Stroke = new SvgColourServer(Color.DimGray),
+                    Stroke = new SvgColourServer(System.Drawing.Color.DimGray),
                     Fill = FillColor(i, j)
                 };
                 svgDoc.Children.Add(rect);
@@ -122,10 +169,10 @@ public class DsmView : IDsmView
 
         SvgColourServer FillColor(int i, int j)
         {
-            if (i == j) return new SvgColourServer(Color.DarkGray);
+            if (i == j) return new SvgColourServer(System.Drawing.Color.DarkGray);
             return _dsm.DsmMatrixView[j, i] == 1
-                ? new SvgColourServer(Color.SlateBlue)
-                : new SvgColourServer(Color.White);
+                ? new SvgColourServer(System.Drawing.Color.SlateBlue)
+                : new SvgColourServer(System.Drawing.Color.White);
         }
     }
 }
