@@ -1,25 +1,275 @@
 {
-  "$schema": "https://vega.github.io/schema/vega/v6.json",
-  "description": "A re-orderable DSM matrix.",
-  "width": 1000,
-  "height": 1000,
-  "padding": 2,
+  "data": [
+    {
+      "name": "nodes",
+      "transform": [
+        {"type": "formula", "as": "order", "expr": "datum.group"},
+        {
+          "type": "formula",
+          "as": "score",
+          "expr": "dest >= 0 && datum === src ? dest : datum.order"
+        },
+        {
+          "type": "window",
+          "as": ["order"],
+          "sort": {"field": "score"},
+          "ops": ["row_number"]
+        }
+      ],
+      "values": []
+    },
+    {
+      "name": "edges",
+      "transform": [
+        {
+          "fields": ["source", "target"],
+          "type": "lookup",
+          "as": ["sourceNode", "targetNode"],
+          "key": "index",
+          "from": "nodes"
+        },
+        {
+          "type": "formula",
+          "as": "group",
+          "expr": "datum.sourceNode.group === datum.targetNode.group ? datum.sourceNode.group : count"
+        }
+      ],
+      "values": []
+    },
+    {
+      "name": "edgeMap",
+      "values": []
+    },
+    {"name": "cross", "transform": [{"type": "cross"}], "source": "nodes"},
+    {
+      "name": "selectedLinks",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "src && src.index != null && datum.source === src.index"
+        },
+        {
+          "fields": ["targetNode.name", "targetNode.index"],
+          "type": "project",
+          "as": ["names", "id"]
+        }
+      ],
+      "source": "edges"
+    },
+    {
+      "name": "selectedCols",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "columnClick && columnClick.index != null && datum.target === columnClick.index"
+        },
+        {
+          "fields": ["sourceNode.name", "sourceNode.index"],
+          "type": "project",
+          "as": ["names", "id"]
+        }
+      ],
+      "source": "edges"
+    }
+  ],
+  "marks": [
+    {
+      "from": {"data": "edges"},
+      "type": "rect",
+      "encode": {
+        "update": {
+          "fill": [
+            {
+              "test": "src && src.index != null && datum.sourceNode.order === src.order",
+              "value": "orange"
+            },
+            {
+              "test": "columnClick && columnClick.index != null && datum.targetNode.order === columnClick.order",
+              "value": "orange"
+            },
+            {"scale": "color", "field": "group"}
+          ],
+          "height": {"band": 1, "offset": -1, "scale": "position"},
+          "width": {"band": 1, "offset": -1, "scale": "position"},
+          "x": {"scale": "position", "field": "targetNode.order"},
+          "y": {"scale": "position", "field": "sourceNode.order"}
+        }
+      },
+      "zindex": 10
+    },
+    {
+      "from": {"data": "nodes"},
+      "type": "rect",
+      "encode": {
+        "update": {
+          "fill": [
+            {
+              "test": "columnClick && columnClick.index != null && datum.index === columnClick.index",
+              "value": "lightsteelblue"
+            }
+          ],
+          "fillOpacity": {"value": 0.3},
+          "width": {"band": 1, "scale": "position"},
+          "height": {"signal": "width"},
+          "y": {"value": 0},
+          "x": {"scale": "position", "field": "order"}
+        }
+      },
+      "name": "colHighlightOnColumnClick"
+    },
+    {
+      "from": {"data": "nodes"},
+      "type": "rect",
+      "encode": {
+        "update": {
+          "fill": [
+            {
+              "test": "src && src.index != null && datum.index === src.index",
+              "value": "lightsteelblue"
+            }
+          ],
+          "fillOpacity": {"value": 0.3},
+          "height": {"band": 1, "scale": "position"},
+          "width": {"signal": "width"},
+          "x": {"value": 0},
+          "y": {"scale": "position", "field": "order"}
+        }
+      },
+      "name": "rowHighlight"
+    },
+    {
+      "from": {"data": "nodes"},
+      "type": "rect",
+      "encode": {
+        "update": {
+          "fill": [
+            {
+              "test": "src && indata('selectedLinks', 'id', datum.index)",
+              "value": "lightsteelblue"
+            }
+          ],
+          "fillOpacity": {"value": 0.3},
+          "height": {"signal": "height"},
+          "width": {"band": 1, "scale": "position"},
+          "x": {"scale": "position", "field": "order"},
+          "y": {"value": 0}
+        }
+      },
+      "name": "colHighlight"
+    },
+    {
+      "from": {"data": "nodes"},
+      "type": "rect",
+      "encode": {
+        "update": {
+          "fill": [
+            {
+              "test": "columnClick && indata('selectedCols', 'id', datum.index)",
+              "value": "lightsteelblue"
+            }
+          ],
+          "fillOpacity": {"value": 0.3},
+          "width": {"signal": "height"},
+          "height": {"band": 1, "scale": "position"},
+          "y": {"scale": "position", "field": "order"},
+          "x": {"value": 0}
+        }
+      },
+      "name": "rowHighlightOnColumnClick"
+    },
+    {
+      "from": {"data": "nodes"},
+      "type": "text",
+      "encode": {
+        "update": {
+          "align": {"value": "left"},
+          "angle": {"value": -90},
+          "baseline": {"value": "middle"},
+          "fill": [
+            {
+              "test": "src && indata('selectedLinks', 'names', datum.name)",
+              "value": "orange"
+            },
+            {"value": "black"}
+          ],
+          "fontSize": {"value": 10},
+          "text": {"field": "name"},
+          "x": {"band": 0.5, "scale": "position", "field": "order"},
+          "y": {"offset": -2}
+        }
+      },
+      "name": "columns"
+    },
+    {
+      "from": {"data": "nodes"},
+      "type": "text",
+      "encode": {
+        "update": {
+          "align": {"value": "right"},
+          "baseline": {"value": "middle"},
+          "fill": [
+            {"test": "datum === src", "value": "steelblue"},
+            {
+              "test": "columnClick && indata('selectedCols', 'names', datum.name)",
+              "value": "orange"
+            },
+            {"value": "black"}
+          ],
+          "fontSize": {"value": 10},
+          "text": {"field": "name"},
+          "x": {"offset": -2},
+          "y": {"band": 0.5, "scale": "position", "field": "order"}
+        }
+      },
+      "name": "rows"
+    }
+  ],
+  "scales": [
+    {
+      "domain": {"data": "nodes", "field": "order", "sort": true},
+      "name": "position",
+      "type": "band",
+      "range": {"step": {"signal": "cellSize"}}
+    },
+    {
+      "domain": {
+        "sort": true,
+        "fields": [{"data": "nodes", "field": "group"}, {"signal": "count"}]
+      },
+      "name": "color",
+      "type": "ordinal",
+      "range": "category"
+    }
+  ],
   "signals": [
+    {
+      "name": "columnClick",
+      "value": {},
+      "on": [
+        {
+          "events": {"markname": "columns", "type": "pointerdown"},
+          "update": "datum"
+        },
+        {"events": "window:pointerup", "update": "{}"}
+      ]
+    },
+    {
+      "name": "src",
+      "value": {},
+      "on": [
+        {
+          "events": {"markname": "rows", "type": "pointerdown"},
+          "update": "datum"
+        },
+        {"events": "window:pointerup", "update": "{}"}
+      ]
+    },
     {"name": "cellSize", "value": 10},
     {"name": "count", "update": "length(data('nodes'))"},
     {"name": "width", "update": "span(range('position'))"},
     {"name": "height", "update": "width"},
     {
-      "name": "src",
-      "value": {},
-      "on": [
-        {"events": "text:pointerdown", "update": "datum"},
-        {"events": "window:pointerup", "update": "{}"}
-      ]
-    },
-    {
       "name": "dest",
-      "value": -1,
       "on": [
         {
           "events": "[@columns:pointerdown, window:pointerup] > window:pointermove",
@@ -30,117 +280,13 @@
           "update": "src.name && datum !== src ? (0.5 + count * clamp(y(), 0, height) / height) : dest"
         },
         {"events": "window:pointerup", "update": "-1"}
-      ]
+      ],
+      "value": -1
     }
   ],
-  "data": [
-    {
-      "name": "nodes",
-      "values": [],
-      "transform": [
-        {"type": "formula", "as": "order", "expr": "datum.group"},
-        {
-          "type": "formula",
-          "as": "score",
-          "expr": "dest >= 0 && datum === src ? dest : datum.order"
-        },
-        {
-          "type": "window",
-          "sort": {"field": "score"},
-          "ops": ["row_number"],
-          "as": ["order"]
-        }
-      ]
-    },
-    {
-      "name": "edges",
-      "values": [],
-      "transform": [
-        {
-          "type": "lookup",
-          "from": "nodes",
-          "key": "index",
-          "fields": ["source", "target"],
-          "as": ["sourceNode", "targetNode"]
-        },
-        {
-          "type": "formula",
-          "as": "group",
-          "expr": "datum.sourceNode.group === datum.targetNode.group ? datum.sourceNode.group : count"
-        }
-      ]
-    },
-    {"name": "cross", "source": "nodes", "transform": [{"type": "cross"}]}
-  ],
-  "scales": [
-    {
-      "name": "position",
-      "type": "band",
-      "domain": {"data": "nodes", "field": "order", "sort": true},
-      "range": {"step": {"signal": "cellSize"}}
-    },
-    {
-      "name": "color",
-      "type": "ordinal",
-      "range": "category",
-      "domain": {
-        "fields": [{"data": "nodes", "field": "group"}, {"signal": "count"}],
-        "sort": true
-      }
-    }
-  ],
-  "marks": [
-    {
-      "type": "rect",
-      "from": {"data": "edges"},
-      "encode": {
-        "update": {
-          "x": {"scale": "position", "field": "targetNode.order"},
-          "y": {"scale": "position", "field": "sourceNode.order"},
-          "width": {"scale": "position", "band": 1, "offset": -1},
-          "height": {"scale": "position", "band": 1, "offset": -1},
-          "fill": {"scale": "color", "field": "group"}
-        }
-      }
-    },
-    {
-      "type": "text",
-      "name": "columns",
-      "from": {"data": "nodes"},
-      "encode": {
-        "update": {
-          "x": {"scale": "position", "field": "order", "band": 0.5},
-          "y": {"offset": -2},
-          "text": {"field": "name"},
-          "fontSize": {"value": 10},
-          "angle": {"value": -90},
-          "align": {"value": "left"},
-          "baseline": {"value": "middle"},
-          "fill": [
-            {"test": "datum === src", "value": "steelblue"},
-            {"value": "black"}
-          ]
-        }
-      }
-    },
-    {
-      "type": "text",
-      "name": "rows",
-      "from": {"data": "nodes"},
-      "encode": {
-        "update": {
-          "x": {"offset": -2},
-          "y": {"scale": "position", "field": "order", "band": 0.5},
-          "text": {"field": "name"},
-          "fontSize": {"value": 10},
-          "align": {"value": "right"},
-          "baseline": {"value": "middle"},
-          "fill": [
-            {"test": "datum === src", "value": "steelblue"},
-            {"value": "black"}
-          ]
-        }
-      }
-    }
-  ]
+  "$schema": "https://vega.github.io/schema/vega/v6.json",
+  "description": "A re-orderable DSM matrix.",
+  "height": 1000,
+  "padding": 2,
+  "width": 1000
 }
