@@ -110,11 +110,18 @@ jobs:
       # --- NuGet Common Package Build/Publish ---
       - name: Build PSGraph.Common (Debug on prerelease, Release on release)
         run: |
-          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
-            dotnet build PSGraph.Common/PSGraph.Common.csproj --configuration Debug --no-restore
+          if [ -n "${{ steps.set_version.outputs.prerelease }}" ]; then
+            VERSION="${{ steps.set_version.outputs.version }}-${{ steps.set_version.outputs.prerelease }}"
+            CONFIG=Debug
           else
-            dotnet build PSGraph.Common/PSGraph.Common.csproj --configuration Release --no-restore
+            VERSION="${{ steps.set_version.outputs.version }}"
+            CONFIG=Release
           fi
+          dotnet build PSGraph.Common/PSGraph.Common.csproj \
+            --configuration $CONFIG \
+            --no-restore \
+            -p:PackageVersion="$VERSION" \
+            -p:Version="$VERSION"
 
       - name: Pack PSGraph.Common (Debug/pre-release on prerelease, Release on release)
         shell: bash
@@ -130,7 +137,8 @@ jobs:
             --configuration $CONFIG \
             --no-build \
             --output ./nupkg \
-            /p:PackageVersion="$VERSION"
+            -p:PackageVersion="$VERSION" \
+            -p:Version="$VERSION"
 
       - name: Publish PSGraph.Common to NuGet
         run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

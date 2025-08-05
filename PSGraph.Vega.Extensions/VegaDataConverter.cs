@@ -1,10 +1,18 @@
 using Microsoft.Msagl.Core.Layout;
+using Newtonsoft.Json.Linq;
+using PSGraph.DesignStructureMatrix;
 using PSGraph.Model;
 using PSGraph.Model.VegaDataModels;
 using QuikGraph;
 
 namespace PSGraph.Vega.Extensions
 {
+    public class MatrixCellRecord
+    {
+        public string row { get; set; } = null!;
+        public string col { get; set; } = null!;
+        public float value { get; set; }
+    }
     public static class VegaConverterExtensions
     {
         public static (List<NodeRecord> nodes, List<LinkRecord> links) ConvertToVegaNodeLink(this Model.PsBidirectionalGraph graph)
@@ -108,6 +116,43 @@ namespace PSGraph.Vega.Extensions
 
             records.AddRange(roots);
             return records;
+        }
+
+
+        public static (JArray nodes, JArray edges) ToVegaReorderableMatrix(this IDsm dsm)
+        {
+            var nodes = new JArray();
+            var edges = new JArray();
+
+            var rowKeys = dsm.RowIndex.OrderBy(kvp => kvp.Value).Select(kvp => kvp.Key).ToList();
+            var indexMap = rowKeys.Select((v, i) => new { v, i }).ToDictionary(x => x.v, x => x.i);
+
+            for (int i = 0; i < rowKeys.Count; i++)
+            {
+                nodes.Add(new JObject
+                {
+                    ["name"] = rowKeys[i].ToString(),
+                    ["index"] = i,
+                    ["group"] = 1 // или использовать кластер
+                });
+            }
+
+            for (int i = 0; i < dsm.DsmMatrixView.RowCount; i++)
+            {
+                for (int j = 0; j < dsm.DsmMatrixView.ColumnCount; j++)
+                {
+                    if (dsm.DsmMatrixView[i, j] != 0)
+                    {
+                        edges.Add(new JObject
+                        {
+                            ["source"] = i,
+                            ["target"] = j
+                        });
+                    }
+                }
+            }
+
+            return (nodes, edges);
         }
     }
 }

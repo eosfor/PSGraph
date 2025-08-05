@@ -17,8 +17,10 @@ public class DsmGraphPartitioningAlgorithm: IDsmPartitionAlgorithm
         var noOutput = FindTasksWithNoOutput(_dsmObj);
         var noInput = FindTasksWithNoInput(_dsmObj);
 
-        var noEmptyLines = _dsmObj.Remove(noOutput);
-        noEmptyLines = noEmptyLines.Remove(noInput);
+        // Удаляем каждую вершину только один раз
+        // TODO: add tests to check that no-input + no-output nodes do not crash and processed correctly
+        var toRemove = noOutput.Union(noInput).Distinct().ToList();
+        var noEmptyLines = _dsmObj.Remove(toRemove);
 
 
         HashSet<List<PSVertex>> tempPart = new(new ListEqualityComparer());
@@ -31,12 +33,12 @@ public class DsmGraphPartitioningAlgorithm: IDsmPartitionAlgorithm
 
 
         List<PSVertex> order = new();
-        order = order.Concat(noOutput).ToList();
+        order = order.Concat(toRemove).ToList();
         foreach (var p in _partitions)
         {
             order = order.Concat(p).ToList();
         }
-        order = order.Concat(noInput).ToList();
+        //order = order.Concat(noInput).ToList();
         
         var diff = _dsmObj.RowIndex.Select( r => r.Key).Except(order).ToList();
         if (diff.Count > 0)

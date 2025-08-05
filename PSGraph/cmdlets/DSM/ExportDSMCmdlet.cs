@@ -8,6 +8,9 @@ using MathNet.Numerics.Data.Text;
 using PSGraph.DesignStructureMatrix;
 using PSGraph.Model;
 using QuikGraph;
+using PSGraph.Vega.Extensions;
+using Newtonsoft.Json.Linq;
+using PSGraph.Vega.Spec;
 
 namespace PSGraph.Cmdlets
 {
@@ -16,18 +19,18 @@ namespace PSGraph.Cmdlets
     {
         [Parameter(Position = 0, Mandatory = true, ParameterSetName = "PlainDsm")]
         public IDsm Dsm;
-        
+
         [Parameter(Position = 0, Mandatory = true, ParameterSetName = "PartitionedDsm")]
         public PartitioningResult Result;
-        
-        [Parameter(Position = 1, Mandatory = true, ParameterSetName = "PlainDsm")]
-        [Parameter(Position = 1, Mandatory = true, ParameterSetName = "PartitionedDsm")]
-        [Parameter(Mandatory = true)]
+
+        [Parameter(Position = 1, Mandatory = false, ParameterSetName = "PlainDsm")]
+        [Parameter(Position = 1, Mandatory = false, ParameterSetName = "PartitionedDsm")]
+        [Parameter(Mandatory = false)]
         public string Path;
 
         [Parameter(Position = 2, Mandatory = false, ParameterSetName = "PlainDsm")]
         [Parameter(Position = 3, Mandatory = false, ParameterSetName = "PartitionedDsm")]
-        public DSMExportTypes Format = DSMExportTypes.SVG;
+        public DSMExportTypes Format = DSMExportTypes.TEXT;
 
         private IDsm _dsm;
         private IDsmPartitionAlgorithm? _algo;
@@ -48,28 +51,48 @@ namespace PSGraph.Cmdlets
                     break;
             }
 
+            string result = string.Empty;
 
             switch (Format)
             {
-                default:
-                case DSMExportTypes.SVG:
-                    ExportSVG();
-                    break;
+                // case DSMExportTypes.SVG:
+                //     result = ExportSVG();
+                //     break;
                 case DSMExportTypes.TEXT:
-                    ExportText();
+                    result = ExportText();
                     break;
+                case DSMExportTypes.VEGA_JSON:
+                    result = ExportVega(VegaExportTypes.JSON);
+                    break;
+                case DSMExportTypes.VEGA_HTML:
+                    result = ExportVega(VegaExportTypes.HTML);
+                    break;
+            }
+
+            if (MyInvocation.BoundParameters.ContainsKey("Path"))
+            {
+                File.WriteAllText(Path, result);
+            }
+            else
+            {
+                WriteObject(result);
             }
         }
 
-        private void ExportText()
+        private string ExportText()
         {
-            _view.ExportText(Path);
+            return _view.ExportText();
         }
 
-        private void ExportSVG()
+        private string ExportSVG()
         {
-            var svgDoc = _view.ToSvg();
-            svgDoc.Write(Path);
+            return _view.ToSvgString();
+        }
+
+        private string ExportVega(VegaExportTypes exportType)
+        {
+            var modulePath = MyInvocation.MyCommand.Module?.ModuleBase;
+            return _view.ToVegaSpec(exportType, modulePath);
         }
     }
 }

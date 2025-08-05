@@ -9,12 +9,12 @@ public static class VegaHelper
 {
     public static JObject GetVegaTemplate(string templateName)
     {
-        var currentDir = System.IO.Directory.GetCurrentDirectory();
-        var templatePath = System.IO.Path.Combine(currentDir, "Assets", templateName);
+        var assemblyPath = System.IO.Path.GetDirectoryName(typeof(VegaHelper).Assembly.Location);
+        var templatePath = System.IO.Path.Combine(assemblyPath ?? ".", "Assets", templateName);
 
         if (!System.IO.File.Exists(templatePath))
         {
-            throw new FileNotFoundException($"Template file '{templateName}' not found in Assets directory.");
+            throw new FileNotFoundException($"Template file '{templateName}' not found in Assets directory at '{templatePath}'.");
         }
 
         return JObject.Parse(System.IO.File.ReadAllText(templatePath));
