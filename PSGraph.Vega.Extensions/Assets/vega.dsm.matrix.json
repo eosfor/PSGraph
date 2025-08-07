@@ -70,16 +70,16 @@
   ],
   "marks": [
     {
-      "type": "rect",
       "from": {"data": "nodes"},
+      "type": "rect",
       "encode": {
         "update": {
-          "x": {"scale": "position", "field": "order"},
-          "y": {"scale": "position", "field": "order"},
-          "width": {"scale": "position", "band": 1, "offset": -1},
-          "height": {"scale": "position", "band": 1, "offset": -1},
           "fill": {"value": "#cccccc"},
-          "fillOpacity": {"value": 0.45}
+          "fillOpacity": {"value": 0.45},
+          "height": {"band": 1, "offset": -1, "scale": "position"},
+          "width": {"band": 1, "offset": -1, "scale": "position"},
+          "x": {"scale": "position", "field": "order"},
+          "y": {"scale": "position", "field": "order"}
         }
       },
       "zindex": 0
@@ -98,6 +98,7 @@
               "test": "columnClick && columnClick.index != null && datum.targetNode.order === columnClick.order",
               "value": "orange"
             },
+            {"test": "datum.group === -1", "value": "#d0d0d0"},
             {"scale": "color", "field": "group"}
           ],
           "height": {"band": 1, "offset": -1, "scale": "position"},
@@ -120,10 +121,10 @@
             }
           ],
           "fillOpacity": {"value": 0.3},
-          "width": {"band": 1, "scale": "position"},
           "height": {"signal": "width"},
-          "y": {"value": 0},
-          "x": {"scale": "position", "field": "order"}
+          "width": {"band": 1, "scale": "position"},
+          "x": {"scale": "position", "field": "order"},
+          "y": {"value": 0}
         }
       },
       "name": "colHighlightOnColumnClick"
@@ -180,10 +181,10 @@
             }
           ],
           "fillOpacity": {"value": 0.3},
-          "width": {"signal": "height"},
           "height": {"band": 1, "scale": "position"},
-          "y": {"scale": "position", "field": "order"},
-          "x": {"value": 0}
+          "width": {"signal": "height"},
+          "x": {"value": 0},
+          "y": {"scale": "position", "field": "order"}
         }
       },
       "name": "rowHighlightOnColumnClick"
@@ -243,37 +244,34 @@
       "range": {"step": {"signal": "cellSize"}}
     },
     {
-      "domain": {
-        "sort": true,
-        "fields": [{"data": "nodes", "field": "group"}, {"signal": "count"}]
-      },
       "name": "color",
       "type": "ordinal",
-      "range": "category"
+      "domain": {"fields": [{"data": "nodes", "field": "group"}, [-1]]},
+      "range": {"scheme": "category20b", "extent": [0, 1], "count": 21}
     }
   ],
   "signals": [
     {
       "name": "columnClick",
-      "value": {},
       "on": [
         {
           "events": {"markname": "columns", "type": "pointerdown"},
           "update": "datum"
         },
         {"events": "window:pointerup", "update": "{}"}
-      ]
+      ],
+      "value": {}
     },
     {
       "name": "src",
-      "value": {},
       "on": [
         {
           "events": {"markname": "rows", "type": "pointerdown"},
           "update": "datum"
         },
         {"events": "window:pointerup", "update": "{}"}
-      ]
+      ],
+      "value": {}
     },
     {"name": "cellSize", "value": 10},
     {"name": "count", "update": "length(data('nodes'))"},

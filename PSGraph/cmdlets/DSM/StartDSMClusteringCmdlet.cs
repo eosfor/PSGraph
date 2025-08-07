@@ -29,7 +29,7 @@ namespace PSGraph.Cmdlets
                     algo = new DsmClassicPartitioningAlgorithm((DsmClassic)Dsm);
                     break;
                 case DsmPartitioningAlgorithms.GraphBased:
-                    algo = new DsmGraphPartitioningAlgorithm((DsmClassic)Dsm);
+                    algo = new DsmGraphPartitioningAlgorithm((IDsm)Dsm);
                     break;
                     
             }

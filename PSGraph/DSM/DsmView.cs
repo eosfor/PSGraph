@@ -80,7 +80,7 @@ public class DsmView : IDsmView
 
     public string ToVegaSpec(VegaExportTypes exportType, string modulePath)
     {
-        var (nodes, edges) = _dsm.ToVegaReorderableMatrix();
+        var (nodes, edges) = _dsm.ToVegaReorderableMatrix(_partitions);
         var vega = VegaHelper.GetVegaTemplateObjectFromModulePath(modulePath, "vega.dsm.matrix.json");
 
         // assuming these indices are correct for the matrix template
