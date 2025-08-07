@@ -36,10 +36,6 @@
       ],
       "values": []
     },
-    {
-      "name": "edgeMap",
-      "values": []
-    },
     {"name": "cross", "transform": [{"type": "cross"}], "source": "nodes"},
     {
       "name": "selectedLinks",
@@ -73,6 +69,21 @@
     }
   ],
   "marks": [
+    {
+      "type": "rect",
+      "from": {"data": "nodes"},
+      "encode": {
+        "update": {
+          "x": {"scale": "position", "field": "order"},
+          "y": {"scale": "position", "field": "order"},
+          "width": {"scale": "position", "band": 1, "offset": -1},
+          "height": {"scale": "position", "band": 1, "offset": -1},
+          "fill": {"value": "#cccccc"},
+          "fillOpacity": {"value": 0.45}
+        }
+      },
+      "zindex": 0
+    },
     {
       "from": {"data": "edges"},
       "type": "rect",
