@@ -2,70 +2,85 @@
   "data": [
     {
       "name": "nodes",
-      "transform": [
-        {"type": "formula", "as": "order", "expr": "datum.group"},
-        {
-          "type": "formula",
-          "as": "score",
-          "expr": "dest >= 0 && datum === src ? dest : datum.order"
-        },
-        {
-          "type": "window",
-          "as": ["order"],
-          "sort": {"field": "score"},
-          "ops": ["row_number"]
-        }
-      ],
+      "transform": [{"type": "formula", "as": "order", "expr": "datum.index"}],
       "values": []
     },
     {
       "name": "edges",
       "transform": [
         {
-          "fields": ["source", "target"],
           "type": "lookup",
-          "as": ["sourceNode", "targetNode"],
+          "from": "nodes",
           "key": "index",
-          "from": "nodes"
+          "fields": ["source"],
+          "as": ["sourceNode"]
+        },
+        {
+          "type": "lookup",
+          "from": "nodes",
+          "key": "index",
+          "fields": ["target"],
+          "as": ["targetNode"]
         },
         {
           "type": "formula",
-          "as": "group",
-          "expr": "datum.sourceNode.group === datum.targetNode.group ? datum.sourceNode.group : count"
+          "as": "sourceCluster",
+          "expr": "datum.sourceNode.group"
+        },
+        {
+          "type": "formula",
+          "as": "targetCluster",
+          "expr": "datum.targetNode.group"
+        },
+        {
+          "type": "formula",
+          "as": "clusterKey",
+          "expr": "datum.sourceCluster * groupBase + datum.targetCluster"
+        },
+        {
+          "type": "formula",
+          "as": "clusterLabel",
+          "expr": "toString(datum.sourceCluster) + '-' + toString(datum.targetCluster)"
         }
       ],
       "values": []
     },
-    {"name": "cross", "transform": [{"type": "cross"}], "source": "nodes"},
     {
-      "name": "selectedLinks",
+      "name": "children",
       "transform": [
         {
           "type": "filter",
-          "expr": "src && src.index != null && datum.source === src.index"
+          "expr": "datum.sourceNode.index === rowClick.index || datum.targetNode.index === columnClick.index"
         },
         {
-          "fields": ["targetNode.name", "targetNode.index"],
-          "type": "project",
-          "as": ["names", "id"]
+          "type": "formula",
+          "as": "targetNodeName",
+          "expr": "datum.targetNode.name"
+        },
+        {
+          "type": "formula",
+          "as": "sourceNodeName",
+          "expr": "datum.sourceNode.name"
         }
       ],
       "source": "edges"
     },
     {
-      "name": "selectedCols",
+      "name": "groupStats",
+      "source": "nodes",
       "transform": [
         {
-          "type": "filter",
-          "expr": "columnClick && columnClick.index != null && datum.target === columnClick.index"
-        },
-        {
-          "fields": ["sourceNode.name", "sourceNode.index"],
-          "type": "project",
-          "as": ["names", "id"]
+          "type": "aggregate",
+          "ops": ["max"],
+          "fields": ["group"],
+          "as": ["groupMax"]
         }
-      ],
-      "source": "edges"
+      ]
+    },
+    {
+      "name": "pairs",
+      "source": "edges",
+      "transform": [{"type": "aggregate", "groupby": ["clusterKey"]}]
     }
   ],
   "marks": [
@@ -91,23 +106,62 @@
         "update": {
           "fill": [
             {
-              "test": "src && src.index != null && datum.sourceNode.order === src.order",
-              "value": "orange"
+              "test": "rowClick && rowClick.index != null && datum.sourceNode.index === rowClick.index",
+              "value": "red"
             },
             {
-              "test": "columnClick && columnClick.index != null && datum.targetNode.order === columnClick.order",
-              "value": "orange"
+              "test": "columnClick && columnClick.index != null && datum.targetNode.index === columnClick.index",
+              "value": "red"
             },
-            {"test": "datum.group === -1", "value": "#d0d0d0"},
-            {"scale": "color", "field": "group"}
+            {"scale": "color", "field": "clusterKey"}
           ],
           "height": {"band": 1, "offset": -1, "scale": "position"},
           "width": {"band": 1, "offset": -1, "scale": "position"},
-          "x": {"scale": "position", "field": "targetNode.order"},
-          "y": {"scale": "position", "field": "sourceNode.order"}
+          "x": {"mult": {"signal": "cellSize"}, "field": "y"},
+          "y": {"mult": {"signal": "cellSize"}, "field": "x"}
         }
       },
       "zindex": 10
+    },
+    {
+      "from": {"data": "nodes"},
+      "type": "rect",
+      "encode": {
+        "update": {
+          "fill": [
+            {
+              "test": "rowClick && rowClick.index != null && datum.index === rowClick.index",
+              "value": "lightsteelblue"
+            }
+          ],
+          "fillOpacity": {"value": 0.3},
+          "height": {"band": 1, "scale": "position"},
+          "width": {"signal": "width"},
+          "x": {"value": 0},
+          "y": {"scale": "position", "field": "order"}
+        }
+      },
+      "name": "rowHighlight"
+    },
+    {
+      "from": {"data": "nodes"},
+      "type": "rect",
+      "encode": {
+        "update": {
+          "fill": [
+            {
+              "test": "rowClick && rowClick.index != null && indata('children', 'target', datum.index)",
+              "value": "lightsteelblue"
+            }
+          ],
+          "fillOpacity": {"value": 0.3},
+          "height": {"signal": "height"},
+          "width": {"band": 1, "scale": "position"},
+          "x": {"scale": "position", "field": "order"},
+          "y": {"value": 0}
+        }
+      },
+      "name": "colHighlight"
     },
     {
       "from": {"data": "nodes"},
@@ -136,47 +190,7 @@
         "update": {
           "fill": [
             {
-              "test": "src && src.index != null && datum.index === src.index",
-              "value": "lightsteelblue"
-            }
-          ],
-          "fillOpacity": {"value": 0.3},
-          "height": {"band": 1, "scale": "position"},
-          "width": {"signal": "width"},
-          "x": {"value": 0},
-          "y": {"scale": "position", "field": "order"}
-        }
-      },
-      "name": "rowHighlight"
-    },
-    {
-      "from": {"data": "nodes"},
-      "type": "rect",
-      "encode": {
-        "update": {
-          "fill": [
-            {
-              "test": "src && indata('selectedLinks', 'id', datum.index)",
-              "value": "lightsteelblue"
-            }
-          ],
-          "fillOpacity": {"value": 0.3},
-          "height": {"signal": "height"},
-          "width": {"band": 1, "scale": "position"},
-          "x": {"scale": "position", "field": "order"},
-          "y": {"value": 0}
-        }
-      },
-      "name": "colHighlight"
-    },
-    {
-      "from": {"data": "nodes"},
-      "type": "rect",
-      "encode": {
-        "update": {
-          "fill": [
-            {
-              "test": "columnClick && indata('selectedCols', 'id', datum.index)",
+              "test": "columnClick && indata('children', 'source', datum.index)",
               "value": "lightsteelblue"
             }
           ],
@@ -199,8 +213,8 @@
           "baseline": {"value": "middle"},
           "fill": [
             {
-              "test": "src && indata('selectedLinks', 'names', datum.name)",
-              "value": "orange"
+              "test": "rowClick && indata('children', 'targetNodeName', datum.name)",
+              "value": "red"
             },
             {"value": "black"}
           ],
@@ -220,10 +234,10 @@
           "align": {"value": "right"},
           "baseline": {"value": "middle"},
           "fill": [
-            {"test": "datum === src", "value": "steelblue"},
+            {"test": "datum === rowClick", "value": "steelblue"},
             {
-              "test": "columnClick && indata('selectedCols', 'names', datum.name)",
-              "value": "orange"
+              "test": "columnClick && indata('children', 'sourceNodeName', datum.name)",
+              "value": "red"
             },
             {"value": "black"}
           ],
@@ -246,8 +260,11 @@
     {
       "name": "color",
       "type": "ordinal",
-      "domain": {"fields": [{"data": "nodes", "field": "group"}, [-1]]},
-      "range": {"scheme": "category20b", "extent": [0, 1], "count": 21}
+      "domain": {"data": "edges", "field": "clusterKey", "sort": true},
+      "range": {
+        "scheme": {"signal": "colorSchemeName"},
+        "count": {"signal": "schemeCount"}
+      }
     }
   ],
   "signals": [
@@ -255,42 +272,49 @@
       "name": "columnClick",
       "on": [
         {
-          "events": {"markname": "columns", "type": "pointerdown"},
+          "events": {"markname": "columns", "type": "mouseover"},
           "update": "datum"
         },
-        {"events": "window:pointerup", "update": "{}"}
+        {"events": "mouseout", "update": "{}"}
       ],
       "value": {}
     },
     {
-      "name": "src",
+      "name": "rowClick",
       "on": [
         {
-          "events": {"markname": "rows", "type": "pointerdown"},
+          "events": {"markname": "rows", "type": "mouseover"},
           "update": "datum"
         },
-        {"events": "window:pointerup", "update": "{}"}
+        {"events": "mouseout", "update": "{}"}
       ],
       "value": {}
     },
+    {"name": "pairsCount", "update": "length(data('pairs'))"},
+    {
+      "name": "colorSchemeName",
+      "update": "pairsCount <= 10 ? 'tableau10' : (pairsCount <= 12 ? 'set3' : 'category20')"
+    },
+    {"name": "schemeCount", "update": "min(pairsCount, 20)"},
+    {"name": "groupBase", "update": "data('groupStats')[0].groupMax + 1"},
     {"name": "cellSize", "value": 10},
     {"name": "count", "update": "length(data('nodes'))"},
     {"name": "width", "update": "span(range('position'))"},
-    {"name": "height", "update": "width"},
+    {"name": "height", "update": "width"}
+  ],
+  "legends": [
     {
-      "name": "dest",
-      "on": [
-        {
-          "events": "[@columns:pointerdown, window:pointerup] > window:pointermove",
-          "update": "src.name && datum !== src ? (0.5 + count * clamp(x(), 0, width) / width) : dest"
-        },
-        {
-          "events": "[@rows:pointerdown, window:pointerup] > window:pointermove",
-          "update": "src.name && datum !== src ? (0.5 + count * clamp(y(), 0, height) / height) : dest"
-        },
-        {"events": "window:pointerup", "update": "-1"}
-      ],
-      "value": -1
+      "fill": "color",
+      "title": "Cluster pairs (src→dst)",
+      "encode": {
+        "labels": {
+          "update": {
+            "text": {
+              "signal": "floor(datum.value / groupBase) + '-' + (datum.value % groupBase)"
+            }
+          }
+        }
+      }
     }
   ],
   "$schema": "https://vega.github.io/schema/vega/v6.json",
