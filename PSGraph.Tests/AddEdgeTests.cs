@@ -272,5 +272,89 @@ namespace PSGraph.Tests
             edge.Should().NotBeNull();
             //edge.Tag.Name.Should().BeNull();
         }
+
+        [Fact]
+        public void AddEdge_AddVerticesAndEdge_BothMethodsWorkCorrectly()
+        {
+            var graph = new PsBidirectionalGraph();
+
+            var v1 = new PSVertex("A");
+            var v2 = new PSVertex("B");
+            var edge = new PSEdge(v1, v2);
+
+            // Проверяем AddEdge
+            bool addedEdge = graph.AddEdge(edge);
+            Assert.True(addedEdge);
+            Assert.Contains(v1, graph.Vertices);
+            Assert.Contains(v2, graph.Vertices);
+            Assert.Contains(graph.Edges.First(), graph.Edges);
+            Assert.Equal(v1, graph.Edges.First().Source);
+            Assert.Equal(v2, graph.Edges.First().Target);
+
+            // Проверяем AddVerticesAndEdge с новыми вершинами
+            var v3 = new PSVertex("C");
+            var v4 = new PSVertex("D");
+            var edge2 = new PSEdge(v3, v4);
+
+            bool addedEdge2 = graph.AddVerticesAndEdge(edge2);
+            Assert.True(addedEdge2);
+            Assert.Contains(v3, graph.Vertices);
+            Assert.Contains(v4, graph.Vertices);
+
+            // Проверяем, что рёбра корректно добавлены
+            var allEdges = graph.Edges.ToList();
+            Assert.Contains(allEdges[1], graph.Edges);
+            Assert.Equal(v3, allEdges[1].Source);
+            Assert.Equal(v4, allEdges[1].Target);
+        }
+
+        [Fact]
+        public void AddEdge_AddVerticesAndEdge_VertexReferencesAndMetadataAreCorrect()
+        {
+            var graph = new PsBidirectionalGraph();
+
+            var v1 = new PSVertex("A");
+            var v2 = new PSVertex("B");
+            v1.Metadata["cluster"] = 1;
+            v2.Metadata["cluster"] = 2;
+
+            var edge = new PSEdge(v1, v2);
+
+            // Проверяем AddEdge
+            graph.AddEdge(edge);
+
+            // Получаем объекты-вершины из графа
+            var graphV1 = graph.Vertices.First(v => v.Label == "A");
+            var graphV2 = graph.Vertices.First(v => v.Label == "B");
+            var graphEdge = graph.Edges.First(e => e.Source.Label == "A" && e.Target.Label == "B");
+
+            // Проверяем, что ссылки совпадают
+            Assert.True(object.ReferenceEquals(graphV1, graphEdge.Source));
+            Assert.True(object.ReferenceEquals(graphV2, graphEdge.Target));
+
+            // Проверяем метаданные
+            Assert.True(graphEdge.Source.Metadata.ContainsKey("cluster"));
+            Assert.Equal(1, graphEdge.Source.Metadata["cluster"]);
+            Assert.True(graphEdge.Target.Metadata.ContainsKey("cluster"));
+            Assert.Equal(2, graphEdge.Target.Metadata["cluster"]);
+
+            // Проверяем AddVerticesAndEdge
+            var v3 = new PSVertex("C");
+            var v4 = new PSVertex("D");
+            v3.Metadata["cluster"] = 3;
+            v4.Metadata["cluster"] = 4;
+
+            var edge2 = new PSEdge(v3, v4);
+            graph.AddVerticesAndEdge(edge2);
+
+            var graphV3 = graph.Vertices.First(v => v.Label == "C");
+            var graphV4 = graph.Vertices.First(v => v.Label == "D");
+            var graphEdge2 = graph.Edges.First(e => e.Source.Label == "C" && e.Target.Label == "D");
+
+            Assert.True(object.ReferenceEquals(graphV3, graphEdge2.Source));
+            Assert.True(object.ReferenceEquals(graphV4, graphEdge2.Target));
+            Assert.Equal(3, graphEdge2.Source.Metadata["cluster"]);
+            Assert.Equal(4, graphEdge2.Target.Metadata["cluster"]);
+        }
     }
 }

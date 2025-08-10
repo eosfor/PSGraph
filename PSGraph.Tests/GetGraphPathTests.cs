@@ -70,17 +70,14 @@ namespace PSGraph.Tests
             pathEdges.Should().NotBeNull();
 
             var path = pathEdges.ToList();
-            path.Should().HaveCount(3);
+            path.Should().HaveCount(2);
 
-            // Expected path: A -> B -> C -> D
+            // Expected path: A -> C -> D
             path[0].Source.Should().Be(vertexA);
-            path[0].Target.Should().Be(vertexB);
+            path[0].Target.Should().Be(vertexC);
 
-            path[1].Source.Should().Be(vertexB);
-            path[1].Target.Should().Be(vertexC);
-
-            path[2].Source.Should().Be(vertexC);
-            path[2].Target.Should().Be(vertexD);
+            path[1].Source.Should().Be(vertexC);
+            path[1].Target.Should().Be(vertexD);
         }
 
 
@@ -252,20 +249,22 @@ namespace PSGraph.Tests
             var vertexA = new PSVertex("A");
             var vertexB = new PSVertex("B");
             var vertexC = new PSVertex("C");
+            var vertexD = new PSVertex("D");
 
-            graph.AddVertexRange(new[] { vertexA, vertexB, vertexC });
+            graph.AddVertexRange(new[] { vertexA, vertexB, vertexC, vertexD });
 
             // Create edges with different weights and tags
             var edgeAB = new PSEdge(vertexA, vertexB, new PSEdgeTag()) { Weight = 10 };
             var edgeAC = new PSEdge(vertexA, vertexC, new PSEdgeTag()) { Weight = 1 };
             var edgeCB = new PSEdge(vertexC, vertexB, new PSEdgeTag()) { Weight = 1 };
+            var edgeCD = new PSEdge(vertexC, vertexD, new PSEdgeTag()) { Weight = 3 };
 
-            graph.AddEdgeRange(new[] { edgeAB, edgeAC, edgeCB });
+            graph.AddEdgeRange(new[] { edgeAB, edgeAC, edgeCB, edgeCD });
 
             // Add the parameters for Get-GraphPath
             _powershell.AddCommand("Get-GraphPath")
                 .AddParameter("From", vertexA)
-                .AddParameter("To", vertexB)
+                .AddParameter("To", vertexD)
                 .AddParameter("Graph", graph);
 
             // Act
@@ -279,12 +278,12 @@ namespace PSGraph.Tests
             var path = pathEdges.ToList();
             path.Should().HaveCount(2);
 
-            // Expected path: A -> C -> B
+            // Expected path: A -> C -> D
             path[0].Source.Should().Be(vertexA);
             path[0].Target.Should().Be(vertexC);
 
             path[1].Source.Should().Be(vertexC);
-            path[1].Target.Should().Be(vertexB);
+            path[1].Target.Should().Be(vertexD);
         }
 
 

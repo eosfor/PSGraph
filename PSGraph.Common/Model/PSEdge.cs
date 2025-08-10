@@ -5,10 +5,15 @@ namespace PSGraph.Model
 {
     public class PSEdge : TaggedEdge<PSVertex, PSEdgeTag>
     {
-        public string Label;
+        public string Label = string.Empty;
         public string Name => Label;
         public int Weight = 1;
         public GraphvizEdge GVertexParameters = new GraphvizEdge();
+
+        public PSEdge(PSVertex source, PSVertex target)
+            : base(source, target, new PSEdgeTag(string.Empty))
+        {
+        }
         public PSEdge(PSVertex source, PSVertex target, PSEdgeTag tag) : base(source, target, tag)
         {
         }
@@ -38,13 +43,13 @@ namespace PSGraph.Model
                 this.Source = s;
                 this.Target = t;
             }
-            
+
             if (res > 0)
             {
                 this.Source = t;
                 this.Target = s;
             }
-            
+
             this.Tag = tag;
         }
 
