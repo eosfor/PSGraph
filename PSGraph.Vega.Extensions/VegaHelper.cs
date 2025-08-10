@@ -31,14 +31,14 @@ public static class VegaHelper
         }
 
         return Vega.Spec.Vega.FromJson(
-            System.IO.File.ReadAllText(templatePath)) 
+            System.IO.File.ReadAllText(templatePath))
             ?? throw new InvalidOperationException($"Failed to deserialize Vega template from '{templateName}'.");
 
         // return JsonConvert.DeserializeObject<Spec.Vega>(System.IO.File.ReadAllText(templatePath), Converter.Settings)
         //     ?? throw new InvalidOperationException($"Failed to deserialize Vega template from '{templatePath}'.");
     }
 
-        public static Spec.Vega GetVegaTemplateObjectFromModulePath(string modulePath, string templateName)
+    public static Spec.Vega GetVegaTemplateObjectFromModulePath(string modulePath, string templateName)
     {
         var templatePath = System.IO.Path.Combine(modulePath, "Assets", templateName);
 
@@ -48,7 +48,7 @@ public static class VegaHelper
         }
 
         return Vega.Spec.Vega.FromJson(
-            System.IO.File.ReadAllText(templatePath)) 
+            System.IO.File.ReadAllText(templatePath))
             ?? throw new InvalidOperationException($"Failed to deserialize Vega template from '{templateName}'.");
 
         // return JsonConvert.DeserializeObject<Spec.Vega>(System.IO.File.ReadAllText(templatePath), Converter.Settings)
@@ -64,23 +64,22 @@ public static class VegaHelper
         System.IO.File.WriteAllText(templatePath, json);
     }
 
-    public static JObject InsertData(JObject template, JArray data)
+    public static string InsertData(JObject data, string[] properties, VegaExportTypes exportType, string modulePath, string vegaSpecFileName)
     {
-        var dataToken = template["data"];
+        var vega = VegaHelper.GetVegaTemplateObjectFromModulePath(modulePath, vegaSpecFileName); //"vega.dsm.matrix.json"
 
-        if (dataToken is JArray dataArray &&
-            dataArray.Count > 0 &&
-            dataArray[0] is JObject firstData &&
-            firstData["values"] != null)
+        // assuming these indices are correct for the matrix template
+        foreach (string property in properties)
         {
-            firstData["values"] = data;
-        }
-        else
-        {
-            throw new InvalidOperationException("The 'values' field is missing in the template.");
+            vega.Data.Single(d => d.Name == property).Values =
+                data[property]["values"].ToObject<List<object>>();
         }
 
-        return template;
+        return exportType switch
+        {
+            VegaExportTypes.HTML => VegaHelper.RenderHtml(vega),
+            _ => vega.ToJson()
+        };
     }
 
     public static string RenderHtml(Vega.Spec.Vega vegaSpec)

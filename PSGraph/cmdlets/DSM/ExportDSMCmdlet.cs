@@ -92,7 +92,12 @@ namespace PSGraph.Cmdlets
         private string ExportVega(VegaExportTypes exportType)
         {
             var modulePath = MyInvocation.MyCommand.Module?.ModuleBase;
-            return _view.ToVegaSpec(exportType, modulePath);
+            var data = _view.ToNodeAndEdgeView();
+            return VegaHelper.InsertData(data: data,
+                                         new string[] { "nodes", "edges" },
+                                         exportType,
+                                         vegaSpecFileName: "vega.dsm.matrix.json",
+                                         modulePath: modulePath  );
         }
     }
 }

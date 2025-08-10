@@ -3,9 +3,7 @@ using MathNet.Numerics.Data.Text;
 using PSGraph.Model;
 using QuikGraph.Graphviz;
 using Svg;
-using PSGraph.Vega.Extensions;
 using Newtonsoft.Json.Linq;
-using PSGraph.Vega.Spec;
 using System.Text;
 
 namespace PSGraph.DesignStructureMatrix;
@@ -78,24 +76,24 @@ public class DsmView : IDsmView
         return reader.ReadToEnd();
     }
 
-    public string ToVegaSpec(VegaExportTypes exportType, string modulePath)
-    {
-        var matrix = _dsm.ToVegaReorderableMatrix(_partitions);
-        var vega = VegaHelper.GetVegaTemplateObjectFromModulePath(modulePath, "vega.dsm.matrix.json");
+    // public string ToVegaSpec(VegaExportTypes exportType, string modulePath)
+    // {
+    //     var matrix = ToVegaReorderableMatrix(_dsm, _partitions);
+    //     var vega = VegaHelper.GetVegaTemplateObjectFromModulePath(modulePath, "vega.dsm.matrix.json");
 
-        // assuming these indices are correct for the matrix template
-        vega.Data.Single(d => d.Name == "nodes").Values =
-            matrix["nodes"]["values"].ToObject<List<object>>();
+    //     // assuming these indices are correct for the matrix template
+    //     vega.Data.Single(d => d.Name == "nodes").Values =
+    //         matrix["nodes"]["values"].ToObject<List<object>>();
 
-        vega.Data.Single(d => d.Name == "edges").Values =
-            matrix["edges"]["values"].ToObject<List<object>>();
+    //     vega.Data.Single(d => d.Name == "edges").Values =
+    //         matrix["edges"]["values"].ToObject<List<object>>();
 
-        return exportType switch
-        {
-            VegaExportTypes.HTML => VegaHelper.RenderHtml(vega),
-            _ => vega.ToJson()
-        };
-    }
+    //     return exportType switch
+    //     {
+    //         VegaExportTypes.HTML => VegaHelper.RenderHtml(vega),
+    //         _ => vega.ToJson()
+    //     };
+    // }
 
     private void GeneratePartitionBoundaries(int itemSize, SvgDocument svgDoc)
     {
@@ -177,5 +175,73 @@ public class DsmView : IDsmView
                 ? new SvgColourServer(System.Drawing.Color.SlateBlue)
                 : new SvgColourServer(System.Drawing.Color.White);
         }
+    }
+
+    /// <summary>
+    /// Формирует данные для reorderable-матрицы в формате Vega (v6).
+    /// </summary>
+    public JObject ToNodeAndEdgeView()
+    {
+        var nodeValues = new JArray();
+        var edgeValues = new JArray();
+
+        /* ------------------------ 1.  Сопоставляем вершину → группа ------------------------ */
+        var vertexToGroup = new Dictionary<PSVertex, int>();
+
+        // Группы нумеруем с 1; «непомеченные» вершины получат группу 0.
+        if (_partitions is { Count: > 0 })
+        {
+            for (int gi = 0; gi < _partitions.Count; gi++)
+                foreach (var v in _partitions[gi])
+                    vertexToGroup[v] = gi + 1;
+        }
+
+        /* ------------------------ 2.  Узлы (nodes.values) ---------------------------------- */
+        var rowKeys = _dsm.RowIndex
+                         .OrderBy(kvp => kvp.Value)
+                         .Select(kvp => kvp.Key)
+                         .ToList();
+
+        for (int i = 0; i < rowKeys.Count; i++)
+        {
+            var v = rowKeys[i];
+            nodeValues.Add(new JObject
+            {
+                ["name"] = v.ToString(),
+                ["index"] = i,
+                ["group"] = vertexToGroup.TryGetValue(v, out var g) ? g : 0
+            });
+        }
+
+        /* ------------------------ 3.  Рёбра (edges.values) --------------------------------- */
+        var m = _dsm.DsmMatrixView;
+
+        for (int r = 0; r < m.RowCount; r++)
+            for (int c = 0; c < m.ColumnCount; c++)
+            {
+                if (m[r, c] == 0) continue;
+
+                // определяем, внутри одной группы или межгрупповое ребро
+                var srcGroup = (int)nodeValues[r]["group"];
+                var dstGroup = (int)nodeValues[c]["group"];
+                var edgeGroup = srcGroup == dstGroup ? srcGroup : -1;
+
+                edgeValues.Add(new JObject
+                {
+                    ["source"] = r,
+                    ["target"] = c,
+                    ["group"] = edgeGroup,    // пригодится, если захотите подсвечивать связи
+                                              // ["weight"] = m[r, c]   // при необходимости можно добавить вес
+                    ["x"] = r,
+                    ["y"] = c
+                });
+            }
+
+        /* ------------------------ 4.  Итоговый объект для Vega ----------------------------- */
+        return new JObject
+        {
+            ["nodes"] = new JObject { ["values"] = nodeValues },
+            ["edges"] = new JObject { ["values"] = edgeValues }
+        };
     }
 }

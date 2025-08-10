@@ -31,9 +31,6 @@ namespace PSGraph.Cmdlets
                 case DsmPartitioningAlgorithms.GraphBased:
                     algo = new DsmGraphPartitioningAlgorithm((IDsm)Dsm);
                     break;
-                case DsmPartitioningAlgorithms.Test:
-                    algo = new DsmClassicPartitioningAlgorithm((IDsm)Dsm);
-                    break;
             }
             
             ret = algo.Partition();

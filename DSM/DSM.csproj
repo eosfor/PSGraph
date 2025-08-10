@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="MathNet.Numerics.Data.Text" Version="5.0.0" />
+    <PackageReference Include="QuikGraph" Version="2.5.0" />
+    <PackageReference Include="QuikGraph.Graphviz" Version="2.5.0" />
+    <PackageReference Include="QuikGraph.Serialization" Version="2.5.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="../PSGraph.Common/PSGraph.Common.csproj" />
+  </ItemGroup>
+
+
+</Project>

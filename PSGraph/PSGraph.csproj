@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../DSM/DSM.csproj" />
     <ProjectReference Include="..\PSGraph.Common\PSGraph.Common.csproj" />
     <ProjectReference Include="..\PSGraph.Vega.Extensions\PSGraph.Vega.Extensions.csproj" />
     <Content Include="..\PSGraph.Vega.Extensions\Assets\**\*.*">

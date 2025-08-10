@@ -1,6 +1,5 @@
 using Microsoft.Msagl.Core.Layout;
 using Newtonsoft.Json.Linq;
-using PSGraph.DesignStructureMatrix;
 using PSGraph.Model;
 using PSGraph.Model.VegaDataModels;
 using QuikGraph;
@@ -119,74 +118,7 @@ namespace PSGraph.Vega.Extensions
         }
 
 
-        /// <summary>
-        /// Формирует данные для reorderable-матрицы в формате Vega (v6).
-        /// </summary>
-        public static JObject ToVegaReorderableMatrix(this IDsm dsm,
-                                                      List<List<PSVertex>> partitions)
-        {
-            var nodeValues = new JArray();
-            var edgeValues = new JArray();
 
-            /* ------------------------ 1.  Сопоставляем вершину → группа ------------------------ */
-            var vertexToGroup = new Dictionary<PSVertex, int>();
-
-            // Группы нумеруем с 1; «непомеченные» вершины получат группу 0.
-            if (partitions is { Count: > 0 })
-            {
-                for (int gi = 0; gi < partitions.Count; gi++)
-                    foreach (var v in partitions[gi])
-                        vertexToGroup[v] = gi + 1;
-            }
-
-            /* ------------------------ 2.  Узлы (nodes.values) ---------------------------------- */
-            var rowKeys = dsm.RowIndex
-                             .OrderBy(kvp => kvp.Value)
-                             .Select(kvp => kvp.Key)
-                             .ToList();
-
-            for (int i = 0; i < rowKeys.Count; i++)
-            {
-                var v = rowKeys[i];
-                nodeValues.Add(new JObject
-                {
-                    ["name"] = v.ToString(),
-                    ["index"] = i,
-                    ["group"] = vertexToGroup.TryGetValue(v, out var g) ? g : 0
-                });
-            }
-
-            /* ------------------------ 3.  Рёбра (edges.values) --------------------------------- */
-            var m = dsm.DsmMatrixView;
-
-            for (int r = 0; r < m.RowCount; r++)
-                for (int c = 0; c < m.ColumnCount; c++)
-                {
-                    if (m[r, c] == 0) continue;
-
-                    // определяем, внутри одной группы или межгрупповое ребро
-                    var srcGroup = (int)nodeValues[r]["group"];
-                    var dstGroup = (int)nodeValues[c]["group"];
-                    var edgeGroup = srcGroup == dstGroup ? srcGroup : -1;
-
-                    edgeValues.Add(new JObject
-                    {
-                        ["source"] = r,
-                        ["target"] = c,
-                        ["group"] = edgeGroup,    // пригодится, если захотите подсвечивать связи
-                                                  // ["weight"] = m[r, c]   // при необходимости можно добавить вес
-                        ["x"] = r,
-                        ["y"] = c
-                    });
-                }
-
-            /* ------------------------ 4.  Итоговый объект для Vega ----------------------------- */
-            return new JObject
-            {
-                ["nodes"] = new JObject { ["values"] = nodeValues },
-                ["edges"] = new JObject { ["values"] = edgeValues }
-            };
-        }
 
     }
 }
