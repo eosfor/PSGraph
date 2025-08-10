@@ -3,29 +3,34 @@ using PSGraph.Model;
 
 namespace PSGraph.DesignStructureMatrix;
 
-public class DsmBase: IDsm
+public class DsmBase : IDsm
 {
-    protected readonly Matrix<Single> _dsm;
+    protected readonly Matrix<Double> _dsm;
     protected readonly PsBidirectionalGraph _graph;
     protected Dictionary<PSVertex, int> _rowIndex;
     protected Dictionary<PSVertex, int> _colIndex;
-    
+
     public Dictionary<PSVertex, int> RowIndex => _rowIndex;
     public Dictionary<PSVertex, int> ColIndex => _colIndex;
-    public Matrix<Single> DsmMatrixView => _dsm;
+    public Matrix<Double> DsmMatrixView => _dsm;
     public PsBidirectionalGraph DsmGraphView => _graph;
-    
+
     private const int _linkWeight = 1;
-    
-    public Matrix<Single> DsmMatrixViewCopy
+
+    public IDsm Clone()
+    {
+        return new DsmBase(this);
+    }
+
+    public Matrix<Double> DsmMatrixViewCopy
     {
         get
         {
             return CopyDsmMatrix(_dsm);
 
-            Matrix<Single> CopyDsmMatrix(Matrix<Single> dsm)
+            Matrix<Double> CopyDsmMatrix(Matrix<Double> dsm)
             {
-                var ret = Matrix<Single>.Build.Dense(dsm.RowCount, dsm.ColumnCount);
+                var ret = Matrix<Double>.Build.Dense(dsm.RowCount, dsm.ColumnCount);
                 dsm.CopyTo(ret);
                 return ret;
             }
@@ -45,7 +50,7 @@ public class DsmBase: IDsm
         }
     }
 
-    public Single this[PSVertex from, PSVertex to]
+    public Double this[PSVertex from, PSVertex to]
     {
         get => _dsm[_rowIndex[from], _colIndex[to]];
     }
@@ -74,13 +79,13 @@ public class DsmBase: IDsm
         {
             if (newRowIndex[r] > _rowIndex[vertex]) newRowIndex[r] -= 1;
         }
-        
+
         foreach (var r in newColIndex.Keys)
         {
             if (newColIndex[r] > _colIndex[vertex]) newColIndex[r] -= 1;
         }
-        
-        
+
+
         return new DsmBase(matrixCopy, graphCopy, newRowIndex, newColIndex);
     }
 
@@ -97,11 +102,11 @@ public class DsmBase: IDsm
 
     public IDsm Order(List<PSVertex> order)
     {
-        var dsmNew = Matrix<Single>.Build.Dense(_dsm.RowCount, _dsm.ColumnCount);
+        var dsmNew = Matrix<Double>.Build.Dense(_dsm.RowCount, _dsm.ColumnCount);
 
         int k = 0;
         var newRowIndex = order.ToDictionary(v => v, v => k++);
-        
+
         k = 0;
         var newColIndex = order.ToDictionary(v => v, v => k++);
 
@@ -117,10 +122,10 @@ public class DsmBase: IDsm
         return new DsmBase(dsmNew, _graph, newRowIndex, newColIndex);
     }
 
-    private Matrix<Single> InitDsmWithGraph(PsBidirectionalGraph graph)
+    private Matrix<Double> InitDsmWithGraph(PsBidirectionalGraph graph)
     {
-        var dsm = Matrix<Single>.Build.Dense(graph.VertexCount, graph.VertexCount);
-        
+        var dsm = Matrix<Double>.Build.Dense(graph.VertexCount, graph.VertexCount);
+
         foreach (var e in graph.Edges)
         {
             var from = e.Source;
@@ -133,12 +138,12 @@ public class DsmBase: IDsm
 
         return dsm;
     }
-    
+
     private Dictionary<PSVertex, int> InitIndexWithGraph(PsBidirectionalGraph graph)
     {
         int i = 0;
         var ret = graph.Vertices.ToDictionary(v => v, v => i++);
-        
+
         return ret;
     }
 
@@ -155,11 +160,11 @@ public class DsmBase: IDsm
         _rowIndex = new Dictionary<PSVertex, int>(current.RowIndex);
         _colIndex = new Dictionary<PSVertex, int>(current.ColIndex);
         _graph = new PsBidirectionalGraph(current.DsmGraphView);
-        _dsm = Matrix<Single>.Build.Dense(current.DsmMatrixView.RowCount, current.DsmMatrixView.ColumnCount);
+        _dsm = Matrix<Double>.Build.Dense(current.DsmMatrixView.RowCount, current.DsmMatrixView.ColumnCount);
         current.DsmMatrixView.CopyTo(_dsm);
     }
 
-    protected DsmBase(Matrix<Single> dsm, PsBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
+    protected DsmBase(Matrix<Double> dsm, PsBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex)
     {
         _dsm = dsm;
         _graph = graph;

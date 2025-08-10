@@ -14,7 +14,7 @@ public class DsmClassic: DsmBase
     {
     }
 
-    protected DsmClassic(Matrix<float> dsm, PsBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex) : base(dsm, graph, rowIndex, colIndex)
+    protected DsmClassic(Matrix<Double> dsm, PsBidirectionalGraph graph, Dictionary<PSVertex, int> rowIndex, Dictionary<PSVertex, int> colIndex) : base(dsm, graph, rowIndex, colIndex)
     {
     }
     
