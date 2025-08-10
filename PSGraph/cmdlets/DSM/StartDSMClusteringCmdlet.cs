@@ -26,12 +26,14 @@ namespace PSGraph.Cmdlets
             {
                 default:
                 case DsmPartitioningAlgorithms.Classic:
-                    algo = new DsmClassicPartitioningAlgorithm((DsmClassic)Dsm);
+                    algo = new DsmSimulatedAnnealingAlgorithm((IDsm)Dsm);
                     break;
                 case DsmPartitioningAlgorithms.GraphBased:
                     algo = new DsmGraphPartitioningAlgorithm((IDsm)Dsm);
                     break;
-                    
+                case DsmPartitioningAlgorithms.Test:
+                    algo = new DsmClassicPartitioningAlgorithm((IDsm)Dsm);
+                    break;
             }
             
             ret = algo.Partition();
