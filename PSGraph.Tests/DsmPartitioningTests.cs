@@ -9,10 +9,10 @@ namespace PSGraph.Tests
     public class DsmPartitioningTests
     {
 
-        private Matrix<float> ReorderMatrix(Matrix<float> original, Dictionary<PSVertex, int> actualIndex, string[] expectedOrder)
+        private Matrix<double> ReorderMatrix(Matrix<double> original, Dictionary<PSVertex, int> actualIndex, string[] expectedOrder)
         {
             int size = expectedOrder.Length;
-            var reordered = Matrix<float>.Build.Dense(size, size);
+            var reordered = Matrix<double>.Build.Dense(size, size);
 
             for (int i = 0; i < size; i++)
             {
@@ -74,7 +74,7 @@ namespace PSGraph.Tests
 
 
             // Expected DSM after partitioning
-            float[,] expectedMatrix = {
+            double[,] expectedMatrix = {
                                 { 0, 0, 0, 0, 0, 0, 0 },
                                 { 0, 0, 0, 1, 0, 0, 0 },
                                 { 0, 1, 0, 0, 0, 0, 0 },
@@ -107,7 +107,7 @@ namespace PSGraph.Tests
             var reorderedActual = ReorderMatrix(result.DsmMatrixView, result.RowIndex, expectedOrder);
 
             // Create expected matrix using MathNet
-            var targetMatrix = Matrix<Single>.Build.DenseOfArray(expectedMatrix);
+            var targetMatrix = Matrix<Double>.Build.DenseOfArray(expectedMatrix);
 
             // Check if the partitioned DSM matrix matches the expected matrix
             reorderedActual.Should().BeEquivalentTo(targetMatrix, "The partitioned DSM matrix should match the expected matrix");
