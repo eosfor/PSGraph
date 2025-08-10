@@ -4,7 +4,7 @@ namespace PSGraph.DesignStructureMatrix;
 
 public class DsmClassicPartitioningAlgorithm : IDsmPartitionAlgorithm
 {
-    private DsmClassic _dsmObj;
+    private IDsm _dsmObj;
     private IDsm _partitionedObj;
     private List<List<PSVertex>> _partitions = new();
 
@@ -50,7 +50,7 @@ public class DsmClassicPartitioningAlgorithm : IDsmPartitionAlgorithm
         return Partitioned;
     }
 
-    private List<PSVertex> FindTasksWithNoOutput(DsmClassic dsmObj)
+    private List<PSVertex> FindTasksWithNoOutput(IDsm dsmObj)
     {
         var ret = new List<PSVertex>();
 
@@ -65,7 +65,7 @@ public class DsmClassicPartitioningAlgorithm : IDsmPartitionAlgorithm
         return ret;
     }
 
-    private List<PSVertex> FindTasksWithNoInput(DsmClassic dsmObj)
+    private List<PSVertex> FindTasksWithNoInput(IDsm dsmObj)
     {
         var ret = new List<PSVertex>();
 
@@ -109,7 +109,7 @@ public class DsmClassicPartitioningAlgorithm : IDsmPartitionAlgorithm
         }
     }
 
-    public DsmClassicPartitioningAlgorithm(DsmClassic dsmObj)
+    public DsmClassicPartitioningAlgorithm(IDsm dsmObj)
     {
         _dsmObj = dsmObj;
     }
