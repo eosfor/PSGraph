@@ -4,6 +4,10 @@ namespace PSGraph.Model
 {
     public class PsBidirectionalGraph : BidirectionalGraph<PSVertex, PSEdge>
     {
+        public PsBidirectionalGraph() : base()
+        {
+        }
+
         public PsBidirectionalGraph(bool allowParallelEdges = false) : base(allowParallelEdges)
         {
         }
@@ -12,6 +16,7 @@ namespace PSGraph.Model
         {
 
         }
+
 
         public override bool AddEdge(PSEdge edge)
         {

@@ -1,6 +1,6 @@
 namespace PSGraph.Model;
 
-public enum DsmPartitioningAlgorithms{
+public enum ClusteringAlgorithmOptions{
     Classic,
     GraphBased
 }

@@ -5,10 +5,10 @@ namespace PSGraph.DesignStructureMatrix;
 
 public class DsmBase : IDsm
 {
-    protected readonly Matrix<Double> _dsm;
-    protected readonly PsBidirectionalGraph _graph;
-    protected Dictionary<PSVertex, int> _rowIndex;
-    protected Dictionary<PSVertex, int> _colIndex;
+    private readonly Matrix<Double> _dsm;
+    private readonly PsBidirectionalGraph _graph;
+    private readonly Dictionary<PSVertex, int> _rowIndex;
+    private readonly Dictionary<PSVertex, int> _colIndex;
 
     public Dictionary<PSVertex, int> RowIndex => _rowIndex;
     public Dictionary<PSVertex, int> ColIndex => _colIndex;
@@ -52,61 +52,65 @@ public class DsmBase : IDsm
 
     public Double this[PSVertex from, PSVertex to]
     {
-        get => _dsm[_rowIndex[from], _colIndex[to]];
+        get
+        {
+            var ri = _rowIndex[from];
+            var ti = _colIndex[to];
+            return _dsm[ri, ti];
+        } 
     }
 
     //public abstract IDsm Remove(PSVertex vertex);
 
-    public virtual IDsm Remove(PSVertex vertex)
+    public IDsm Remove(PSVertex vertex)
     {
-        //remove row and column from the matrix
-        //remove vertex from the graph
-        //update index
-        var matrixCopy = _dsm.RemoveRow(_rowIndex[vertex]);
-        matrixCopy = matrixCopy.RemoveColumn(_colIndex[vertex]);
+        if (!_rowIndex.ContainsKey(vertex))
+            throw new KeyNotFoundException($"Vertex not found: {vertex.Label}");
+        int rowIdx = _rowIndex[vertex];
+        int colIdx = _colIndex[vertex];
 
-        var graphCopy = new PsBidirectionalGraph(_graph);
+        // Копируем граф и удаляем вершину
+        var newGraph = new PsBidirectionalGraph(_graph);
+        newGraph.RemoveVertex(vertex);
 
-        graphCopy.RemoveVertex(vertex);
-
+        // Копируем индексы и удаляем вершину
         var newRowIndex = new Dictionary<PSVertex, int>(_rowIndex);
         var newColIndex = new Dictionary<PSVertex, int>(_colIndex);
-
         newRowIndex.Remove(vertex);
         newColIndex.Remove(vertex);
 
-        foreach (var r in newRowIndex.Keys)
+        // Перестраиваем матрицу
+        var newDsm = _dsm.RemoveRow(rowIdx).RemoveColumn(colIdx);
+
+        // Пересчитываем индексы (сдвигаем)
+        foreach (var v in newRowIndex.Keys.ToList())
         {
-            if (newRowIndex[r] > _rowIndex[vertex]) newRowIndex[r] -= 1;
+            if (newRowIndex[v] > rowIdx) newRowIndex[v]--;
+        }
+        foreach (var v in newColIndex.Keys.ToList())
+        {
+            if (newColIndex[v] > colIdx) newColIndex[v]--;
         }
 
-        foreach (var r in newColIndex.Keys)
-        {
-            if (newColIndex[r] > _colIndex[vertex]) newColIndex[r] -= 1;
-        }
-
-
-        return new DsmBase(matrixCopy, graphCopy, newRowIndex, newColIndex);
+        return new DsmBase(newDsm, newGraph, newRowIndex, newColIndex);
     }
 
-    public IDsm Remove(List<PSVertex> vertex)
+    public IDsm Remove(List<PSVertex> vertices)
     {
-        IDsm ret = this;
-        foreach (var v in vertex)
+        IDsm result = this;
+        foreach (var v in vertices)
         {
-            ret = ret.Remove(v);
+            result = result.Remove(v);
         }
-
-        return ret;
+        return result;
     }
 
     public IDsm Order(List<PSVertex> order)
     {
-        var dsmNew = Matrix<Double>.Build.Dense(_dsm.RowCount, _dsm.ColumnCount);
+        var dsmNew = Matrix<Double>.Build.Dense(order.Count, order.Count);
 
         int k = 0;
         var newRowIndex = order.ToDictionary(v => v, v => k++);
-
         k = 0;
         var newColIndex = order.ToDictionary(v => v, v => k++);
 
@@ -118,8 +122,18 @@ public class DsmBase : IDsm
             }
         }
 
-
         return new DsmBase(dsmNew, _graph, newRowIndex, newColIndex);
+    }
+
+
+    public List<PSVertex> GetSinks()
+    {
+        return _graph.Vertices.Where(v => _graph.OutDegree(v) == 0).Distinct().ToList();
+    }
+
+    public List<PSVertex> GetSources()
+    {
+        return _graph.Vertices.Where(v => _graph.InDegree(v) == 0).Distinct().ToList();
     }
 
     private Matrix<Double> InitDsmWithGraph(PsBidirectionalGraph graph)

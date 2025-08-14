@@ -17,26 +17,33 @@ namespace PSGraph.Cmdlets
     [Cmdlet(VerbsData.Export, "DSM", DefaultParameterSetName = "PlainDsm")]
     public class ExportDSMCmdlet : PSCmdlet
     {
+
         [Parameter(Position = 0, Mandatory = true, ParameterSetName = "PlainDsm")]
         public IDsm Dsm;
 
         [Parameter(Position = 0, Mandatory = true, ParameterSetName = "PartitionedDsm")]
         public PartitioningResult Result;
 
+        [Parameter(Position = 0, Mandatory = true, ParameterSetName = "SequencedDsm")]
+        public IDsm SequencedDsm;
+
         [Parameter(Position = 1, Mandatory = false, ParameterSetName = "PlainDsm")]
         [Parameter(Position = 1, Mandatory = false, ParameterSetName = "PartitionedDsm")]
+        [Parameter(Position = 1, Mandatory = false, ParameterSetName = "SequencedDsm")]
         [Parameter(Mandatory = false)]
-        public string Path;
+        public string? Path;
 
         [Parameter(Position = 2, Mandatory = false, ParameterSetName = "PlainDsm")]
         [Parameter(Position = 3, Mandatory = false, ParameterSetName = "PartitionedDsm")]
+        [Parameter(Position = 2, Mandatory = false, ParameterSetName = "SequencedDsm")]
         public DSMExportTypes Format = DSMExportTypes.TEXT;
 
-        private IDsm _dsm;
+        private IDsm? _dsm;
         private IDsmPartitionAlgorithm? _algo;
-        private IDsmView _view;
+        private IDsmView? _view;
         protected override void ProcessRecord()
         {
+
             switch (ParameterSetName)
             {
                 default:
@@ -48,6 +55,10 @@ namespace PSGraph.Cmdlets
                     _dsm = Result.Dsm;
                     _algo = Result.Algorithm;
                     _view = new DsmView(_dsm, _algo.Partitions);
+                    break;
+                case "SequencedDsm":
+                    _dsm = SequencedDsm;
+                    _view = new DsmView(_dsm);
                     break;
             }
 
@@ -97,7 +108,7 @@ namespace PSGraph.Cmdlets
                                          new string[] { "nodes", "edges" },
                                          exportType,
                                          vegaSpecFileName: "vega.dsm.matrix.json",
-                                         modulePath: modulePath  );
+                                         modulePath: modulePath);
         }
     }
 }

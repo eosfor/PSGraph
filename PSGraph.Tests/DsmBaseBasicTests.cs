@@ -59,18 +59,18 @@ namespace PSGraph.Tests
             var dsm = new DsmClassic(GraphTestData.SimpleTestGraph1);
 
             // Removing vertex "C"
-            var updatedDsm = dsm.Remove(new PSVertex("C"));
-            updatedDsm.Should().NotBeNull();
+            var newDsm = dsm.Remove(new PSVertex("C"));
+            newDsm.Should().NotBeNull();
 
             // Verify that the edges involving "C" are removed
-            FluentActions.Invoking(() => updatedDsm[new PSVertex("A"), new PSVertex("C")])
+            FluentActions.Invoking(() => newDsm[new PSVertex("A"), new PSVertex("C")])
                 .Should().Throw<KeyNotFoundException>("Edge from A to C should not exist after C is removed");
 
-            FluentActions.Invoking(() => updatedDsm[new PSVertex("C"), new PSVertex("A")])
+            FluentActions.Invoking(() => newDsm[new PSVertex("C"), new PSVertex("A")])
                 .Should().Throw<KeyNotFoundException>("Edge from C to A should not exist after C is removed");
 
             // Check if other edges are still intact
-            FluentActions.Invoking(() => updatedDsm[new PSVertex("D"), new PSVertex("C")])
+            FluentActions.Invoking(() => newDsm[new PSVertex("D"), new PSVertex("C")])
                 .Should().Throw<KeyNotFoundException>("Edge from D to C should still exist");
         }
 
@@ -82,12 +82,12 @@ namespace PSGraph.Tests
             var originalRowCount = dsm.DsmMatrixView.RowCount;
             var originalColCount = dsm.DsmMatrixView.ColumnCount;
 
-            // Remove vertex "C"
-            var updatedDsm = dsm.Remove(new PSVertex("C"));
+            // Remove vertex "C" (immutability: assign result)
+            var newDsm = dsm.Remove(new PSVertex("C"));
 
             // Verify the row and column count decreased by 1
-            updatedDsm.DsmMatrixView.RowCount.Should().Be(originalRowCount - 1);
-            updatedDsm.DsmMatrixView.ColumnCount.Should().Be(originalColCount - 1);
+            newDsm.DsmMatrixView.RowCount.Should().Be(originalRowCount - 1);
+            newDsm.DsmMatrixView.ColumnCount.Should().Be(originalColCount - 1);
         }
 
         [Fact]

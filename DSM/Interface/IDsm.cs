@@ -15,6 +15,9 @@ public interface IDsm
     public Dictionary<PSVertex, int> ColIndex { get; }
     public Double this[PSVertex from, PSVertex to] { get; }
 
+    public List<PSVertex> GetSinks();
+    public List<PSVertex> GetSources();
+
     public IDsm Remove(PSVertex vertex);
     public IDsm Remove(List<PSVertex> vertex);
     public IDsm Order(List<PSVertex> partitions);

@@ -63,16 +63,16 @@ public class DsmTests
 
         // Remove vertices "C" and "E"
         var verticesToRemove = new List<PSVertex> { new PSVertex("C"), new PSVertex("E") };
-        var updatedDsm = dsm.Remove(verticesToRemove);
+        var newDsm = dsm.Remove(verticesToRemove);
 
-        updatedDsm.Should().NotBeNull("Updated DSM should not be null");
+        newDsm.Should().NotBeNull("Updated DSM should not be null");
 
         // Verify the matrix is updated correctly after removing multiple vertices
-        updatedDsm.RowIndex.Should().NotContainKey(new PSVertex("C"), "Vertex C should be removed from RowIndex");
-        updatedDsm.RowIndex.Should().NotContainKey(new PSVertex("E"), "Vertex E should be removed from RowIndex");
+        newDsm.RowIndex.Should().NotContainKey(new PSVertex("C"), "Vertex C should be removed from RowIndex");
+        newDsm.RowIndex.Should().NotContainKey(new PSVertex("E"), "Vertex E should be removed from RowIndex");
 
-        updatedDsm.ColIndex.Should().NotContainKey(new PSVertex("C"), "Vertex C should be removed from ColIndex");
-        updatedDsm.ColIndex.Should().NotContainKey(new PSVertex("E"), "Vertex E should be removed from ColIndex");
+        newDsm.ColIndex.Should().NotContainKey(new PSVertex("C"), "Vertex C should be removed from ColIndex");
+        newDsm.ColIndex.Should().NotContainKey(new PSVertex("E"), "Vertex E should be removed from ColIndex");
     }
     [Fact]
     public void DsmBase_ShouldHandleLargeGraph()

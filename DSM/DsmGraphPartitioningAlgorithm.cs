@@ -18,10 +18,8 @@ public class DsmGraphPartitioningAlgorithm : IDsmPartitionAlgorithm
     public IDsm Partition()
     {
         // 1) источники / стоки
-        var sinks = FindTasksWithNoOutput(_dsmObj);
-        var sources = FindTasksWithNoInput(_dsmObj);
-        // var toRemove = sinks.Concat(sources).Distinct().ToList();
-        // var trimmed = _dsmObj.Remove(toRemove);
+        var sinks = _dsmObj.GetSinks();
+        var sources = _dsmObj.GetSources();
 
 
         // 2) SCC → топологический порядок (уже DAG)
@@ -40,15 +38,41 @@ public class DsmGraphPartitioningAlgorithm : IDsmPartitionAlgorithm
         return _partitionedObj;
     }
 
-
-    private List<PSVertex> FindTasksWithNoOutput(IDsm dsmObj)
+    public PartitioningExtendedResult PartitionWithDetails()
     {
-        return dsmObj.DsmGraphView.Vertices.Where(v => _dsmObj.DsmGraphView.OutDegree(v) == 0).Distinct().ToList();
-    }
+        // Perform partition (SCC + topo ordering)
+        var dsm = Partition();
 
-    private List<PSVertex> FindTasksWithNoInput(IDsm dsmObj)
-    {
-        return dsmObj.DsmGraphView.Vertices.Where(v => _dsmObj.DsmGraphView.InDegree(v) == 0).Distinct().ToList();
+        // Simple cost metric: number of inter-component edges (cross-SCC edges)
+        // Build vertex -> component index map
+        var componentIndex = new Dictionary<PSVertex, int>();
+        for (int i = 0; i < _partitions.Count; i++)
+        {
+            foreach (var v in _partitions[i]) componentIndex[v] = i;
+        }
+
+        int crossEdges = 0;
+        foreach (var edge in _dsmObj.DsmGraphView.Edges)
+        {
+            if (componentIndex.TryGetValue(edge.Source, out var si) &&
+                componentIndex.TryGetValue(edge.Target, out var ti) &&
+                si != ti)
+            {
+                crossEdges++;
+            }
+        }
+
+        // Since this algorithm is single-pass deterministic: Passes = 1, StablePasses = 1
+        return new PartitioningExtendedResult
+        {
+            Dsm = dsm,
+            Algorithm = this,
+            CostHistory = new List<double> { crossEdges },
+            ImprovementStats = null,
+            BestCost = crossEdges,
+            Passes = 1,
+            StablePasses = 1
+        };
     }
 
     private IEnumerable<List<PSVertex>> PartitionInternal(IDsm dsmObj)
@@ -64,9 +88,10 @@ public class DsmGraphPartitioningAlgorithm : IDsmPartitionAlgorithm
         }
     }
 
-    public DsmGraphPartitioningAlgorithm(IDsm dsmObj)
+    public DsmGraphPartitioningAlgorithm(IDsm dsmObj, DsmGraphPartitioningConfig? config = null)
     {
         _dsmObj = dsmObj;
+        _partitionedObj = dsmObj; // initialize
     }
 
     private static IEnumerable<List<PSVertex>> GetTopoOrderedScc(IDsm dsm)

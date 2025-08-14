@@ -1,5 +1,5 @@
 $nodeCount = 50
-$edgeCount = 300
+$edgeCount = 100
 
 $v = [PSGraph.Model.PSVertex[]]::new($nodeCount)
 $g = New-Graph
@@ -26,7 +26,22 @@ while ($edgeSet.Count -lt $edgeCount) {
 
 "Graph ready: $($g.VertexCount) vertices, $($g.EdgeCount) edges."
 
-$dsm = New-DSM -graph $g
-$ret = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm Classic
-Export-DSM -Result $ret -Format VEGA_HTML -Path $Env:TMPDIR/dsmPartitioned1.html
+$dsm1 = New-DSM -graph $sg
+$ret1 = Start-DSMClustering -Dsm $dsm1 -ClusteringAlgorithm Classic
+Export-DSM -Result $ret1 -Format VEGA_HTML -Path $Env:TMPDIR/dsmPartitioned1.html
 open $Env:TMPDIR/dsmPartitioned1.html
+
+
+$dsm2 = New-DSM -graph $sg
+$ret2 = Start-DSMClustering -Dsm $dsm2 -ClusteringAlgorithm Graph
+Export-DSM -Result $ret2 -Format VEGA_HTML -Path $Env:TMPDIR/dsmPartitioned2.html
+open $Env:TMPDIR/dsmPartitioned2.html
+
+
+$ret3 = Start-DSMSequencing -Dsm $dsm2
+Export-DSM -SequencedDsm $ret3 -Format VEGA_HTML -Path $Env:TMPDIR/dsmPartitioned3.html
+open $Env:TMPDIR/dsmPartitioned3.html
+
+
+Export-Graph -Graph $g -Format Vega_ForceDirected -Path $Env:TMPDIR/dsmPartitioned4.html
+open $Env:TMPDIR/dsmPartitioned4.html

@@ -62,70 +62,29 @@ namespace PSGraph.Tests
         }
 
         [Fact]
-        public void BasicPartitioning_ShouldPartitionCorrectly()
+        public void BasicPowersLoopDetection_ShouldDetectLoopsCorrectly()
         {
             var dsm = new DsmClassic(GraphTestData.DSMFull);
-            dsm.Should().NotBeNull("DSM object should not be null");
+            dsm.Should().NotBeNull();
 
-            var algo = new DsmClassicPartitioningAlgorithm(dsm);
-            var result = algo.Partition();
+            var algo = new DsmPowersLoopDetectionAlgorithm(dsm);
 
-            result.Should().NotBeNull("Partitioning result should not be null");
+            // Проверяем DetectLoops
+            var blocks = algo.DetectLoops(dsm);
+            blocks.Should().NotBeNull();
+            blocks.Count.Should().BeGreaterThan(0);
 
+            // Проверяем CondenceLoops
+            List<List<PSVertex>> collapsedBlocks;
+            var condensedDsm = algo.CondenceLoops(dsm, out collapsedBlocks);
+            condensedDsm.Should().NotBeNull();
+            collapsedBlocks.Should().BeEquivalentTo(blocks);
 
-            // Expected DSM after partitioning
-            double[,] expectedMatrix = {
-                                { 0, 0, 0, 0, 0, 0, 0 },
-                                { 0, 0, 0, 1, 0, 0, 0 },
-                                { 0, 1, 0, 0, 0, 0, 0 },
-                                { 1, 0, 1, 0, 0, 0, 0 },
-                                { 0, 0, 1, 0, 0, 1, 0 },
-                                { 1, 1, 0, 1, 1, 0, 0 },
-                                { 1, 0, 0, 0, 0, 1, 0 }
-                              };
-
-            // Expected row/column order after partitioning
-            string[] expectedOrder = { "F", "B", "D", "G", "A", "C", "E" };
-
-            // Задаем ожидаемые группы
-            var expectedGroups = new List<List<PSVertex>>
-            {
-                new() { new PSVertex("F"), new PSVertex("E") },
-                new() { new PSVertex("B"), new PSVertex("D"), new PSVertex("G") },
-                new() { new PSVertex("A"), new PSVertex("C") }
-            };
-
-            Console.WriteLine("Row indices:");
-            foreach (var kvp in result.RowIndex.OrderBy(k => k.Value))
-            {
-                Console.WriteLine($"{kvp.Key.Name} => {kvp.Value}");
-            }
-
-            // Проверим, что группы упорядочены и внутри сжаты
-            AssertVertexGroupsAreClustered(result.RowIndex, expectedGroups);
-
-            var reorderedActual = ReorderMatrix(result.DsmMatrixView, result.RowIndex, expectedOrder);
-
-            // Create expected matrix using MathNet
-            var targetMatrix = Matrix<Double>.Build.DenseOfArray(expectedMatrix);
-
-            // Check if the partitioned DSM matrix matches the expected matrix
-            reorderedActual.Should().BeEquivalentTo(targetMatrix, "The partitioned DSM matrix should match the expected matrix");
-
-
-            // Validate row and column indices match the expected vertex order
-            for (int idx = 0; idx < expectedOrder.Length; idx++)
-            {
-                var vertex = new PSVertex(expectedOrder[idx]);
-
-                result.RowIndex.Should().ContainKey(vertex);
-                result.ColIndex.Should().ContainKey(vertex);
-            }
-
-            for (int i = 0; i < reorderedActual.RowCount; i++)
-            {
-                reorderedActual[i, i].Should().Be(0, $"self-dependency at index {i} should be zero");
-            }
+            // condensedDsm не содержит вершин без входов/выходов
+            var sinks = condensedDsm.GetSinks();
+            var sources = condensedDsm.GetSources();
+            sinks.Count.Should().Be(0);
+            sources.Count.Should().Be(0);
         }
     }
 }

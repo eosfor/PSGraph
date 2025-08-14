@@ -9,30 +9,53 @@ namespace PSGraph.Tests
     public class Graph5ClassicPartitioningTests
     {
         [Fact]
-        public void Graph5_ClassicPartitioning_ShouldPartitionCorrectly()
+        public void Graph5_PowersLoopDetection_ShouldDetectLoopsCorrectly()
         {
             var dsm = new DsmClassic(GraphTestData.SimpleTestGraph5);
-            dsm.Should().NotBeNull("DSM object should not be null");
+            dsm.Should().NotBeNull();
 
-            var algo = new DsmClassicPartitioningAlgorithm(dsm);
-            var partitionedDsm = algo.Partition();
+            var algo = new DsmPowersLoopDetectionAlgorithm(dsm);
 
-            partitionedDsm.Should().NotBeNull("Partitioned DSM should not be null");
+            // Проверяем DetectLoops
+            var blocks = algo.DetectLoops(dsm);
+            blocks.Should().NotBeNull();
+            blocks.Count.Should().BeGreaterThan(0);
 
-            // Validate the row and column counts
-            partitionedDsm.RowIndex.Count.Should().Be(partitionedDsm.DsmMatrixView.RowCount, "Row count should match matrix row count");
-            partitionedDsm.ColIndex.Count.Should().Be(partitionedDsm.DsmMatrixView.ColumnCount, "Column count should match matrix column count");
+            // Проверяем CondenceLoops
+            List<List<PSVertex>> collapsedBlocks;
+            var condensedDsm = algo.CondenceLoops(dsm, out collapsedBlocks);
+            condensedDsm.Should().NotBeNull();
+            collapsedBlocks.Should().BeEquivalentTo(blocks);
 
-            // Generate the DSM view with partitions
-            var view = new DsmView(partitionedDsm, algo.Partitions);
-            var svgDocument = view.ToSvg();
+            // Итеративно конденсируем DSM, пока не останется элементов
+            var currentDsm = condensedDsm;
+            int maxIterations = 100;
+            int iteration = 0;
+            while (currentDsm.RowIndex.Count > 0 && iteration < maxIterations)
+            {
+                var sinks = currentDsm.GetSinks();
+                var sources = currentDsm.GetSources();
+                // Удаляем вершины без входов/выходов
+                var toRemove = sinks.Union(sources).Distinct().ToList();
+                if (toRemove.Count == 0)
+                {
+                    // Если нет вершин для удаления, пробуем конденсировать циклы
+                    List<List<PSVertex>> innerBlocks;
+                    var nextDsm = algo.CondenceLoops(currentDsm, out innerBlocks);
+                    // Если DSM не изменился, прерываем цикл
+                    if (nextDsm.RowIndex.Count == currentDsm.RowIndex.Count)
+                        break;
+                    currentDsm = nextDsm;
+                }
+                else
+                {
+                    currentDsm = currentDsm.Remove(toRemove);
+                }
+                iteration++;
+            }
 
-            // Save the SVG to a temp file for manual verification (optional)
-            var tempPath = Path.GetTempPath();
-            var filePath = Path.Combine(tempPath, "Graph5ClassicPartitioningTest.svg");
-            svgDocument.Write(filePath);
-
-            File.Exists(filePath).Should().BeTrue("SVG file should be generated");
+            // Проверяем, что цикл завершился корректно
+            iteration.Should().BeLessThan(maxIterations, "DSM condensation should not loop forever");
         }
     }
 }

@@ -35,6 +35,70 @@ The original goal was to **analyse dependencies** in IaC workloads, but the modu
 
 ---
 
+## DSM Clustering (Design Structure Matrix)
+
+PSGraph includes experimental DSM clustering capabilities with two algorithms:
+
+* Classic (simulated annealing heuristic)
+* GraphBased (SCC condensation + topological ordering)
+
+You can tune algorithms via a single `-AlgorithmConfig` parameter that accepts:
+
+* A strongly typed record (`[PSGraph.DesignStructureMatrix.DsmSimulatedAnnealingConfig]`)
+* A hashtable / ordered dictionary
+* A `PSCustomObject`
+
+### Quick Example (Hashtable configuration)
+
+```powershell
+$dsm = New-Dsm -Graph (New-Graph | % { Add-Vertex -Graph $_ -Vertex 'A' }) # minimal placeholder
+
+# Build a sample dependency graph
+$g = New-Graph
+'A','B','C','D' | ForEach-Object { Add-Vertex -Graph $g -Vertex $_ | Out-Null }
+Add-Edge -From A -To B -Graph $g | Out-Null
+Add-Edge -From B -To C -Graph $g | Out-Null
+Add-Edge -From C -To A -Graph $g | Out-Null # cycle
+Add-Edge -From C -To D -Graph $g | Out-Null
+$dsm = New-Dsm -Graph $g
+
+# Run classic clustering (simulated annealing) with a tuned config
+$cfg = @{ Times = 2; StableLimit = 2; MaxRepeat = 200; PowCc = 1 }
+$result = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm Classic -AlgorithmConfig $cfg -Detailed
+
+$result.Passes       # number of passes performed
+$result.BestCost     # best coordination cost achieved
+$result.CostHistory  # cost trajectory
+```
+
+### Strongly Typed Config Example
+
+```powershell
+$saCfg = [PSGraph.DesignStructureMatrix.DsmSimulatedAnnealingConfig]::new(
+    PowCc = 1,
+    PowBid = 0,
+    PowDep = 0,
+    Times = 3,
+    StableLimit = 2,
+    MaxRepeat = 500,
+    InitialTemperature = $null,
+    CoolingRate = 0.92,
+    MinTemperature = 0.001
+)
+$result = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm Classic -AlgorithmConfig $saCfg -Detailed
+```
+
+### Graph-Based (Deterministic) Example
+
+```powershell
+$graphResult = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm GraphBased -Detailed
+$graphResult.CostHistory # single value: cross-SCC edge count
+```
+
+> Tip: For hashtable / PSCustomObject configs, keys are matched case-insensitively to record constructor parameters. Missing values fall back to defaults.
+
+---
+
 ## Quick install
 
 ```powershell
