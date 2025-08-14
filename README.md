@@ -35,6 +35,56 @@ The original goal was to **analyse dependencies** in IaC workloads, but the modu
 
 ---
 
+## Quick install
+
+```powershell
+Install-Module -Name PSQuickGraph -Scope CurrentUser
+```
+
+**An example of Cartesian layouts for a node-link diagram of hierarchical data.**
+
+```pwsh
+$data = (Invoke-WebRequest -Uri https://raw.githubusercontent.com/vega/vega-datasets/refs/heads/main/data/flare.json).Content | ConvertFrom-Json
+$index = [object[]]::new($data.count + 1)
+$data | % { $index[$_.id] = $_ }
+
+$g = new-graph
+
+$data | Group-Object -Property parent | % {
+    $currentGroup = $_
+    if ([string]::IsNullOrEmpty($currentGroup.name)) {
+        $currentGroup.Group | % {
+            Add-Vertex -Vertex $_.name -Graph $g
+        }
+    }
+    else {
+        $parentLabel = $index[$currentGroup.name].name
+        $currentGroup.Group | % {
+            Add-Edge -From $parentLabel -To $_.name -Graph $g
+        }
+    }
+}
+
+$tempDir = [System.IO.Path]::GetTempPath() 
+$outFile = Join-Path $tempDir 'x.tree.html'
+Export-Graph -Graph $g -Format Vega_TreeLayout -Path $outFile
+```
+
+![tree](docs/img/visualization-3.svg)
+
+
+**Same graph but using Force Directed layout**
+
+```pwsh
+$tempDir = [System.IO.Path]::GetTempPath() 
+$outFile = Join-Path $tempDir 'x.force.html'
+Export-Graph -Graph $g -Format Vega_ForceDirected -Path $outFile
+```
+
+![tree](docs/img/visualization-4.svg)
+
+---
+
 ## DSM Clustering (Design Structure Matrix)
 
 PSGraph includes experimental DSM clustering capabilities with two algorithms:
@@ -97,52 +147,40 @@ $graphResult.CostHistory # single value: cross-SCC edge count
 
 > Tip: For hashtable / PSCustomObject configs, keys are matched case-insensitively to record constructor parameters. Missing values fall back to defaults.
 
----
+### Simulated Annealing Parameters Explained
 
-## Quick install
+These fields tune the Classic (simulated annealing) DSM clustering. Use a strongly typed `DsmSimulatedAnnealingConfig`, or supply them via hashtable / PSCustomObject.
+
+| Parameter | Role / Effect | Raise To | Lower To |
+|-----------|---------------|----------|----------|
+| `PowCc` | Exponent on cluster size in intra / extra cluster cost (penalises large clusters). | Split oversized clusters more aggressively. | Allow larger clusters. |
+| `PowBid` | Exponent on cluster size in bid denominator ( (inOut^PowDep)/(size^PowBid) ). | Bias toward smaller clusters. | Reduce size pressure. |
+| `PowDep` | Exponent amplifying interaction strength (inOut) in bid numerator. | Emphasise strong coupling. | Downplay link intensity. |
+| `Times` | Move attempts per pass = `Times * N`. | More exploration (slower). | Faster passes, less search. |
+| `StableLimit` | Passes w/out improvement before considered stable. | Avoid premature convergence. | Stop earlier. |
+| `MaxRepeat` | Hard cap on passes. | Permit longer searches. | Force early cutoff. |
+| `InitialTemperature` | Starting T; null ⇒ auto-scale to initial cost (adaptive). | Accept more uphill moves early. | Greedier start. |
+| `CoolingRate` | Per-pass decay (`T *= CoolingRate`). | Maintain exploration longer. | Freeze faster. |
+| `MinTemperature` | Convergence threshold on T. | Extend late stochastic phase. | Terminate sooner. |
+
+Heuristics:
+* Quick coarse result: `Times=1`, `CoolingRate=0.90`, lower `MaxRepeat`.
+* Higher quality dense graphs: `Times=5+`, `CoolingRate=0.97..0.99`, higher `StableLimit`.
+* Discourage giant clusters: raise `PowCc` / `PowBid`.
+* Emphasise connectivity: raise `PowDep`.
+
+Example tuned config:
 
 ```powershell
-Install-Module -Name PSQuickGraph -Scope CurrentUser
-```
-
-**An example of Cartesian layouts for a node-link diagram of hierarchical data.**
-
-```pwsh
-$data = (Invoke-WebRequest -Uri https://raw.githubusercontent.com/vega/vega-datasets/refs/heads/main/data/flare.json).Content | ConvertFrom-Json
-$index = [object[]]::new($data.count + 1)
-$data | % { $index[$_.id] = $_ }
-
-$g = new-graph
-
-$data | Group-Object -Property parent | % {
-    $currentGroup = $_
-    if ([string]::IsNullOrEmpty($currentGroup.name)) {
-        $currentGroup.Group | % {
-            Add-Vertex -Vertex $_.name -Graph $g
-        }
-    }
-    else {
-        $parentLabel = $index[$currentGroup.name].name
-        $currentGroup.Group | % {
-            Add-Edge -From $parentLabel -To $_.name -Graph $g
-        }
-    }
+$saCfg = [pscustomobject]@{
+    PowCc = 1; PowBid = 1; PowDep = 1;
+    Times = 5; StableLimit = 3; MaxRepeat = 800;
+    InitialTemperature = $null; # auto-scale to initial cost
+    CoolingRate = 0.985; MinTemperature = 0.0005
 }
-
-$tempDir = [System.IO.Path]::GetTempPath() 
-$outFile = Join-Path $tempDir 'x.tree.html'
-Export-Graph -Graph $g -Format Vega_TreeLayout -Path $outFile
+$result = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm Classic -AlgorithmConfig $saCfg -Detailed
 ```
 
-![tree](docs/img/visualization-3.svg)
+Leaving `InitialTemperature` as `$null` makes runs scale-aware across different matrix sizes; set a numeric value for strict comparability.
 
-
-**Same graph but woth Force Directed layout**
-
-```pwsh
-$tempDir = [System.IO.Path]::GetTempPath() 
-$outFile = Join-Path $tempDir 'x.force.html'
-Export-Graph -Graph $g -Format Vega_ForceDirected -Path $outFile
-```
-
-![tree](docs/img/visualization-4.svg)
+---
