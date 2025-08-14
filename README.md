@@ -1,6 +1,6 @@
 # PSGraph
 
-![PowerShell Gallery](https://img.shields.io/powershellgallery/v/PSQuickGraph?label=PSGallery) ![CI](https://github.com/eosfor/PSGraph/actions/workflows/ci.yml/badge.svg) ![Licence](https://img.shields.io/github/license/eosfor/PSGraph)
+![PowerShell Gallery](https://img.shields.io/powershellgallery/v/PSQuickGraph?label=PSGallery) ![CI](https://github.com/eosfor/PSGraph/actions/workflows/build.yml/badge.svg) ![Licence](https://img.shields.io/github/license/eosfor/PSGraph)
 
 > **PSGraph is a PowerShell-first wrapper around the ⚡ QuickGraph / QuikGraph** ecosystem.  
 > It lets you **build, query and visualise graphs directly from the pipeline** without
@@ -10,7 +10,8 @@
 
 ## Why another graph module?
 
-QuickGraph/QuikGraph gives .NET a battle-tested set of graph data-structures and algorithms (DFS, BFS, Dijkstra, min-cut, spanning-tree, etc.) :contentReference[oaicite:0]{index=0}.  
+QuickGraph/QuikGraph gives .NET a battle-tested set of graph data-structures and algorithms (DFS, BFS, Dijkstra, min-cut, spanning-tree, etc.)
+
 PSGraph layers **PowerShell ergonomics, discoverability and visualisation** on top so that:
 
 * You can **pipe any object collection** into a graph, specify what constitutes vertices
