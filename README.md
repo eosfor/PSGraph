@@ -184,3 +184,23 @@ $result = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm Classic -AlgorithmC
 Leaving `InitialTemperature` as `$null` makes runs scale-aware across different matrix sizes; set a numeric value for strict comparability.
 
 ---
+## Fast Reachability Checks
+
+For quickly determining whether any path exists between two vertices (without retrieving the actual edge sequence) use `Test-GraphPath` which leverages strongly connected components and a condensed DAG search under the hood.
+
+```powershell
+$g = New-Graph
+'A','B','C','D','E' | ForEach-Object { Add-Vertex -Graph $g -Vertex $_ }
+Add-Edge -From A -To B -Graph $g | Out-Null
+Add-Edge -From B -To C -Graph $g | Out-Null
+Add-Edge -From C -To D -Graph $g | Out-Null
+Add-Edge -From A -To E -Graph $g | Out-Null
+
+Test-GraphPath -Graph $g -From A -To D   # True
+Test-GraphPath -Graph $g -From D -To A   # False (directional)
+Test-GraphPath -Graph $g -From A -To A   # True (trivial)
+```
+
+Use `Get-GraphPath` when you need the actual path (edges) rather than just a boolean.
+
+---
