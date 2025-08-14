@@ -1,6 +1,6 @@
 # PSGraph
 
-![PowerShell Gallery](https://img.shields.io/powershellgallery/v/PSQuickGraph?label=PSGallery) ![CI](https://github.com/<your-org>/PSGraph/actions/workflows/ci.yml/badge.svg) ![Licence](https://img.shields.io/github/license/eosfor/PSGraph)
+![PowerShell Gallery](https://img.shields.io/powershellgallery/v/PSQuickGraph?label=PSGallery) ![CI](https://github.com/eosfor/PSGraph/actions/workflows/ci.yml/badge.svg) ![Licence](https://img.shields.io/github/license/eosfor/PSGraph)
 
 > **PSGraph is a PowerShell-first wrapper around the ⚡ QuickGraph / QuikGraph** ecosystem.  
 > It lets you **build, query and visualise graphs directly from the pipeline** without
