@@ -112,7 +112,17 @@ jobs:
           $versionPattern = 'ModuleVersion\s*=\s*''[^'']*'''
           $content = $content -replace $versionPattern, "ModuleVersion = '$version'"
           if ($prerelease) {
-            $content = $content -replace '^\s*#\s*Prerelease\s*=\s*''[^'']*''', "Prerelease = '$prerelease'"
+            # Replace commented or uncommented prerelease line with active one
+            $content = $content -replace '^\s*#?\s*Prerelease\s*=\s*''[^'']*''', "Prerelease = '$prerelease'"
+            if ($content -notmatch '^\s*Prerelease\s*=') {
+              # Append if missing entirely
+              $content += "`nPrerelease = '$prerelease'"
+            }
+          } else {
+            # Stable release: ensure any existing prerelease line is commented out
+            if ($content -match '^\s*#?\s*Prerelease\s*=\s*''[^'']*''') {
+              $content = $content -replace '^\s*#?\s*Prerelease\s*=\s*''[^'']*''', "# Prerelease = ''"
+            }
           }
           Set-Content -Path $psd1.FullName -Value $content
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
