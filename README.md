@@ -36,6 +36,39 @@ The original goal was to **analyse dependencies** in IaC workloads, but the modu
 
 ---
 
+## Examples Index
+
+Jump straight to focused, copy‑paste friendly examples for each major task. All examples assume the module is imported and use concise variable names.
+
+### Graph Construction & Mutation
+* `New-Graph` – create an empty bidirectional graph (`docs/New-Graph.md`)
+* `New-AdjacencyGraph` – create an adjacency-list backed graph (`docs/New-AdjacencyGraph.md`)
+* `Add-Vertex` – add (or dedupe) vertices (`docs/Add-Vertex.md`)
+* `Add-Edge` – add directed edges with optional tag (`docs/Add-Edge.md`)
+* `Import-Graph` – load GraphML into a new graph (`docs/Import-Graph.md`)
+* `Export-Graph` – Graphviz / GraphML / MSAGL / Vega export (`docs/Export-Graph.md`)
+
+### Graph Query & Analysis
+* `Get-GraphPath` – shortest path (Dijkstra) between two vertices (`docs/Get-GraphPath.md`)
+* `Test-GraphPath` – fast reachability boolean (`docs/Test-GraphPath.md`)
+* `Get-InEdge` / `Get-OutEdge` – incoming / outgoing edge enumeration (`docs/Get-InEdge.md`, `docs/Get-OutEdge.md`)
+* `Get-GraphDistanceVector` – root-based distance levels (`docs/Get-GraphDistanceVector.md`)
+
+### Design Structure Matrix (DSM)
+* `New-DSM` – wrap a graph as a DSM (`docs/New-DSM.md`)
+* `Start-DSMClustering` – cluster / partition with SA or graph-based algorithms (`docs/Start-DSMClustering.md`)
+* `Start-DSMSequencing` – reorder to expose sources / cycles / sinks (`docs/Start-DSMSequencing.md`)
+* `Export-DSM` – text / Vega matrix export (`docs/Export-DSM.md`)
+
+### Typical End-to-End Flows
+* Build → Query: New-Graph → Add-Vertex / Add-Edge → Get-GraphPath / Get-InEdge
+* Import → Analyse → Export: Import-Graph → Get-GraphDistanceVector → Export-Graph
+* Graph → DSM Insight: New-Graph → Add-* → New-DSM → Start-DSMClustering / Start-DSMSequencing → Export-DSM
+
+> Tip: Each linked doc contains multiple scenarios; skim the first example for the minimal pattern, then look for advanced sections (weights, tagging, configs).
+
+---
+
 ## Quick install
 
 ```powershell

@@ -5,31 +5,28 @@ online version:
 schema: 2.0.0
 ---
 
-# New-Graph
+# New-AdjacencyGraph
 
 ## SYNOPSIS
-Create a new directed bidirectional graph suitable for adding vertices and edges.
+Create a new adjacency graph (PsAdjacencyGraph) instance.
 
 ## SYNTAX
 
 ```
-New-Graph [-ProgressAction <ActionPreference>] [<CommonParameters>]
+New-AdjacencyGraph [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Creates an empty PsBidirectionalGraph (directed) which supports vertex/edge list operations and
-can be exported or transformed into a DSM. Use Add-Vertex / Add-Edge to populate it. All further
-graph algorithms/cmdlets accept this graph type.
+Returns an empty PsAdjacencyGraph (adjacency-list backed) useful when you need that concrete
+representation instead of the default PsBidirectionalGraph. Use Add-Vertex / Add-Edge to populate.
 
 ## EXAMPLES
 
 ### Example 1
-Create a graph and add an edge.
+Create and populate an adjacency graph.
 ```powershell
-$g = New-Graph
+$g = New-AdjacencyGraph
 Add-Edge -From A -To B -Graph $g
-$g.VertexCount  # 2
-$g.EdgeCount    # 1
 ```
 
 ## PARAMETERS
@@ -57,8 +54,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ### None
 ## OUTPUTS
 
-### PSGraph.Model.PsBidirectionalGraph
-The new empty graph.
+### PSGraph.Model.PsAdjacencyGraph
+The new graph instance.
 ## NOTES
 
 ## RELATED LINKS

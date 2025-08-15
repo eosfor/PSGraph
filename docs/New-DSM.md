@@ -5,34 +5,49 @@ online version:
 schema: 2.0.0
 ---
 
-# New-Graph
+# New-DSM
 
 ## SYNOPSIS
-Create a new directed bidirectional graph suitable for adding vertices and edges.
+Create a classic Design Structure Matrix (DSM) view over an existing graph.
 
 ## SYNTAX
 
 ```
-New-Graph [-ProgressAction <ActionPreference>] [<CommonParameters>]
+New-DSM -Graph <PsBidirectionalGraph> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Creates an empty PsBidirectionalGraph (directed) which supports vertex/edge list operations and
-can be exported or transformed into a DSM. Use Add-Vertex / Add-Edge to populate it. All further
-graph algorithms/cmdlets accept this graph type.
+Wraps the supplied PsBidirectionalGraph in a DsmClassic implementation providing matrix-based
+operations (clustering, sequencing, export). The input graph is not modified; the DSM references
+its vertices and edges to build matrix indices.
 
 ## EXAMPLES
 
 ### Example 1
-Create a graph and add an edge.
+Create a DSM and export to text.
 ```powershell
 $g = New-Graph
 Add-Edge -From A -To B -Graph $g
-$g.VertexCount  # 2
-$g.EdgeCount    # 1
+$dsm = New-DSM -Graph $g
+Export-DSM -Dsm $dsm -Format TEXT
 ```
 
 ## PARAMETERS
+
+### -Graph
+Underlying graph supplying vertices/edges for the DSM.
+
+```yaml
+Type: PsBidirectionalGraph
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -ProgressAction
 Internal PowerShell progress preference.
@@ -57,8 +72,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ### None
 ## OUTPUTS
 
-### PSGraph.Model.PsBidirectionalGraph
-The new empty graph.
+### PSGraph.DesignStructureMatrix.IDsm
+A DSM instance (DsmClassic implementation).
 ## NOTES
 
 ## RELATED LINKS

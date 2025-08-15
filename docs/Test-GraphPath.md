@@ -5,52 +5,49 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-GraphPath
+# Test-GraphPath
 
 ## SYNOPSIS
-Compute a shortest path (by edge Weight) between two vertices in a directed graph.
+Return True if any directed path exists from one vertex to another.
 
 ## SYNTAX
 
 ```
-Get-GraphPath -From <PSVertex> -To <PSVertex> -Graph <PsBidirectionalGraph>
+Test-GraphPath -From <PSVertex> -To <PSVertex> -Graph <PsBidirectionalGraph>
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Runs Dijkstra (edge.Weight delegate) from the -From vertex to the -To vertex over a PsBidirectionalGraph.
-Outputs the sequence of PSEdge objects representing a shortest path when one exists. If no path exists
-no output is produced. Passing the same vertex for -From and -To yields no output (zero-length path suppressed).
-Vertices must already be present in the graph; otherwise an error is thrown by the underlying algorithm.
+Performs a reachability test between two vertices. If the vertices are equal returns True. If they
+are in the same strongly connected component returns True. Otherwise it builds a condensation
+component adjacency and breadth‑first searches for a path of components from source to target. If
+either vertex is not in the graph returns False. Outputs a single Boolean value.
 
 ## EXAMPLES
 
 ### Example 1
-Find the shortest path A -> D.
+Basic reachability.
 ```powershell
 $g = New-Graph
 Add-Edge -From A -To B -Graph $g
 Add-Edge -From B -To C -Graph $g
-Add-Edge -From C -To D -Graph $g
-Get-GraphPath -From ([PSGraph.Model.PSVertex]::new('A')) -To ([PSGraph.Model.PSVertex]::new('D')) -Graph $g
+Test-GraphPath -From ([PSGraph.Model.PSVertex]::new('A')) -To ([PSGraph.Model.PSVertex]::new('C')) -Graph $g  # True
+Test-GraphPath -From ([PSGraph.Model.PSVertex]::new('C')) -To ([PSGraph.Model.PSVertex]::new('A')) -Graph $g  # False
 ```
 
 ### Example 2
-Edge weights influence route selection.
+Cycle detection counts as reachable.
 ```powershell
 $g = New-Graph
-$a=[PSGraph.Model.PSVertex]::new('A');$b=[PSGraph.Model.PSVertex]::new('B');$c=[PSGraph.Model.PSVertex]::new('C')
-$g.AddVertexRange(@($a,$b,$c))
-$g.AddEdge([PSGraph.Model.PSEdge]::new($a,$b,[PSGraph.Model.PSEdgeTag]::new()) ); $g.Edges.Last().Weight=10
-$g.AddEdge([PSGraph.Model.PSEdge]::new($a,$c,[PSGraph.Model.PSEdgeTag]::new()) ); $g.Edges.Last().Weight=1
-$g.AddEdge([PSGraph.Model.PSEdge]::new($c,$b,[PSGraph.Model.PSEdgeTag]::new()) ); $g.Edges.Last().Weight=1
-Get-GraphPath -From $a -To $b -Graph $g   # returns A->C, C->B
+Add-Edge -From A -To B -Graph $g
+Add-Edge -From B -To A -Graph $g
+Test-GraphPath -From ([PSGraph.Model.PSVertex]::new('A')) -To ([PSGraph.Model.PSVertex]::new('B')) -Graph $g  # True
 ```
 
 ## PARAMETERS
 
 ### -From
-Starting vertex for the path search (must exist in graph).
+Source vertex.
 
 ```yaml
 Type: PSVertex
@@ -65,7 +62,7 @@ Accept wildcard characters: False
 ```
 
 ### -Graph
-Graph in which to search.
+Graph to test.
 
 ```yaml
 Type: PsBidirectionalGraph
@@ -80,7 +77,7 @@ Accept wildcard characters: False
 ```
 
 ### -To
-Destination vertex (must exist in graph).
+Destination vertex.
 
 ```yaml
 Type: PSVertex
@@ -117,9 +114,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ### None
 ## OUTPUTS
 
-### System.Object
-Sequence of PSEdge objects representing the shortest path (when found).
+### System.Boolean
+True if a path exists, otherwise False.
 ## NOTES
 
 ## RELATED LINKS
-Test-GraphPath

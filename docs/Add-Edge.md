@@ -1,57 +1,57 @@
 ---
 external help file: PSGraph.dll-Help.xml
-online version: 
+Module Name: PSGraph
+online version:
 schema: 2.0.0
 ---
 
 # Add-Edge
 
 ## SYNOPSIS
-Adds an edge between two vertexes into a graph
+Add a directed edge between two vertices (creating the vertices if they do not yet exist).
 
 ## SYNTAX
 
 ```
-Add-Edge -From <Object> -To <Object> -Graph <Object> [-Attribute <Object>] [<CommonParameters>]
+Add-Edge -From <PSObject> -To <PSObject>
+ -Graph <QuikGraph.IMutableVertexAndEdgeListGraph`2[PSGraph.Model.PSVertex,PSGraph.Model.PSEdge]>
+ [-Tag <Object>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Adds an edge between two vertexes into a graph
+Adds a directed edge From -> To into the supplied mutable graph. If either -From or -To is not
+already a PSGraph PSVertex it is wrapped in a new PSVertex whose Label is the object's ToString().
+If the vertices already exist (label equality) the existing instances are reused. An optional
+Tag value is stored on the created PSEdge (converted to string when present). The cmdlet does not
+emit a value; use the graph object to inspect results.
 
 ## EXAMPLES
 
 ### Example 1
-In this example new graph is created and stored in $g variable. Next line adds an edge from A to B into it. Vertexes A and B are automatically added to the graph. If vertexes are already in the graph they are used as source and target vertexes. In order for this to work vertex types has to be comparable.
+Create a graph and add an edge A -> B (vertices auto-created).
+```powershell
+$g = New-Graph
+Add-Edge -From A -To B -Graph $g
+$g.EdgeCount   # 1
+```
 
-```powershell code
-PS C:\> $g = New-Graph -Type AdjacencyGraph
-PS C:\> Add-Edge -From A -To B -Graph $g
+### Example 2
+Attach a tag to an edge.
+```powershell
+$g = New-Graph
+Add-Edge -From A -To B -Graph $g -Tag Dependency
+($g.Edges | Select-Object -First 1).Tag.Value  # "Dependency"
 ```
 
 ## PARAMETERS
 
-### -Attribute
-Not used in current implementation
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases: 
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -From
-Source vertex to use for the edge
+Source vertex (or arbitrary object which will be wrapped as a vertex) for the edge.
 
 ```yaml
-Type: Object
+Type: PSObject
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: Named
@@ -61,14 +61,29 @@ Accept wildcard characters: False
 ```
 
 ### -Graph
-Graph to add vertexes and edges to
+Graph instance receiving the edge. Must be a mutable, directed QuikGraph implementation.
+
+```yaml
+Type: QuikGraph.IMutableVertexAndEdgeListGraph`2[PSGraph.Model.PSVertex,PSGraph.Model.PSEdge]
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Tag
+Optional label stored inside the created edge's Tag object (stringified).
 
 ```yaml
 Type: Object
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
-Required: True
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -76,12 +91,12 @@ Accept wildcard characters: False
 ```
 
 ### -To
-Target vertex to use for the edge
+Target vertex (or object to wrap) for the edge.
 
 ```yaml
-Type: Object
+Type: PSObject
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: Named
@@ -90,19 +105,32 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -ProgressAction
+Internal PowerShell progress preference (normally not used).
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### None
-When addin edges library checks to see if there are such edges and vertices. If they are they are not added to the graph. Instead existing once are used.
-
 ## OUTPUTS
 
-### System.Object
-
+### None
 ## NOTES
 
 ## RELATED LINKS
-
+Add-Vertex
+New-Graph

@@ -5,34 +5,48 @@ online version:
 schema: 2.0.0
 ---
 
-# New-Graph
+# Import-Graph
 
 ## SYNOPSIS
-Create a new directed bidirectional graph suitable for adding vertices and edges.
+Import a GraphML file into a new PsBidirectionalGraph.
 
 ## SYNTAX
 
 ```
-New-Graph [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Import-Graph -Path <String> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Creates an empty PsBidirectionalGraph (directed) which supports vertex/edge list operations and
-can be exported or transformed into a DSM. Use Add-Vertex / Add-Edge to populate it. All further
-graph algorithms/cmdlets accept this graph type.
+Creates a new empty PsBidirectionalGraph and populates it by deserializing the specified GraphML
+file (nodes and directed edges). Vertex labels become PSVertex ids. Edge tags are initialized with
+empty PSEdgeTag instances. Only GraphML is supported; provide a valid path to a .graphml file.
 
 ## EXAMPLES
 
 ### Example 1
-Create a graph and add an edge.
+Load a previously exported GraphML file.
 ```powershell
-$g = New-Graph
-Add-Edge -From A -To B -Graph $g
-$g.VertexCount  # 2
-$g.EdgeCount    # 1
+$g = Import-Graph -Path ./graph.graphml
+$g.VertexCount
+$g.EdgeCount
 ```
 
 ## PARAMETERS
+
+### -Path
+Path to a GraphML (.graphml) file to deserialize.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -ProgressAction
 Internal PowerShell progress preference.
@@ -58,7 +72,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ### PSGraph.Model.PsBidirectionalGraph
-The new empty graph.
+The imported graph.
 ## NOTES
 
 ## RELATED LINKS
