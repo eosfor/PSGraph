@@ -30,7 +30,7 @@ jobs:
             Write-Error 'Bad tag'; exit 1
           }
           $ver = $Matches[1]; $pre = $Matches[2]
-          $manifest = 'PSGraph/PSQuickGraph.psd1'
+          $manifest = Join-Path $PWD 'PSGraph/PSQuickGraph.psd1'
 
           $md = Test-ModuleManifest -Path $manifest
 
@@ -91,7 +91,7 @@ jobs:
             Write-Error 'Bad tag'; exit 1
           }
           $ver = $Matches[1]; $pre = $Matches[2]
-          $manifest = 'PSGraph/PSQuickGraph.psd1'
+          $manifest = Join-Path $PWD 'PSGraph/PSQuickGraph.psd1'
 
           $md = Test-ModuleManifest -Path $manifest
 
