@@ -24,29 +24,26 @@ jobs:
         if: github.event_name == 'release'
         shell: pwsh
         run: |
-          $tag = "$env:GITHUB_REF" -replace '^refs/tags/', ''
-          if (-not $tag) { Write-Error 'No tag ref found.'; exit 1 }
-          $tagCore = $tag -replace '^v',''
-          if ($tagCore -notmatch '^([0-9]+\.[0-9]+\.[0-9]+)(?:-([A-Za-z0-9\-]+))?$') {
-            Write-Error "Tag '$tag' has invalid format. Use vX.Y.Z or vX.Y.Z-suffix"; exit 1
+          $tag = "${env:GITHUB_REF}" -replace '^refs/tags/',''
+          $tag = $tag -replace '^v',''
+          if ($tag -notmatch '^([0-9]+\.[0-9]+\.[0-9]+)(?:-([A-Za-z0-9\-]+))?$') {
+            Write-Error 'Bad tag'; exit 1
           }
-          $expectedVersion = $Matches[1]
-          $expectedPrerelease = $Matches[2]
-          $psd1Path = Join-Path $PWD 'PSGraph/PSQuickGraph.psd1'
-          if (-not (Test-Path $psd1Path)) { Write-Error 'PSQuickGraph.psd1 not found.'; exit 1 }
-          $raw = Get-Content $psd1Path -Raw
-          $m = [regex]::Match($raw, '(?m)^\s*Prerelease\s*=\s*''([^'']+)''')
-          $manifestPrerelease = if ($m.Success) { $m.Groups[1].Value } else { $null } 
-          $moduleVersion = ($raw | Select-String -Pattern "ModuleVersion\s*=\s*'([^']+)'" -AllMatches).Matches.Groups[1].Value
-          #$prLine = ($raw | Select-String -Pattern "^\s*Prerelease\s*=\s*'([^']+)'" -AllMatches)
-          #$manifestPrerelease = if ($prLine) { $prLine.Matches.Groups[1].Value } else { $null }
+          $ver = $Matches[1]; $pre = $Matches[2]
+          $manifest = 'PSGraph/PSQuickGraph.psd1'
+
+          $md = Test-ModuleManifest -Path $manifest
+
+          $moduleVersion = $md.Version
+          $manifestPrerelease = $md.PrivateData.PSData.Prerelease
+
           $ok = $true
-          if ($moduleVersion -ne $expectedVersion) {
-            Write-Host "::error::Manifest ModuleVersion ($moduleVersion) does not match tag version ($expectedVersion)."; $ok = $false
+          if ($moduleVersion -ne $ver) {
+            Write-Host "::error::Manifest ModuleVersion ($moduleVersion) does not match tag version ($ver)."; $ok = $false
           }
-          if ($expectedPrerelease) {
-            if ($manifestPrerelease -ne $expectedPrerelease) {
-              Write-Host "::error::Manifest Prerelease ('$manifestPrerelease') does not match tag prerelease ('$expectedPrerelease')."; $ok = $false
+          if ($pre) {
+            if ($manifestPrerelease -ne $pre) {
+              Write-Host "::error::Manifest Prerelease ('$manifestPrerelease') does not match tag prerelease ('$pre')."; $ok = $false
             }
           } else {
             if ($manifestPrerelease) {
@@ -56,8 +53,8 @@ jobs:
           if (-not $ok) {
             Write-Host '--- Manual Action Required ---'
             Write-Host 'Update PSGraph/PSQuickGraph.psd1 with:'
-            Write-Host "  ModuleVersion = '$expectedVersion'"
-            if ($expectedPrerelease) { Write-Host "  Prerelease    = '$expectedPrerelease'" } else { Write-Host '  (Remove/Comment any Prerelease entry)' }
+            Write-Host "  ModuleVersion = '$ver'"
+            if ($pre) { Write-Host "  Prerelease    = '$pre'" } else { Write-Host '  (Remove/Comment any Prerelease entry)' }
             Write-Host 'Commit the change and recreate the release (or re-run after fixing).'
             exit 1
           } else {
@@ -88,47 +85,25 @@ jobs:
         id: set_version
         shell: pwsh
         run: |
-          $tag = "${env:GITHUB_REF}" -replace '^refs/tags/', ''
-          if (-not $tag) {
-            Write-Error "Tag not found. Failing."
-            exit 1
+          $tag = "${env:GITHUB_REF}" -replace '^refs/tags/',''
+          $tag = $tag -replace '^v',''
+          if ($tag -notmatch '^([0-9]+\.[0-9]+\.[0-9]+)(?:-([A-Za-z0-9\-]+))?$') {
+            Write-Error 'Bad tag'; exit 1
           }
-          $tag = $tag -replace '^v', ''
-          if ($tag -match '^([0-9]+\.[0-9]+\.[0-9]+)(?:-([A-Za-z0-9\-]+))?$') {
-            $version = $matches[1]
-            $prerelease = $matches[2]
+          $ver = $Matches[1]; $pre = $Matches[2]
+          $manifest = 'PSGraph/PSQuickGraph.psd1'
+
+          $md = Test-ModuleManifest -Path $manifest
+
+
+          if ($pre) {
+            Update-ModuleManifest -Path $manifest -ModuleVersion $ver -Prerelease $pre
           } else {
-            Write-Error "Tag format invalid. Should be X.Y.Z or X.Y.Z-suffix"
-            exit 1
+            Update-ModuleManifest -Path $manifest -ModuleVersion $ver -Prerelease ''
           }
-          if ($prerelease -and ($prerelease -notmatch '^(?:-)?[a-zA-Z0-9\-]+$')) {
-            Write-Error "Prerelease string '$prerelease' contains invalid characters. Only a-z, A-Z, 0-9, and hyphen (-) at the beginning are allowed."
-            exit 1
-          }
-          $psd1 = Get-Item ./PSGraph/PSQuickGraph.psd1
-          if (-not $psd1) {
-            Write-Error "Module manifest (.psd1) not found!"
-            exit 1
-          }
-          $content = Get-Content $psd1.FullName
-          $versionPattern = 'ModuleVersion\s*=\s*''[^'']*'''
-          $content = $content -replace $versionPattern, "ModuleVersion = '$version'"
-          if ($prerelease) {
-            # Replace commented or uncommented prerelease line with active one
-            $content = $content -replace '^\s*#?\s*Prerelease\s*=\s*''[^'']*''', "Prerelease = '$prerelease'"
-            if ($content -notmatch '^\s*Prerelease\s*=') {
-              # Append if missing entirely
-              $content += "`nPrerelease = '$prerelease'"
-            }
-          } else {
-            # Stable release: ensure any existing prerelease line is commented out
-            if ($content -match '^\s*#?\s*Prerelease\s*=\s*''[^'']*''') {
-              $content = $content -replace '^\s*#?\s*Prerelease\s*=\s*''[^'']*''', "# Prerelease = ''"
-            }
-          }
-          Set-Content -Path $psd1.FullName -Value $content
-          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "prerelease=$prerelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+          "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "prerelease=$pre" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       # --- PowerShell Module Build/Test/Publish ---
       - name: Install dependencies
