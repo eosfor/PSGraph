@@ -40,14 +40,23 @@ public class DsmSequencingAlgorithm : IDsmSequencingAlgorithm
                 collapsedBlocks.AddRange(collapsed);
         }
 
-        // Итог: источники + развёрнутые блоки циклов + стоки
+        // Итог: источники + развёрнутые блоки циклов + стоки (только оригинальные вершины)
+        var originalSet = new HashSet<PSVertex>(_dsm.RowIndex.Keys);
+
         var newOrder = sources
-            .Distinct()
-            .Concat(collapsedBlocks.SelectMany(b => b))
-            .Concat(sinks.Distinct())
+            .Where(v => originalSet.Contains(v))                 // отбрасываем синтетические C0,C1,...
+            .Concat(collapsedBlocks.SelectMany(b => b))          // это всегда оригинальные вершины
+            .Concat(sinks.Where(v => originalSet.Contains(v)))   // фильтруем синтетические
+            .Where(v => originalSet.Contains(v))                 // финальный фильтр
             .Distinct()
             .ToList();
-    return _dsm.Order(newOrder);
+
+        // Добавим недостающих оригинальных вершин (если какие‑то не попали из-за фильтрации)
+        foreach (var v in originalSet)
+            if (!newOrder.Contains(v))
+                newOrder.Add(v);
+
+        return _dsm.Order(newOrder);
     }
 
     private bool IsConverged()

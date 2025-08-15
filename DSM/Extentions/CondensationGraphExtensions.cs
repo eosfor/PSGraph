@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using QuikGraph;
 using QuikGraph.Algorithms.Condensation;
 using PSGraph.Model;
@@ -9,16 +11,26 @@ public static class CondensationGraphExtensions
     public static PsBidirectionalGraph ToPsBidirectionalGraph(this IMutableBidirectionalGraph<PsBidirectionalGraph, CondensedEdge<PSVertex, PSEdge, PsBidirectionalGraph>> condensedGraph)
     {
         var resultGraph = new PsBidirectionalGraph();
+        var sccToVertexMap = new Dictionary<PsBidirectionalGraph, PSVertex>();
 
+        int idx = 0;
         // Каждая вершина condensedGraph — это PsBidirectionalGraph (SCC)
         foreach (var scc in condensedGraph.Vertices)
         {
             // Добавляем все вершины SCC в итоговый граф
-            foreach (var vertex in scc.Vertices)
-            {
-                if (!resultGraph.Vertices.Contains(vertex))
-                    resultGraph.AddVertex(vertex);
-            }
+            // foreach (var vertex in scc.Vertices)
+            // {
+            //     if (!resultGraph.Vertices.Contains(vertex))
+            //         resultGraph.AddVertex(vertex);
+            // }
+
+
+            var label = $"C{idx++}";
+            var sccVertex = new PSVertex(label);
+            sccVertex.OriginalObject = scc; // хранит агрегированный подграф
+            sccVertex.Metadata["OriginalVertices"] = scc.Vertices.ToList();
+            resultGraph.AddVertex(sccVertex);
+            sccToVertexMap[scc] = sccVertex;
         }
 
         // Добавляем рёбра между SCC
@@ -27,9 +39,14 @@ public static class CondensationGraphExtensions
             // Для каждого ребра между SCC берём любые две вершины из SCC
             var source = edge.Source.Vertices.FirstOrDefault();
             var target = edge.Target.Vertices.FirstOrDefault();
+
             if (source != null && target != null)
             {
-                resultGraph.AddEdge(new PSEdge(source, target));
+                var srcV = sccToVertexMap[edge.Source];
+                var tgtV = sccToVertexMap[edge.Target];
+
+                if (srcV != tgtV)
+                    resultGraph.AddEdge(new PSEdge(srcV, tgtV));
             }
         }
 
