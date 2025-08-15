@@ -59,7 +59,8 @@ jobs:
             Write-Host 'Commit the change and recreate the release (or re-run after fixing).'
             exit 1
           } else {
-            Write-Host "Manifest version check passed ($moduleVersion${if($manifestPrerelease){"-$manifestPrerelease"}})."
+            $suffix = if ($manifestPrerelease) { "-$manifestPrerelease" } else { '' }
+            Write-Host "Manifest version check passed ($moduleVersion$suffix)."
           }
 
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
