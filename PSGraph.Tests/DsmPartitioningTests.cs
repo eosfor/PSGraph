@@ -3,12 +3,14 @@ using Xunit;
 using PSGraph.DesignStructureMatrix;
 using FluentAssertions;
 using PSGraph.Model;
+using System.Diagnostics.CodeAnalysis; 
 
 namespace PSGraph.Tests
 {
     public class DsmPartitioningTests
     {
 
+        [ExcludeFromCodeCoverage]
         private Matrix<double> ReorderMatrix(Matrix<double> original, Dictionary<PSVertex, int> actualIndex, string[] expectedOrder)
         {
             int size = expectedOrder.Length;
@@ -31,6 +33,7 @@ namespace PSGraph.Tests
             return reordered;
         }
 
+        [ExcludeFromCodeCoverage]
         private void AssertVertexGroupsAreClustered(Dictionary<PSVertex, int> rowIndex, List<List<PSVertex>> expectedGroups)
         {
             var allIndices = new Dictionary<string, int>();

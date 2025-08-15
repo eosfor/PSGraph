@@ -70,14 +70,17 @@ namespace PSGraph.Tests
             pathEdges.Should().NotBeNull();
 
             var path = pathEdges.ToList();
-            path.Should().HaveCount(2);
+            // With weights (A->B=1, B->C=1, A->C=5, C->D=1) the true shortest path is A->B->C->D (total 3)
+            path.Should().HaveCount(3);
 
-            // Expected path: A -> C -> D
             path[0].Source.Should().Be(vertexA);
-            path[0].Target.Should().Be(vertexC);
+            path[0].Target.Should().Be(vertexB);
 
-            path[1].Source.Should().Be(vertexC);
-            path[1].Target.Should().Be(vertexD);
+            path[1].Source.Should().Be(vertexB);
+            path[1].Target.Should().Be(vertexC);
+
+            path[2].Source.Should().Be(vertexC);
+            path[2].Target.Should().Be(vertexD);
         }
 
 
