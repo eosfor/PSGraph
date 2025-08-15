@@ -35,9 +35,11 @@ jobs:
           $psd1Path = Join-Path $PWD 'PSGraph/PSQuickGraph.psd1'
           if (-not (Test-Path $psd1Path)) { Write-Error 'PSQuickGraph.psd1 not found.'; exit 1 }
           $raw = Get-Content $psd1Path -Raw
+          $m = [regex]::Match($raw, '(?m)^\s*Prerelease\s*=\s*''([^'']+)''')
+          $manifestPrerelease = if ($m.Success) { $m.Groups[1].Value } else { $null } 
           $moduleVersion = ($raw | Select-String -Pattern "ModuleVersion\s*=\s*'([^']+)'" -AllMatches).Matches.Groups[1].Value
-          $prLine = ($raw | Select-String -Pattern "^\s*Prerelease\s*=\s*'([^']+)'" -AllMatches)
-          $manifestPrerelease = if ($prLine) { $prLine.Matches.Groups[1].Value } else { $null }
+          #$prLine = ($raw | Select-String -Pattern "^\s*Prerelease\s*=\s*'([^']+)'" -AllMatches)
+          #$manifestPrerelease = if ($prLine) { $prLine.Matches.Groups[1].Value } else { $null }
           $ok = $true
           if ($moduleVersion -ne $expectedVersion) {
             Write-Host "::error::Manifest ModuleVersion ($moduleVersion) does not match tag version ($expectedVersion)."; $ok = $false
