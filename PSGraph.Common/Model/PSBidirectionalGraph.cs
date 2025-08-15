@@ -4,57 +4,36 @@ namespace PSGraph.Model
 {
     public class PsBidirectionalGraph : BidirectionalGraph<PSVertex, PSEdge>
     {
-        public PsBidirectionalGraph() : base()
-        {
-        }
+        // A: default now disallows parallel edges
+        public PsBidirectionalGraph() : this(false) { }
 
-        public PsBidirectionalGraph(bool allowParallelEdges = false) : base(allowParallelEdges)
-        {
-        }
+        public PsBidirectionalGraph(bool allowParallelEdges = false) : base(allowParallelEdges) { }
 
-        public PsBidirectionalGraph(PsBidirectionalGraph g) : base(g)
-        {
+        public PsBidirectionalGraph(PsBidirectionalGraph g) : base(g) { }
 
-        }
-
-
+        // B: explicit duplicate prevention + vertex reuse by label
         public override bool AddEdge(PSEdge edge)
         {
-            var s = Vertices.Contains(edge.Source) ? Vertices.First(v => v == edge.Source) : edge.Source;
-            var t = Vertices.Contains(edge.Target) ? Vertices.First(v => v == edge.Target) : edge.Target;
+            if (edge is null) return false;
 
-            if (!Vertices.Contains(s))
-                AddVertex(s);
-            if (!Vertices.Contains(t))
-                AddVertex(t);
+            var source = Vertices.FirstOrDefault(v => v == edge.Source) ?? edge.Source;
+            var target = Vertices.FirstOrDefault(v => v == edge.Target) ?? edge.Target;
 
-            var e = new PSEdge(s, t, edge.Tag);
-            return base.AddEdge(e);
+            if (!Vertices.Contains(source)) AddVertex(source);
+            if (!Vertices.Contains(target)) AddVertex(target);
+
+            var toAdd = (ReferenceEquals(source, edge.Source) && ReferenceEquals(target, edge.Target))
+                ? edge
+                : new PSEdge(source, target, edge.Tag);
+
+            return base.AddEdge(toAdd);
         }
 
         public override bool AddVerticesAndEdge(PSEdge edge)
         {
-            PSVertex s = edge.Source;
-            PSVertex t = edge.Target;
-
-            if (!Vertices.Contains(s))
-                AddVertex(s);
-            if (!Vertices.Contains(t))
-                AddVertex(t);
-
-            var e = new PSEdge(
-                Vertices.First(v => v == s),
-                Vertices.First(v => v == t),
-                edge.Tag
-            );
-
-            return base.AddEdge(e);
-        }
-
-
-        private bool Exists(PSVertex vertex)
-        {
-            return this.Vertices.Contains(vertex);
+            if (edge is null) return false;
+            // Delegate to AddEdge after ensuring canonical vertices
+            return AddEdge(edge);
         }
     }
 }
