@@ -7,29 +7,28 @@
     {"name": "link-data", "source": "link-data-raw"},
     {
       "name": "node-data",
-      "values": [],
       "transform": [
         {
-          "type": "force",
-          "iterations": 300,
-          "restart": {"signal": "restart"},
           "signal": "force",
+          "type": "force",
           "forces": [
             {"force": "center", "x": {"signal": "cx"}, "y": {"signal": "cy"}},
             {
               "force": "collide",
-              "radius": {"signal": "2 * nodeRadius"},
               "iterations": 1,
+              "radius": {"signal": "2 * nodeRadius"},
               "strength": 0.7
             },
             {"force": "nbody", "strength": {"signal": "nodeCharge"}},
             {
               "force": "link",
-              "links": "link-data-raw",
               "distance": {"signal": "linkDistance"},
-              "id": "index"
+              "id": "index",
+              "links": "link-data-raw"
             }
-          ]
+          ],
+          "iterations": 300,
+          "restart": {"signal": "restart"}
         },
         {
           "type": "formula",
@@ -41,7 +40,8 @@
           "as": "fy",
           "expr": "fix[1]!=null && node==datum.index ?invert('yscale',fix[1]):null"
         }
-      ]
+      ],
+      "values": []
     },
     {
       "name": "adj-nodes",
@@ -68,7 +68,6 @@
   ],
   "marks": [
     {
-      "name": "links",
       "from": {"data": "link-data"},
       "type": "path",
       "encode": {
@@ -80,6 +79,7 @@
         }
       },
       "interactive": false,
+      "name": "links",
       "transform": [
         {
           "type": "linkpath",
@@ -97,27 +97,27 @@
       "type": "symbol",
       "encode": {
         "enter": {
-          "fill": { "signal": "datum.nodeType === 'BaristaLabs.ChromeDevTools.Runtime.Network.RequestWillBeSentEvent'? '#e0e1dd' : scale('color', datum.group)" },
+          "fill": {"signal": "scale('color', datum.nodeType)"},
           "stroke": {"value": "white"}
         },
         "update": {
           "cursor": {"value": "pointer"},
           "fill": {
-            "signal": "hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index) ? 'red' :  datum.nodeType === 'BaristaLabs.ChromeDevTools.Runtime.Network.RequestWillBeSentEvent'? '#e0e1dd' : scale('color', datum.group)"
+            "signal": "hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index) ? 'red' : scale('color', datum.nodeType)"
           },
           "size": {
             "signal": "(hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index)) ? 2.5 * nodeRadius * nodeRadius : 2 * nodeRadius * nodeRadius"
           },
-          "zindex": {
-            "signal": "(hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index)) ? 10 : 1"
-          },
+          "tooltip": {"signal": "{ name: datum.name }"},
           "x": {
             "signal": "fix[0]!=null && node===datum.index ?fix[0]:scale('xscale', datum.x)"
           },
           "y": {
             "signal": "fix[1]!=null && node===datum.index ?fix[1]:scale('yscale', datum.y)"
           },
-          "tooltip": {"signal": "{ name: datum.name }"}
+          "zindex": {
+            "signal": "(hoverIndex === datum.index || indata('adjacentIndices', 'adj', datum.index)) ? 10 : 1"
+          }
         }
       },
       "name": "nodes",
@@ -126,22 +126,22 @@
   ],
   "scales": [
     {
-      "domain": {"data": "node-data", "field": "group"},
+      "domain": {"data": "node-data", "field": "nodeType"},
       "name": "color",
       "type": "ordinal",
       "range": {"scheme": "category10"}
     },
     {
-      "name": "xscale",
-      "zero": false,
       "domain": {"signal": "xdom"},
-      "range": {"signal": "xrange"}
+      "name": "xscale",
+      "range": {"signal": "xrange"},
+      "zero": false
     },
     {
-      "name": "yscale",
-      "zero": false,
       "domain": {"signal": "ydom"},
-      "range": {"signal": "yrange"}
+      "name": "yscale",
+      "range": {"signal": "yrange"},
+      "zero": false
     }
   ],
   "signals": [
@@ -151,7 +151,6 @@
     {"name": "yext", "update": "[height, 0]"},
     {
       "name": "down",
-      "value": null,
       "on": [
         {"events": "mouseup,touchend", "update": "null"},
         {"events": "mousedown, touchstart", "update": "xy()"},
@@ -160,42 +159,39 @@
     },
     {
       "name": "xcur",
-      "value": null,
       "on": [{"events": "mousedown, touchstart, touchend", "update": "xdom"}]
     },
     {
       "name": "ycur",
-      "value": null,
       "on": [{"events": "mousedown, touchstart, touchend", "update": "ydom"}]
     },
     {
       "name": "delta",
-      "value": [0, 0],
       "on": [
         {
           "events": [
             {
-              "source": "window",
-              "type": "mousemove",
-              "consume": true,
               "between": [
                 {"type": "mousedown"},
                 {"source": "window", "type": "mouseup"}
-              ]
+              ],
+              "consume": true,
+              "source": "window",
+              "type": "mousemove"
             },
             {
-              "type": "touchmove",
               "consume": true,
-              "filter": "event.touches.length === 1"
+              "filter": "event.touches.length === 1",
+              "type": "touchmove"
             }
           ],
           "update": "down ? [down[0]-x(), y()-down[1]] : [0,0]"
         }
-      ]
+      ],
+      "value": [0, 0]
     },
     {
       "name": "anchor",
-      "value": [0, 0],
       "on": [
         {
           "events": "wheel",
@@ -203,16 +199,16 @@
         },
         {
           "events": {
-            "type": "touchstart",
-            "filter": "event.touches.length===2"
+            "filter": "event.touches.length===2",
+            "type": "touchstart"
           },
           "update": "[(xdom[0] + xdom[1]) / 2, (ydom[0] + ydom[1]) / 2]"
         }
-      ]
+      ],
+      "value": [0, 0]
     },
     {
       "name": "zoom",
-      "value": 1,
       "on": [
         {
           "events": "wheel!",
@@ -225,39 +221,39 @@
           "update": "dist1 / dist2"
         },
         {"events": [{"source": "view", "type": "dblclick"}], "update": "1"}
-      ]
+      ],
+      "value": 1
     },
     {
       "name": "dist1",
-      "value": 0,
       "on": [
         {
           "events": {
-            "type": "touchstart",
-            "filter": "event.touches.length===2"
+            "filter": "event.touches.length===2",
+            "type": "touchstart"
           },
           "update": "pinchDistance(event)"
         },
         {"events": {"signal": "dist2"}, "update": "dist2"}
-      ]
+      ],
+      "value": 0
     },
     {
       "name": "dist2",
-      "value": 0,
       "on": [
         {
           "events": {
-            "type": "touchmove",
             "consume": true,
-            "filter": "event.touches.length===2"
+            "filter": "event.touches.length===2",
+            "type": "touchmove"
           },
           "update": "pinchDistance(event)"
         }
-      ]
+      ],
+      "value": 0
     },
     {
       "name": "xdom",
-      "update": "xext",
       "on": [
         {
           "events": {"signal": "delta"},
@@ -268,11 +264,11 @@
           "update": "[anchor[0] + (xdom[0] - anchor[0]) * zoom, anchor[0] + (xdom[1] - anchor[0]) * zoom]"
         },
         {"events": [{"source": "view", "type": "dblclick"}], "update": "xrange"}
-      ]
+      ],
+      "update": "xext"
     },
     {
       "name": "ydom",
-      "update": "yext",
       "on": [
         {
           "events": {"signal": "delta"},
@@ -283,18 +279,19 @@
           "update": "[anchor[1] + (ydom[0] - anchor[1]) * zoom, anchor[1] + (ydom[1] - anchor[1]) * zoom]"
         },
         {"events": [{"source": "view", "type": "dblclick"}], "update": "yrange"}
-      ]
+      ],
+      "update": "yext"
     },
     {"name": "size", "update": "clamp(20 / span(xdom), 1, 1000)"},
     {
       "name": "cx",
-      "update": "width / 2",
       "on": [
         {
           "events": "[symbol:mousedown, window:mouseup] > window:mousemove",
           "update": " cx==width/2?cx+0.001:width/2"
         }
-      ]
+      ],
+      "update": "width / 2"
     },
     {"name": "cy", "update": "height / 2"},
     {"name": "w", "value": 1200},
@@ -326,24 +323,23 @@
     {
       "description": "State variable for active node fix status.",
       "name": "fix",
-      "value": false,
       "on": [
         {
           "events": "symbol:mouseout[!event.buttons], window:mouseup",
           "update": "false"
         },
-        {"events": "symbol:mouseover", "update": "fix || true", "force": true},
+        {"events": "symbol:mouseover", "force": true, "update": "fix || true"},
         {
           "events": "[symbol:mousedown, window:mouseup] > window:mousemove!",
-          "update": "xy()",
-          "force": true
+          "force": true,
+          "update": "xy()"
         }
-      ]
+      ],
+      "value": false
     },
     {
       "description": "Graph node most recently interacted with.",
       "name": "node",
-      "value": null,
       "on": [
         {
           "events": "symbol:mouseover",
@@ -354,12 +350,21 @@
     {
       "description": "Flag to restart Force simulation upon data changes.",
       "name": "restart",
-      "value": false,
-      "on": [{"events": {"signal": "fix"}, "update": "fix && fix.length"}]
+      "on": [{"events": {"signal": "fix"}, "update": "fix && fix.length"}],
+      "value": false
+    }
+  ],
+  "legends": [
+    {
+      "fill": "color",
+      "title": "Color codes",
+      "direction": "vertical",
+      "labelLimit": 0
     }
   ],
   "$schema": "https://vega.github.io/schema/vega/v6.json",
-  "autosize": {"type": "none"},
+  "autosize": {"type": "pad", "resize": true, "contains": "padding"},
+  "padding": {"right": 260},
   "description": "A node-link diagram with force-directed layout",
   "height": {"signal": "h"},
   "width": {"signal": "w"}
