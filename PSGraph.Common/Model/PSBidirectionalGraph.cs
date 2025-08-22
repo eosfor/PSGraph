@@ -1,4 +1,5 @@
 ﻿using QuikGraph;
+using QuikGraph.Algorithms;
 
 namespace PSGraph.Model
 {
@@ -10,6 +11,16 @@ namespace PSGraph.Model
         public PsBidirectionalGraph(bool allowParallelEdges = false) : base(allowParallelEdges) { }
 
         public PsBidirectionalGraph(PsBidirectionalGraph g) : base(g) { }
+
+        // Strongly-typed clone that preserves the derived type
+        public new PsBidirectionalGraph Clone()
+        {
+            return new PsBidirectionalGraph(this);
+        }
+
+        public bool IsDag => this.IsDirectedAcyclicGraph();
+
+        public IEnumerable<PSVertex> Roots => this.Roots();
 
         // B: explicit duplicate prevention + vertex reuse by label
         public override bool AddEdge(PSEdge edge)

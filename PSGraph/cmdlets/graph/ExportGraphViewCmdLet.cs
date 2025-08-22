@@ -34,6 +34,9 @@ namespace PSGraph.Cmdlets
         [ValidateNotNullOrEmpty]
         public string Path;
 
+        [Parameter(Mandatory = false)]
+        public SwitchParameter UseVirtualTreeRoot;
+
         private VegaExportTypes _vegaExportType = VegaExportTypes.JSON;
 
 
@@ -114,24 +117,58 @@ namespace PSGraph.Cmdlets
         private string ExportVegaTreeLayout(VegaExportTypes exportType)
         {
             var modulePath = MyInvocation.MyCommand.Module?.ModuleBase;
-            var records = Graph.ConvertToParentChildList();
             var vega = VegaHelper.GetVegaTemplateObjectFromModulePath(modulePath, "vega.tree.layout.json");
-            vega.Data[0].Values = records.ToList<object>();
 
-            switch (exportType)
+            if (Graph.Roots().Count() == 0)
             {
-                case VegaExportTypes.HTML:
-                    return VegaHelper.RenderHtml(vega);
-                default:
-                case VegaExportTypes.JSON:
-                    return vega.ToJson();
+                var records = Graph.ConvertToParentChildList();
+                vega.Data[0].Values = records.ToList<object>();
+
+                switch (exportType)
+                {
+                    case VegaExportTypes.HTML:
+                        return VegaHelper.RenderHtml(vega);
+                    default:
+                    case VegaExportTypes.JSON:
+                        return vega.ToJson();
+                }
             }
+            else
+            {
+                if (!UseVirtualTreeRoot.IsPresent)
+                {
+                    WriteError(new ErrorRecord(
+                        new InvalidOperationException("The graph cannot be exported as a tree. It has multiple roots."),
+                        "PSGraph.ExportVegaTreeLayout.MultipleRoots",
+                        ErrorCategory.InvalidOperation,
+                        Graph));
+                    return string.Empty;
+                }
+                else
+                {
+                    var tmpGraph = Graph.Clone();
+                    var roots = tmpGraph.Roots();
+                    var virtualRoot = new PSVertex("VirtualRoot Node");
+                    tmpGraph.AddVertex(virtualRoot);
+                    foreach (var root in roots)
+                    {
+                        tmpGraph.AddVerticesAndEdge(new PSEdge(virtualRoot, root, new PSEdgeTag(string.Empty)));
+                    }
 
-            //string html = VegaHelper.RenderHtml(vega);
+                    var records = tmpGraph.ConvertToParentChildList();
+                    vega.Data[0].Values = records.ToList<object>();
 
-            //return html;
+                    switch (exportType)
+                    {
+                        case VegaExportTypes.HTML:
+                            return VegaHelper.RenderHtml(vega);
+                        default:
+                        case VegaExportTypes.JSON:
+                            return vega.ToJson();
+                    }
 
-            //File.WriteAllText(Path, html);
+                }
+            }
         }
 
         private string ExportVegaAdjacencyMatrix(VegaExportTypes exportType)
