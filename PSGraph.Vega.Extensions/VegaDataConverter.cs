@@ -95,7 +95,7 @@ namespace PSGraph.Vega.Extensions
             }
 
             var rootRecords = records
-                .Where(r => ((GraphRecord)r).parent == -1)
+                .Where(r => ((GraphRecord)r).parent == -1 || ((GraphRecord)r).parent == ((GraphRecord)r).id)
                 .ToList();
 
             // Удаляем их из исходного списка
