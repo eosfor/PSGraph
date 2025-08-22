@@ -51,7 +51,7 @@ Describe 'Vega Tests' {
         Add-Edge -From B -To E -Graph $graph | Out-Null
         Add-Edge -From C -To F -Graph $graph | Out-Null
 
-        Export-Graph -Graph $graph -Format Vega_TreeLayout -Path /tmp/x.tree.html
+        Export-Graph -Graph $graph -Format Vega_TreeLayout -Path /tmp/x.tree.html -UseVirtualTreeRoot
     }
 
     It 'Vega Adjacency Matrix' {
