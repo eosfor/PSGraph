@@ -187,6 +187,11 @@ namespace PSGraph.Tests
                     .AddParameter("Graph", graph)
                     .AddParameter("Format", $"{vegaName}");
 
+                if (vegaName == nameof(GraphExportTypes.Vega_TreeLayout))
+                {
+                    _powershell.AddParameter("UseVirtualTreeRoot", true);
+                }
+
                 // Act
                 var results = _powershell.Invoke();
 
@@ -226,6 +231,11 @@ namespace PSGraph.Tests
                         .AddParameter("Graph", graph)
                         .AddParameter("Format", $"{vegaName}")
                         .AddParameter("Path", filePath);
+
+                    if (vegaName == nameof(GraphExportTypes.Vega_TreeLayout))
+                    {
+                        _powershell.AddParameter("UseVirtualTreeRoot", true);
+                    }
 
                     // Act
                     var results = _powershell.Invoke();
