@@ -39,6 +39,21 @@ $cfg = @{ InitialTemperature = 5; CoolingRate = 0.9 }
 $res = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm Classic -AlgorithmConfig $cfg
 ```
 
+### Example 1b
+Run classic clustering with deterministic seed and auto-T0 calibration controls.
+```powershell
+$cfg = @{
+  InitialTemperature = $null
+  CoolingSchedule = 'Geometric'
+  CoolingRate = 0.95
+  InitialAcceptanceProbability = 0.8
+  TemperatureCalibrationMoves = 64
+  EpochLength = 0
+  RandomSeed = 12345
+}
+$res = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm Classic -AlgorithmConfig $cfg -Detailed
+```
+
 ### Example 2
 Get detailed output for graph-based clustering.
 ```powershell
@@ -139,6 +154,12 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ### System.Object
+
+When `-Detailed` is set for `Classic`, output includes annealing telemetry:
+* `CostHistory`, `TemperatureHistory`
+* `BestCost`, `Passes`, `StablePasses`
+* `StopReason` (`TemperatureDepleted`, `StableLimitReached`, `MaxRepeatReached`, `EmptyGraph`)
+* `AcceptedMoves`, `RejectedMoves`, `AcceptedWorseMoves`, `AcceptanceRate`
 ## NOTES
 
 ## RELATED LINKS

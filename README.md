@@ -163,6 +163,11 @@ These fields tune the Classic (simulated annealing) DSM clustering. Use a strong
 | `InitialTemperature` | Starting T; null ⇒ auto-scale to initial cost (adaptive). | Accept more uphill moves early. | Greedier start. |
 | `CoolingRate` | Per-pass decay (`T *= CoolingRate`). | Maintain exploration longer. | Freeze faster. |
 | `MinTemperature` | Convergence threshold on T. | Extend late stochastic phase. | Terminate sooner. |
+| `EpochLength` | Moves per annealing epoch; `0` ⇒ auto (`Times * N`). | More sampling before each cooling step. | More frequent cooling. |
+| `CoolingSchedule` | Temperature schedule: `Geometric`, `Linear`, `Logarithmic`. | Control cooling shape. | Use default `Geometric` for stability. |
+| `InitialAcceptanceProbability` | Target probability for auto-`T0` calibration. | Hotter initial search. | Colder initial search. |
+| `TemperatureCalibrationMoves` | Number of sampled moves for auto-`T0`. | Smoother/robust `T0` estimate. | Faster startup. |
+| `RandomSeed` | Optional deterministic seed. | Reproducible runs/tests. | More randomness across runs. |
 
 Heuristics:
 * Quick coarse result: `Times=1`, `CoolingRate=0.90`, lower `MaxRepeat`.
@@ -183,6 +188,11 @@ $result = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm Classic -AlgorithmC
 ```
 
 Leaving `InitialTemperature` as `$null` makes runs scale-aware across different matrix sizes; set a numeric value for strict comparability.
+
+When `Start-DSMClustering -Detailed` is used with `Classic`, the extended result now also includes:
+* `StopReason` (`TemperatureDepleted`, `StableLimitReached`, `MaxRepeatReached`, `EmptyGraph`)
+* `AcceptedMoves`, `RejectedMoves`, `AcceptedWorseMoves`
+* `AcceptanceRate`
 
 ---
 ## Fast Reachability Checks
