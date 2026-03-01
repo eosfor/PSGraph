@@ -30,6 +30,7 @@ public class DsmExtendedResultTests
         Assert.Equal(1, ext.StablePasses);
         Assert.Equal(ext.CostHistory[0], ext.BestCost);
         Assert.Null(ext.ImprovementStats); // deterministic single pass
+        Assert.Equal(AnnealingStopReason.None, ext.StopReason);
 
         // Recompute cross-component edges independently and compare
         // Build component index map from partitions
@@ -70,6 +71,13 @@ public class DsmExtendedResultTests
         Assert.True(ext.BestCost >= ext.CostHistory.Min() - 1e-9); // best >= best lower bound (avoid NaN)
         Assert.True(ext.Passes >= 1);
         Assert.True(ext.StablePasses >= 0);
+        Assert.InRange(ext.AcceptanceRate, 0.0, 1.0);
+        Assert.True(ext.AcceptedMoves >= 0);
+        Assert.True(ext.RejectedMoves >= 0);
+        Assert.True(ext.AcceptedWorseMoves >= 0);
+        Assert.True(ext.AcceptedWorseMoves <= ext.AcceptedMoves);
+        Assert.True(ext.AcceptedMoves + ext.RejectedMoves >= 0);
+        Assert.NotEqual(AnnealingStopReason.None, ext.StopReason);
 
         if (ext.ImprovementStats != null && ext.ImprovementStats.Count > 0)
         {

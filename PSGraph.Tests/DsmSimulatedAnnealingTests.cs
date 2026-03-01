@@ -57,4 +57,86 @@ public class DsmSimulatedAnnealingTests
             result.RowIndex.Should().ContainKey(v);
         }
     }
+
+    [Fact]
+    public void SimAnneal_WithSeed_ShouldBeDeterministic()
+    {
+        var cfg = new DsmSimulatedAnnealingConfig
+        {
+            Times = 2,
+            StableLimit = 2,
+            MaxRepeat = 20,
+            RandomSeed = 12345
+        };
+
+        var algo1 = new DsmSimulatedAnnealingAlgorithm(BuildSimpleDsm(), cfg);
+        var ext1 = algo1.PartitionWithDetails();
+
+        var algo2 = new DsmSimulatedAnnealingAlgorithm(BuildSimpleDsm(), cfg);
+        var ext2 = algo2.PartitionWithDetails();
+
+        ext1.BestCost.Should().BeApproximately(ext2.BestCost ?? 0, 1e-9);
+        ext1.Passes.Should().Be(ext2.Passes);
+        ext1.CostHistory.Should().Equal(ext2.CostHistory);
+    }
+
+    [Fact]
+    public void SimAnneal_UsesInitialTemperatureOverride_WhenProvided()
+    {
+        var dsm = BuildSimpleDsm();
+        var cfg = new DsmSimulatedAnnealingConfig
+        {
+            InitialTemperature = 42.0,
+            MinTemperature = 1e-6,
+            CoolingRate = 0.9,
+            MaxRepeat = 2,
+            StableLimit = 2
+        };
+        var algo = new DsmSimulatedAnnealingAlgorithm(dsm, cfg);
+
+        var ext = algo.PartitionWithDetails();
+
+        ext.TemperatureHistory.Should().NotBeNull();
+        ext.TemperatureHistory!.Count.Should().BeGreaterThan(0);
+        ext.TemperatureHistory[0].Should().BeApproximately(42.0, 1e-9);
+    }
+
+    [Fact]
+    public void SimAnneal_StopReason_MaxRepeatReached_WhenPassLimitHits()
+    {
+        var dsm = BuildSimpleDsm();
+        var cfg = new DsmSimulatedAnnealingConfig
+        {
+            MaxRepeat = 1,
+            StableLimit = 100,
+            MinTemperature = 0,
+            CoolingRate = 1.0,
+            RandomSeed = 7
+        };
+        var algo = new DsmSimulatedAnnealingAlgorithm(dsm, cfg);
+
+        var ext = algo.PartitionWithDetails();
+
+        ext.StopReason.Should().Be(AnnealingStopReason.MaxRepeatReached);
+        ext.Passes.Should().Be(1);
+    }
+
+    [Fact]
+    public void SimAnneal_StopReason_TemperatureDepleted_WhenInitialTemperatureBelowThreshold()
+    {
+        var dsm = BuildSimpleDsm();
+        var cfg = new DsmSimulatedAnnealingConfig
+        {
+            InitialTemperature = 1e-6,
+            MinTemperature = 1e-3,
+            MaxRepeat = 10,
+            StableLimit = 10
+        };
+        var algo = new DsmSimulatedAnnealingAlgorithm(dsm, cfg);
+
+        var ext = algo.PartitionWithDetails();
+
+        ext.StopReason.Should().Be(AnnealingStopReason.TemperatureDepleted);
+        ext.Passes.Should().Be(0);
+    }
 }
