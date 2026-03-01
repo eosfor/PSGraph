@@ -11,4 +11,9 @@ public class DsmSimulatedAnnealingConfig: IAlgorithmConfig
     public double? InitialTemperature = null;
     public double CoolingRate = 0.95;
     public double MinTemperature = 1e-3;
+    public int EpochLength = 0;
+    public AnnealingCoolingSchedule CoolingSchedule = AnnealingCoolingSchedule.Geometric;
+    public double InitialAcceptanceProbability = 0.8;
+    public int TemperatureCalibrationMoves = 32;
+    public int? RandomSeed = null;
 }
