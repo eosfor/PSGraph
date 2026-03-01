@@ -7,57 +7,72 @@ namespace PSGraph.DesignStructureMatrix;
 
 public class DsmSimulatedAnnealingAlgorithm : IDsmPartitionAlgorithm
 {
-    IDsm _dsm;
-    IDsm _bestDsm;
-    IDictionary<int, List<PSVertex>> _bestClusterLayout;
+    private IDsm _dsm;
+    private IDsm _bestDsm;
+    private IDictionary<int, List<PSVertex>> _bestClusterLayout;
 
-    IDictionary<int, List<PSVertex>> _clusters;
-    Dictionary<UnorderedPair<PSVertex>, double> _pairs;
-    Dictionary<int, int> _improvementStats; // статистика процесса улучшения
-    private int _passes, _stableStateCount;
-    private double _tcc, _bestTcc;
+    private IDictionary<int, List<PSVertex>> _clusters;
+    private Dictionary<UnorderedPair<PSVertex>, double> _pairs;
+    private Dictionary<int, int> _improvementStats;
+
+    private int _passes;
+    private int _stableStateCount;
+
+    private double _currentCost;
+    private double _bestCost;
+
     public IDsm Partitioned => _dsm;
-
     public Dictionary<int, int> ImprovementStats => _improvementStats;
-
     public List<List<PSVertex>> Partitions => _clusters.Values.ToList();
 
-    // configuration (directly from original algo + annealing additions)
-    private int _powCc = 1;     // penalty assigned to cluster size
-    private int _powBid = 0;    // high value penalizes large clusters
-    private int _powDep = 0;    // high value emphasizes high interactions
-    private int _maxClusterSize = 61;   // max size of cluster(DSM size)
-    private int _randAccept = 122;  // legacy random accept (now superseded by temperature but retained as fallback)
-    private int _randBid = 122; // take second highest bid 1 out of N times(0.5-2 * DSM)
-    private int _times = 2;     // attempt times*size before check sys.stability (inner moves per pass scalar)
-    private int _stableLimit = 2;       // loop at least stable_limit*times* size
-    private int _maxRepeat = 1000;      // safety cap on passes
-    // Simulated annealing parameters
-    private double _temperature;        // current temperature
-    private double _coolingRate = 0.95; // multiplicative cooling per pass
-    private double _minTemperature = 1e-3; // termination threshold
-    private double? _initialTemperatureOverride; // user-specified initial temperature
-    private int _temperatureSampleMoves = 0; // reserved for future adaptive T0 (not yet used)
+    // Legacy cost model parameters
+    private int _powCc = 1;
+    private int _powBid = 0;
+    private int _powDep = 0;
+    private int _maxClusterSize = 0;
+    private int _randBid = 2;
+    private int _times = 2;
+    private int _stableLimit = 2;
+    private int _maxRepeat = 1000;
 
-    // cost tracking
+    // Simulated annealing parameters
+    private double _temperature;
+    private double _coolingRate = 0.95;
+    private double _minTemperature = 1e-3;
+    private double? _initialTemperatureOverride;
+    private int _epochLength = 0;
+    private AnnealingCoolingSchedule _coolingSchedule = AnnealingCoolingSchedule.Geometric;
+    private double _initialAcceptanceProbability = 0.8;
+    private int _temperatureCalibrationMoves = 32;
+    private int? _randomSeed;
+
+    // Run metrics
+    private int _acceptedMoves;
+    private int _rejectedMoves;
+    private int _acceptedWorseMoves;
+    private AnnealingStopReason _stopReason;
+
     private readonly List<double> _costHistory = new();
     public IReadOnlyList<double> CostHistory => _costHistory;
 
     private readonly List<double> _temperatureHistory = new();
     public IReadOnlyList<double> TemperatureHistory => _temperatureHistory;
-    public double BestCost => _bestTcc;
 
-    // NOTE: legacy internal Config replaced by public DsmSimulatedAnnealingConfig (see Model folder)
+    public double BestCost => _bestCost;
+    public AnnealingStopReason StopReason => _stopReason;
 
-    double AbsEps = 1e-12;
-    double RelEps = 1e-9;
+    private readonly Random _random;
+
+    private const double AbsEps = 1e-12;
+    private const double RelEps = 1e-9;
 
     public DsmSimulatedAnnealingAlgorithm(IDsm dsm, DsmSimulatedAnnealingConfig? cfg = null)
     {
         _dsm = _bestDsm = dsm;
-        _clusters = _bestClusterLayout = new Dictionary<int, List<PSVertex>>();
-        _pairs = new();
-        _improvementStats = new();
+        _clusters = new Dictionary<int, List<PSVertex>>();
+        _bestClusterLayout = new Dictionary<int, List<PSVertex>>();
+        _pairs = new Dictionary<UnorderedPair<PSVertex>, double>();
+        _improvementStats = new Dictionary<int, int>();
 
         if (cfg is not null)
         {
@@ -70,116 +85,88 @@ public class DsmSimulatedAnnealingAlgorithm : IDsmPartitionAlgorithm
             _initialTemperatureOverride = cfg.InitialTemperature;
             _coolingRate = cfg.CoolingRate;
             _minTemperature = cfg.MinTemperature;
+            _epochLength = cfg.EpochLength;
+            _coolingSchedule = cfg.CoolingSchedule;
+            _initialAcceptanceProbability = cfg.InitialAcceptanceProbability;
+            _temperatureCalibrationMoves = cfg.TemperatureCalibrationMoves;
+            _randomSeed = cfg.RandomSeed;
         }
 
-        _passes = 0;  //number of passes
-        _stableStateCount = 0;
-        _maxClusterSize = _dsm.DsmMatrixView.RowCount; // матрица квадратная, так что можно взять только количество строк
-        _randAccept = _dsm.DsmMatrixView.RowCount * 2;
-        _randBid = _dsm.DsmMatrixView.RowCount * 2;
+        ValidateConfiguration();
+
+        _maxClusterSize = _dsm.DsmMatrixView.RowCount;
+        _randBid = Math.Max(2, _dsm.DsmMatrixView.RowCount * 2);
+        _random = _randomSeed.HasValue ? new Random(_randomSeed.Value) : Random.Shared;
     }
-
-
 
     public IDsm Partition()
     {
+        ResetRunState();
         Initialize();
         InitializeTemperature();
 
-        while (!IsConverged())
+        AnnealingStopReason stopReason = AnnealingStopReason.None;
+        while (!IsConverged(out stopReason))
         {
-            bool acceptedThisPass = false;
+            _temperatureHistory.Add(_temperature);
+
             bool improvedThisPass = false;
             _improvementStats[_passes] = 0;
 
-            for (int i = 0; i < (_times * _maxClusterSize); i++)
+            int epochMoves = ResolveEpochLength();
+            for (int i = 0; i < epochMoves; i++)
             {
-                var element = SelectRandomElement();
-                var bidVectors = Bid(element).ToList();
-
-                // на случай если вернется 0 элементов
-                if (bidVectors.Count == 0) continue;
-
-                var bestBid = SelectBestBid(bidVectors);
-
-                int oldClusterId = Convert.ToInt32(element.Metadata["cluster"]); // сохраняем старый кластер для отката
-
-                var success = MoveVertex(bestBid.Item1, element);
-                if (!success) continue;
-
-                var newTcc = CalculateTotalCoordinationCost();
-
-                var eps = Math.Max(AbsEps, RelEps * Math.Abs(_tcc));
-                if (newTcc < _tcc - eps)
+                if (!TryEvaluateMove(out var element, out var oldClusterId, out var newCost, out var delta))
                 {
-                    // Strict improvement always accepted
-                    acceptedThisPass = true;
-                }
-                else
-                {
-                    // Metropolis acceptance: accept worse with probability exp(-Δ/T)
-                    double delta = newTcc - _tcc;
-                    if (delta > 0)
-                    {
-                        // guard against overflow in exp
-                        double x = -delta / _temperature;
-                        if (x > 700) x = 700; // prevent double overflow
-                        double prob = Math.Exp(x);
-                        acceptedThisPass = Random.Shared.NextDouble() < prob;
-                    }
-                    else
-                    {
-                        acceptedThisPass = true;
-                    }
-                    // else
-                    // {
-                    //     // fallback to legacy random accept when temperature exhausted
-                    //     acceptedThisPass = Random.Shared.Next(_randAccept) == 0;
-                    // }
+                    continue;
                 }
 
-                if (acceptedThisPass)
+                bool acceptedWorseMove;
+                bool accepted = ShouldAcceptMove(newCost, delta, out acceptedWorseMove);
+                if (accepted)
                 {
-                    _tcc = newTcc;
-                    _costHistory.Add(_tcc);
+                    _acceptedMoves++;
+                    if (acceptedWorseMove)
+                    {
+                        _acceptedWorseMoves++;
+                    }
 
-                    eps = Math.Max(AbsEps, RelEps * Math.Abs(_bestTcc));
-                    if (_tcc < _bestTcc - eps)
+                    _currentCost = newCost;
+                    _costHistory.Add(_currentCost);
+
+                    if (IsStrictlyLess(_currentCost, _bestCost))
                     {
                         _bestDsm = _dsm.Clone();
-                        _bestClusterLayout = _clusters.ToDictionary(
-                                            kvp => kvp.Key,
-                                            kvp => new List<PSVertex>(kvp.Value)
-                                        );
-                        _bestTcc = _tcc;
+                        _bestClusterLayout = DeepCopyClusterLayout(_clusters);
+                        _bestCost = _currentCost;
                         improvedThisPass = true;
                         _improvementStats[_passes]++;
                     }
-
                 }
                 else
                 {
-                    // откат
-                    success = MoveVertex(oldClusterId, element);
+                    _rejectedMoves++;
+                    MoveVertex(oldClusterId, element);
                 }
-
-                // Cool temperature after each pass, save it for later review
-                _temperatureHistory.Add(_temperature);
-                _temperature *= _coolingRate;
             }
 
             _passes++;
-            if (!improvedThisPass) _stableStateCount++; else _stableStateCount = 0;
+            _stableStateCount = improvedThisPass ? 0 : _stableStateCount + 1;
 
-            int removedCount = RemoveEmptyClusters(_clusters);
-            // record pass boundary cost (even if no move accepted)
-            if (_costHistory.Count == 0 || _costHistory[^1] != _tcc)
-                _costHistory.Add(_tcc);
+            RemoveEmptyClusters(_clusters);
+            if (_costHistory.Count == 0 || !AreAlmostEqual(_costHistory[^1], _currentCost))
+            {
+                _costHistory.Add(_currentCost);
+            }
+
+            _temperature = CoolTemperature(_temperature, _passes);
         }
+
+        _stopReason = stopReason;
 
         IDsm dsmToReturn;
         IDictionary<int, List<PSVertex>> clusterLayoutToReturn;
-        if (_bestTcc < _tcc)
+        if (IsStrictlyLess(_bestCost, _currentCost))
         {
             dsmToReturn = _bestDsm;
             clusterLayoutToReturn = _bestClusterLayout;
@@ -191,14 +178,20 @@ public class DsmSimulatedAnnealingAlgorithm : IDsmPartitionAlgorithm
         }
 
         List<PSVertex> newOrder = clusterLayoutToReturn.SelectMany(e => e.Value).ToList();
-        dsmToReturn = (IDsm)dsmToReturn.Order(newOrder); // apply immutable ordering
-        _dsm = dsmToReturn; // sync
+        dsmToReturn = (IDsm)dsmToReturn.Order(newOrder);
+
+        _dsm = dsmToReturn;
+        _clusters = DeepCopyClusterLayout(clusterLayoutToReturn);
+
         return _dsm;
     }
 
     public PartitioningExtendedResult PartitionWithDetails()
     {
         var dsm = Partition();
+        int totalAttempts = _acceptedMoves + _rejectedMoves;
+        double acceptanceRate = totalAttempts == 0 ? 0.0 : (double)_acceptedMoves / totalAttempts;
+
         return new PartitioningExtendedResult
         {
             Dsm = dsm,
@@ -208,7 +201,183 @@ public class DsmSimulatedAnnealingAlgorithm : IDsmPartitionAlgorithm
             ImprovementStats = new Dictionary<int, int>(ImprovementStats),
             BestCost = BestCost,
             Passes = _passes,
-            StablePasses = _stableStateCount
+            StablePasses = _stableStateCount,
+            StopReason = _stopReason,
+            AcceptedMoves = _acceptedMoves,
+            RejectedMoves = _rejectedMoves,
+            AcceptedWorseMoves = _acceptedWorseMoves,
+            AcceptanceRate = acceptanceRate
+        };
+    }
+
+    private void ResetRunState()
+    {
+        _clusters = new Dictionary<int, List<PSVertex>>();
+        _bestClusterLayout = new Dictionary<int, List<PSVertex>>();
+        _pairs = new Dictionary<UnorderedPair<PSVertex>, double>();
+        _improvementStats = new Dictionary<int, int>();
+
+        _passes = 0;
+        _stableStateCount = 0;
+
+        _acceptedMoves = 0;
+        _rejectedMoves = 0;
+        _acceptedWorseMoves = 0;
+        _stopReason = AnnealingStopReason.None;
+
+        _costHistory.Clear();
+        _temperatureHistory.Clear();
+
+        _bestDsm = _dsm;
+    }
+
+    private void ValidateConfiguration()
+    {
+        _times = Math.Max(1, _times);
+        _stableLimit = Math.Max(1, _stableLimit);
+        _maxRepeat = Math.Max(1, _maxRepeat);
+        _epochLength = Math.Max(0, _epochLength);
+        _temperatureCalibrationMoves = Math.Max(1, _temperatureCalibrationMoves);
+
+        if (!double.IsFinite(_initialAcceptanceProbability))
+        {
+            _initialAcceptanceProbability = 0.8;
+        }
+        _initialAcceptanceProbability = Math.Clamp(_initialAcceptanceProbability, 0.01, 0.99);
+
+        if (!double.IsFinite(_coolingRate) || _coolingRate <= 0)
+        {
+            _coolingRate = 0.95;
+        }
+
+        if (_coolingSchedule == AnnealingCoolingSchedule.Geometric && _coolingRate >= 1.0)
+        {
+            _coolingRate = 0.95;
+        }
+
+        if (!double.IsFinite(_minTemperature) || _minTemperature < 0)
+        {
+            _minTemperature = 1e-3;
+        }
+
+        if (_initialTemperatureOverride.HasValue)
+        {
+            double t0 = _initialTemperatureOverride.Value;
+            if (!double.IsFinite(t0) || t0 <= 0)
+            {
+                _initialTemperatureOverride = null;
+            }
+        }
+    }
+
+    private int ResolveEpochLength()
+    {
+        if (_epochLength > 0)
+        {
+            return _epochLength;
+        }
+
+        return Math.Max(1, _times * Math.Max(_maxClusterSize, 1));
+    }
+
+    private bool IsConverged(out AnnealingStopReason reason)
+    {
+        if (_maxClusterSize == 0)
+        {
+            reason = AnnealingStopReason.EmptyGraph;
+            return true;
+        }
+
+        if (_passes >= _maxRepeat)
+        {
+            reason = AnnealingStopReason.MaxRepeatReached;
+            return true;
+        }
+
+        if (_stableStateCount >= _stableLimit)
+        {
+            reason = AnnealingStopReason.StableLimitReached;
+            return true;
+        }
+
+        if (_temperature <= _minTemperature)
+        {
+            reason = AnnealingStopReason.TemperatureDepleted;
+            return true;
+        }
+
+        reason = AnnealingStopReason.None;
+        return false;
+    }
+
+    private bool TryEvaluateMove(out PSVertex element, out int oldClusterId, out double newCost, out double delta)
+    {
+        element = null!;
+        oldClusterId = -1;
+        newCost = _currentCost;
+        delta = 0;
+
+        if (_maxClusterSize <= 1)
+        {
+            return false;
+        }
+
+        element = SelectRandomElement();
+        var bidVectors = Bid(element).ToList();
+        if (bidVectors.Count == 0)
+        {
+            return false;
+        }
+
+        var selectedBid = SelectBestBid(bidVectors);
+        oldClusterId = Convert.ToInt32(element.Metadata["cluster"]);
+
+        if (!MoveVertex(selectedBid.Item1, element))
+        {
+            return false;
+        }
+
+        newCost = CalculateTotalCoordinationCost();
+        delta = newCost - _currentCost;
+        return true;
+    }
+
+    private bool ShouldAcceptMove(double newCost, double delta, out bool acceptedWorseMove)
+    {
+        acceptedWorseMove = false;
+
+        if (IsStrictlyLess(newCost, _currentCost))
+        {
+            return true;
+        }
+
+        if (delta <= 0)
+        {
+            return true;
+        }
+
+        if (_temperature <= double.Epsilon)
+        {
+            return false;
+        }
+
+        double exponent = -delta / _temperature;
+        exponent = Math.Clamp(exponent, -700, 0);
+
+        double probability = Math.Exp(exponent);
+        bool accepted = _random.NextDouble() < probability;
+        acceptedWorseMove = accepted;
+        return accepted;
+    }
+
+    private double CoolTemperature(double currentTemperature, int epochIndex)
+    {
+        return _coolingSchedule switch
+        {
+            AnnealingCoolingSchedule.Geometric => currentTemperature * _coolingRate,
+            AnnealingCoolingSchedule.Linear => Math.Max(0.0, currentTemperature - _coolingRate),
+            AnnealingCoolingSchedule.Logarithmic => currentTemperature / (1.0 + _coolingRate * Math.Log(epochIndex + 1.0)),
+            _ => currentTemperature * _coolingRate
         };
     }
 
@@ -227,30 +396,28 @@ public class DsmSimulatedAnnealingAlgorithm : IDsmPartitionAlgorithm
 
     private bool MoveVertex(int targetClusterId, PSVertex element)
     {
-        var metadata = element.Metadata as IDictionary<string, object?>;
-        if (metadata == null || !metadata.ContainsKey("cluster"))
+        if (!element.Metadata.ContainsKey("cluster"))
         {
-            throw new InvalidDataException($"cluster node  {element} do not have metadata[\"cluster\"] property set");
+            throw new InvalidDataException($"cluster node {element} does not have metadata[\"cluster\"] property set");
         }
 
-        int sourceClusterId = Convert.ToInt32(metadata["cluster"]);
+        int sourceClusterId = Convert.ToInt32(element.Metadata["cluster"]);
 
-        if (sourceClusterId == targetClusterId) return false;
+        if (sourceClusterId == targetClusterId)
+        {
+            return false;
+        }
 
         if (_clusters[sourceClusterId].Remove(element))
         {
             _clusters[targetClusterId].Add(element);
-            metadata["cluster"] = targetClusterId;
+            element.Metadata["cluster"] = targetClusterId;
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
-
-    // TODO: добавить полноценную симуляцию отжига с Т0, расписанием охлаждение и т.д.
     private (int, double) SelectBestBid(IEnumerable<(int, double)> bidVectors)
     {
         var top2 = bidVectors
@@ -258,26 +425,19 @@ public class DsmSimulatedAnnealingAlgorithm : IDsmPartitionAlgorithm
             .Take(2)
             .ToList();
 
-        var max = top2.ElementAtOrDefault(0);      // максимальный
-        var next = top2.ElementAtOrDefault(1);     // следующий за ним
+        var max = top2.ElementAtOrDefault(0);
+        var next = top2.ElementAtOrDefault(1);
 
-        // Вероятность взять второй максимум
-        if (next != default && Random.Shared.Next(_randBid) == 0)
+        if (next != default && _random.Next(_randBid) == 0)
+        {
             return next;
-        else
-            return max;
-    }
+        }
 
-    private bool IsConverged()
-    {
-        bool tempDepleted = _temperature <= _minTemperature;
-        return tempDepleted || (_stableStateCount >= _stableLimit) || (_passes >= _maxRepeat);
+        return max;
     }
 
     private double CalculateTotalCoordinationCost()
     {
-        var vertexCount = _dsm.DsmGraphView.Vertices.Count();
-        var pairs = _dsm.DsmGraphView.Edges;
         double tcc = 0;
 
         foreach (var pair in _pairs.Keys)
@@ -295,7 +455,9 @@ public class DsmSimulatedAnnealingAlgorithm : IDsmPartitionAlgorithm
         int targetCluster = Convert.ToInt32(pair.Second.Metadata["cluster"]);
 
         if (sourceCluster != targetCluster)
+        {
             cost = _pairs[pair] * Math.Pow(_dsm.DsmGraphView.Vertices.Count(), _powCc);
+        }
 
         return cost;
     }
@@ -307,69 +469,156 @@ public class DsmSimulatedAnnealingAlgorithm : IDsmPartitionAlgorithm
         int targetCluster = Convert.ToInt32(pair.Second.Metadata["cluster"]);
 
         if (sourceCluster == targetCluster)
+        {
             cost = _pairs[pair] * Math.Pow(_clusters[sourceCluster].Count, _powCc);
+        }
 
         return cost;
     }
 
     private PSVertex SelectRandomElement()
     {
-        return _dsm.DsmGraphView.Vertices.ElementAt(Random.Shared.Next(_dsm.DsmGraphView.Vertices.Count()));
+        var vertices = _dsm.DsmGraphView.Vertices;
+        return vertices.ElementAt(_random.Next(vertices.Count()));
     }
 
     private IEnumerable<(int, double)> Bid(PSVertex element)
     {
-        double bid = -1;
+        bool yielded = false;
+
         foreach (var cluster in _clusters)
         {
-            if (cluster.Value.Contains(element)) continue; // пропускаем кластер содержащий сам элемент.
-            if (cluster.Value.Count >= _maxClusterSize) continue; // пропускаем кластеры с максимальным количеством элементов
+            if (cluster.Value.Contains(element))
+            {
+                continue;
+            }
 
-            bid = 0;
+            if (cluster.Value.Count >= _maxClusterSize)
+            {
+                continue;
+            }
 
             double inOut = 0;
             foreach (var item in cluster.Value)
             {
                 inOut += _dsm[element, item] + _dsm[item, element];
             }
-            int clusterSize = Math.Max(cluster.Value.Count, 1); // avoid div by zero
-            bid = Math.Pow(inOut, _powDep) / Math.Pow(clusterSize, _powBid);
+
+            int clusterSize = Math.Max(cluster.Value.Count, 1);
+            double bid = Math.Pow(inOut, _powDep) / Math.Pow(clusterSize, _powBid);
+            yielded = true;
             yield return (cluster.Key, bid);
         }
-        // If all clusters rejected (max size), allow no-op bid to enable random accept path
-        if (bid == -1)
+
+        if (!yielded)
         {
-            yield break; // no bids means element skipped silently
+            yield break;
         }
     }
 
-    // initialize partitions, one vertex per partition
     private void Initialize()
     {
         int i = 0;
         foreach (var v in _dsm.DsmGraphView.Vertices)
         {
             v.Metadata["cluster"] = i;
-            _clusters.Add(i++, new List<PSVertex>() { v });
+            _clusters.Add(i++, new List<PSVertex> { v });
         }
 
         foreach (var pair in _dsm.DsmGraphView.Edges)
         {
             var idx = new UnorderedPair<PSVertex>(pair.Source, pair.Target);
             if (_pairs.ContainsKey(idx))
+            {
                 _pairs[idx] += _dsm[pair.Source, pair.Target];
+            }
             else
+            {
                 _pairs[idx] = _dsm[pair.Source, pair.Target];
+            }
         }
 
-        _tcc = _bestTcc = CalculateTotalCoordinationCost();
-        _costHistory.Add(_tcc); // record initial cost
+        _currentCost = _bestCost = CalculateTotalCoordinationCost();
+        _costHistory.Add(_currentCost);
+
         _bestDsm = _dsm.Clone();
+        _bestClusterLayout = DeepCopyClusterLayout(_clusters);
     }
 
     private void InitializeTemperature()
     {
-        _temperature = _initialTemperatureOverride ?? _tcc; // simple heuristic: start at cost scale
-        if (_temperature <= 0) _temperature = 1.0; // guard
+        if (_initialTemperatureOverride.HasValue)
+        {
+            _temperature = _initialTemperatureOverride.Value;
+        }
+        else
+        {
+            _temperature = CalibrateInitialTemperature();
+        }
+
+        if (!double.IsFinite(_temperature) || _temperature <= 0)
+        {
+            _temperature = Math.Max(_currentCost, 1.0);
+        }
+    }
+
+    private double CalibrateInitialTemperature()
+    {
+        if (_maxClusterSize <= 1)
+        {
+            return Math.Max(_currentCost, 1.0);
+        }
+
+        var positiveDeltas = new List<double>(_temperatureCalibrationMoves);
+
+        for (int i = 0; i < _temperatureCalibrationMoves; i++)
+        {
+            if (!TryEvaluateMove(out var element, out var oldClusterId, out _, out var delta))
+            {
+                continue;
+            }
+
+            MoveVertex(oldClusterId, element);
+
+            if (delta > 0)
+            {
+                positiveDeltas.Add(delta);
+            }
+        }
+
+        if (positiveDeltas.Count == 0)
+        {
+            return Math.Max(_currentCost, 1.0);
+        }
+
+        double avgDelta = positiveDeltas.Average();
+        double probability = Math.Clamp(_initialAcceptanceProbability, 0.01, 0.99);
+        double t0 = -avgDelta / Math.Log(probability);
+
+        if (!double.IsFinite(t0) || t0 <= 0)
+        {
+            return Math.Max(_currentCost, 1.0);
+        }
+
+        return t0;
+    }
+
+    private static IDictionary<int, List<PSVertex>> DeepCopyClusterLayout(IDictionary<int, List<PSVertex>> source)
+    {
+        return source.ToDictionary(
+            kvp => kvp.Key,
+            kvp => new List<PSVertex>(kvp.Value));
+    }
+
+    private static bool AreAlmostEqual(double left, double right)
+    {
+        double eps = Math.Max(AbsEps, RelEps * Math.Max(Math.Abs(left), Math.Abs(right)));
+        return Math.Abs(left - right) <= eps;
+    }
+
+    private static bool IsStrictlyLess(double left, double right)
+    {
+        double eps = Math.Max(AbsEps, RelEps * Math.Abs(right));
+        return left < right - eps;
     }
 }
