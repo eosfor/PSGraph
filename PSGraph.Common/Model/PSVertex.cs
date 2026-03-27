@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Reflection;
-using QuikGraph.Graphviz.Dot;
 
 namespace PSGraph.Model;
 
@@ -18,14 +16,14 @@ public sealed class PSVertex : IComparable<PSVertex>
         set => SetLabel(value ?? throw new ArgumentNullException(nameof(value)));
     }
 
-    public GraphvizVertex GVertexParameters = new GraphvizVertex();
     public object? OriginalObject;
+    public IDictionary<string, object?> RenderProperties { get; set; } = new ExpandoObject();
     public IDictionary<string, object?> Metadata { get; set; } = new ExpandoObject();
 
     private void SetLabel(string value)
     {
         label = value;
-        GVertexParameters.Label = value;
+        RenderProperties["Label"] = value;
     }
 
     public PSVertex(string label) => Label = label;
@@ -41,8 +39,7 @@ public sealed class PSVertex : IComparable<PSVertex>
     {
         if (other is null) throw new ArgumentNullException(nameof(other));
 
-        // Клонируем параметры отрисовки
-        GVertexParameters = CloneGraphvizVertex(other.GVertexParameters);
+        RenderProperties = CloneProperties(other.RenderProperties);
 
         // TODO: оригинальный объект передается снаружи. точно не известно какой он. пока так.
         OriginalObject = other.OriginalObject is ICloneable c
@@ -50,28 +47,13 @@ public sealed class PSVertex : IComparable<PSVertex>
             : other.OriginalObject;
 
         // Копия метаданных
-        Metadata = CloneMetadata(other.Metadata);
+        Metadata = CloneProperties(other.Metadata);
 
-        // Label через сеттер (поддержит согласованность с GVertexParameters.Label)
+        // Label через сеттер поддерживает согласованность RenderProperties["Label"].
         Label = other.Label;
     }
 
-    private static GraphvizVertex CloneGraphvizVertex(GraphvizVertex src)
-    {
-        if (src is null) return new GraphvizVertex();
-        var dst = new GraphvizVertex();
-        foreach (var p in typeof(GraphvizVertex).GetProperties(BindingFlags.Public | BindingFlags.Instance))
-        {
-            if (p.CanRead && p.CanWrite)
-            {
-                var val = p.GetValue(src);
-                p.SetValue(dst, val);
-            }
-        }
-        return dst;
-    }
-
-    private static IDictionary<string, object?> CloneMetadata(IDictionary<string, object?> src)
+    private static IDictionary<string, object?> CloneProperties(IDictionary<string, object?> src)
     {
         var expando = new ExpandoObject();
         var dst = (IDictionary<string, object?>)expando;

@@ -45,8 +45,10 @@ $seq = Start-DSMSequencing -Dsm $dsm -LoopDetectionMethod Powers
 Pipe result to export.
 ```powershell
 $seq = Start-DSMSequencing -Dsm $dsm
-Export-DSM -SequencedDsm $seq -Format VEGA_HTML -Path $env:TEMP/dsmSequenced.html
+Export-DSM -SequencedDsm $seq -Format TEXT -Path $env:TEMP/dsmSequenced.txt
 ```
+
+Use `Export-DSMView` from `PSGraphView` when you need visual DSM output.
 
 ## PARAMETERS
 

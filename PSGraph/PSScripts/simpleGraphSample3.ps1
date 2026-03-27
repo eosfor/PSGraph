@@ -43,7 +43,7 @@ if ($IsWindows) {
 }
 
 Export-Graph -Graph $g -Format Graphviz -Path $graphFile
-Export-Graph -Graph $g -Format MSAGL_MDS -Path $svgOutFile
+dot -Tsvg $graphFile -o $svgOutFile
 
 # $graphFile
 # $svgOutFile

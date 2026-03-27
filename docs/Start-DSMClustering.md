@@ -61,11 +61,13 @@ $detail = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm GraphBased -Detaile
 ```
 
 ### Example 3
-Export clustered DSM to Vega HTML.
+Export clustered DSM to text, or hand it off to `PSGraphView` for visualization.
 ```powershell
 $res = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm Classic
-Export-DSM -Result $res -Format VEGA_HTML -Path $env:TEMP/dsmClustered.html
+Export-DSM -Result $res -Format TEXT -Path $env:TEMP/dsmClustered.txt
 ```
+
+Use `Export-DSMView` from `PSGraphView` when you need HTML, JSON, or SVG visualization.
 
 ## PARAMETERS
 

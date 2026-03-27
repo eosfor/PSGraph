@@ -1,14 +1,25 @@
 ﻿using QuikGraph;
-using QuikGraph.Graphviz.Dot;
+using System.Dynamic;
 
 namespace PSGraph.Model
 {
     public class PSEdge : TaggedEdge<PSVertex, PSEdgeTag>
     {
-        public string Label = string.Empty;
+        private string label = string.Empty;
+
+        public string Label
+        {
+            get => label;
+            set
+            {
+                label = value ?? string.Empty;
+                RenderProperties["Label"] = label;
+            }
+        }
+
         public string Name => Label;
         public int Weight = 1;
-        public GraphvizEdge GVertexParameters = new GraphvizEdge();
+        public IDictionary<string, object?> RenderProperties { get; set; } = new ExpandoObject();
 
         public PSEdge(PSVertex source, PSVertex target)
             : base(source, target, new PSEdgeTag(string.Empty))

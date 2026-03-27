@@ -22,17 +22,8 @@ namespace PSGraph.Tests
             // Validate the row and column counts
             partitionedDsm.RowIndex.Count.Should().Be(partitionedDsm.DsmMatrixView.RowCount, "Row count should match matrix row count");
             partitionedDsm.ColIndex.Count.Should().Be(partitionedDsm.DsmMatrixView.ColumnCount, "Column count should match matrix column count");
-
-            // Generate the DSM view with partitions
-            var view = new DsmView(partitionedDsm, algo.Partitions);
-            var svgDocument = view.ToSvg();
-
-            // Save the SVG to a temp file for manual verification (optional)
-            var tempPath = Path.GetTempPath();
-            var filePath = Path.Combine(tempPath, "Graph5GraphBasedPartitioningTest.svg");
-            svgDocument.Write(filePath);
-
-            File.Exists(filePath).Should().BeTrue("SVG file should be generated");
+            algo.Partitions.Should().NotBeNull();
+            algo.Partitions.Should().NotBeEmpty("because graph-based partitioning should identify at least one block");
         }
 
         [Fact]

@@ -6,6 +6,10 @@
 > It lets you **build, query and visualise graphs directly from the pipeline** without
 > dropping down to C# or external tools. Think *LINQ for graphs* – but in PowerShell.
 
+> Visualization note: `PSGraph` now keeps graph construction, algorithms, Graphviz/DOT, GraphML,
+> and DSM logic. Visual rendering has moved to the sibling `PSGraphView` project. `PSGraph`
+> no longer serves as a compatibility entry point for Vega, MSAGL, or DSM view rendering.
+
 ---
 
 ## Why another graph module?
@@ -29,7 +33,7 @@ The original goal was to **analyse dependencies** in IaC workloads, but the modu
 |-----------------------------------|--------------|
 | **Idiomatic cmdlets**             | `New-PSGraph`, `Add-PSVertex`, `Add-PSEdge`, `Get-GraphPath`, … |
 | **Ready-made algorithms**         | All algorithms exposed by QuikGraph are one cmdlet away. |
-| **Batteries-included visualisation** | Render to GraphViz (`*.dot`, `png`, `svg`) or to JSON for Vega/D3 dashboards. |
+| **Visualization split** | Keep Graphviz / GraphML export in `PSGraph`; use `PSGraphView` for Vega / MSAGL / DSM rendering. |
 | **Pipeline-friendly**             | Import/Export from CSV, JSON, XML, SQL, REST or live objects. |
 | **Test-driven**                   | Over 100 Pester tests ensure every cmdlet does what it says. |
 | **Cross-platform**                | Runs anywhere PowerShell 7+ does (Windows, Linux, macOS). |
@@ -41,6 +45,20 @@ The original goal was to **analyse dependencies** in IaC workloads, but the modu
 ```powershell
 Install-Module -Name PSQuickGraph -Scope CurrentUser
 ```
+
+## Visualization split
+
+Current ownership is intentional:
+
+* `PSGraph` owns graph objects, graph algorithms, DSM algorithms, Graphviz DOT export, GraphML interchange, and textual DSM export.
+* `PSGraphView` owns the visual renderer implementations and visualization-facing cmdlets for Vega, MSAGL, and DSM view output.
+* `Export-Graph` and `Export-DSM` in `PSGraph` are no longer the path for visual rendering.
+
+Practical rule of thumb:
+
+* Use `Import-Graph` / `Export-Graph -Format GraphML` when you need a neutral interchange format.
+* Use `Export-Graph -Format Graphviz` when you need textual DOT output that stays fully inside `PSGraph`.
+* Use `PSGraphView` cmdlets for Vega / MSAGL / DSM visual export.
 
 **An example of Cartesian layouts for a node-link diagram of hierarchical data.**
 
@@ -66,10 +84,12 @@ $data | Group-Object -Property parent | % {
     }
 }
 
-$tempDir = [System.IO.Path]::GetTempPath() 
+$tempDir = [System.IO.Path]::GetTempPath()
 $outFile = Join-Path $tempDir 'x.tree.html'
-Export-Graph -Graph $g -Format Vega_TreeLayout -Path $outFile
+Export-GraphView -Graph $g -Renderer VegaTreeLayout -As Html -Path $outFile
 ```
+
+This rendering path now lives in `PSGraphView`.
 
 ![tree](docs/img/visualization-3.svg)
 
@@ -77,10 +97,12 @@ Export-Graph -Graph $g -Format Vega_TreeLayout -Path $outFile
 **Same graph but using Force Directed layout**
 
 ```pwsh
-$tempDir = [System.IO.Path]::GetTempPath() 
+$tempDir = [System.IO.Path]::GetTempPath()
 $outFile = Join-Path $tempDir 'x.force.html'
-Export-Graph -Graph $g -Format Vega_ForceDirected -Path $outFile
+Export-GraphView -Graph $g -Renderer VegaForceDirected -As Html -Path $outFile
 ```
+
+This rendering path also lives in `PSGraphView`.
 
 ![tree](docs/img/visualization-4.svg)
 
@@ -225,8 +247,8 @@ Jump straight to focused, copy‑paste friendly examples for each major task. Al
 * `New-AdjacencyGraph` – create an adjacency-list backed graph (`docs/New-AdjacencyGraph.md`)
 * `Add-Vertex` – add (or dedupe) vertices (`docs/Add-Vertex.md`)
 * `Add-Edge` – add directed edges with optional tag (`docs/Add-Edge.md`)
-* `Import-Graph` – load GraphML into a new graph (`docs/Import-Graph.md`)
-* `Export-Graph` – Graphviz / GraphML / MSAGL / Vega export (`docs/Export-Graph.md`)
+* `Import-Graph` – load GraphML into a new graph; GraphML is treated as the interchange format (`docs/Import-Graph.md`)
+* `Export-Graph` – Graphviz / GraphML export (`docs/Export-Graph.md`)
 
 ### Graph Query & Analysis
 * `Get-GraphPath` – shortest path (Dijkstra) between two vertices (`docs/Get-GraphPath.md`)
@@ -238,7 +260,7 @@ Jump straight to focused, copy‑paste friendly examples for each major task. Al
 * `New-DSM` – wrap a graph as a DSM (`docs/New-DSM.md`)
 * `Start-DSMClustering` – cluster / partition with SA or graph-based algorithms (`docs/Start-DSMClustering.md`)
 * `Start-DSMSequencing` – reorder to expose sources / cycles / sinks (`docs/Start-DSMSequencing.md`)
-* `Export-DSM` – text / Vega matrix export (`docs/Export-DSM.md`)
+* `Export-DSM` – text export (`docs/Export-DSM.md`)
 
 ### Typical End-to-End Flows
 * Build → Query: New-Graph → Add-Vertex / Add-Edge → Get-GraphPath / Get-InEdge

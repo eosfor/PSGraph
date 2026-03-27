@@ -8,7 +8,7 @@ schema: 2.0.0
 # Export-Graph
 
 ## SYNOPSIS
-Export a graph to Graphviz DOT, GraphML, MSAGL SVG layout, or Vega JSON/HTML visualizations.
+Export a graph to Graphviz DOT or GraphML.
 
 ## SYNTAX
 
@@ -18,15 +18,14 @@ Export-Graph -Graph <PsBidirectionalGraph> -Format <GraphExportTypes> [-Path <St
 ```
 
 ## DESCRIPTION
-Exports a PsBidirectionalGraph to one of multiple supported formats for analysis or visualization:
+Exports a PsBidirectionalGraph to one of the supported textual/interchange formats:
 
-* Graphviz – DOT text (layout performed later by graphviz tools).
-* GraphML – XML interchange format.
-* MSAGL_* – Uses Microsoft Automatic Graph Layout to compute positions and returns SVG.
-* Vega_* – Emits data-driven Vega specs (force directed, adjacency matrix, or tree); choose JSON or HTML by file extension (.json or .html).
+* Graphviz – DOT text (layout performed later by graphviz tools). This stays native to `PSGraph`.
+* GraphML – XML interchange format. This also stays native to `PSGraph` and is the recommended neutral import/export format.
 
 If -Path is supplied the content is written to that file; otherwise the string is written to the pipeline.
-File extension also influences Vega export type: .html produces self-contained HTML; .json returns just the spec.
+
+Visual rendering is no longer provided by `PSGraph`. Use `PSGraphView` and `Export-GraphView` for Vega or MSAGL output.
 
 ## EXAMPLES
 
@@ -39,29 +38,22 @@ Export-Graph -Graph $g -Format Graphviz | Out-File graph.dot
 ```
 
 ### Example 2
-Generate an MSAGL MDS SVG file.
+Round-trip a GraphML file.
 ```powershell
 $g = New-Graph; Add-Edge -From A -To B -Graph $g; Add-Edge -From B -To C -Graph $g
-Export-Graph -Graph $g -Format MSAGL_MDS -Path graph.svg
-```
-
-### Example 3
-Produce an interactive force-directed HTML (Vega).
-```powershell
-$g = New-Graph; Add-Edge -From A -To B -Graph $g; Add-Edge -From A -To C -Graph $g
-Export-Graph -Graph $g -Format Vega_ForceDirected -Path graph.html
+Export-Graph -Graph $g -Format GraphML -Path graph.graphml
 ```
 
 ## PARAMETERS
 
 ### -Format
-Desired export format / layout pipeline (see Description for options).
+Desired export format (see Description for options).
 
 ```yaml
 Type: GraphExportTypes
 Parameter Sets: (All)
 Aliases:
-Accepted values: Graphviz, GraphML, MSAGL_MDS, MSAGL_SUGIYAMA, MSAGL_FASTINCREMENTAL, Vega_ForceDirected, Vega_AdjacencyMatrix, Vega_TreeLayout
+Accepted values: Graphviz, GraphML
 
 Required: True
 Position: Named
@@ -86,7 +78,7 @@ Accept wildcard characters: False
 ```
 
 ### -Path
-Optional destination file. Extension chooses some sub-format behaviors (e.g. .html vs .json for Vega).
+Optional destination file.
 
 ```yaml
 Type: String
@@ -99,6 +91,13 @@ Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
+Graphviz / GraphML note:
+
+* `Graphviz` is the textual DOT export that remains owned by `PSGraph`.
+* `GraphML` is the interchange format that remains owned by `PSGraph` and can be round-tripped with `Import-Graph`.
+
+For rendered output, use `PSGraphView` and `Export-GraphView`.
 
 ### -ProgressAction
 Internal PowerShell progress preference (not typically used).

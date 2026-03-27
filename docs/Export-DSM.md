@@ -8,7 +8,7 @@ schema: 2.0.0
 # Export-DSM
 
 ## SYNOPSIS
-Export a Design Structure Matrix (plain, clustered or sequenced) to text or Vega (JSON/HTML) representation.
+Export a Design Structure Matrix (plain, clustered or sequenced) to text.
 
 ## SYNTAX
 
@@ -38,8 +38,9 @@ You can:
 * Export the result of clustering (`Start-DSMClustering`) by passing the returned `PartitioningResult`.
 * Export a sequenced DSM returned from `Start-DSMSequencing`.
 
-TEXT format outputs a simple adjacency matrix (comma separated rows).  
-VEGA_JSON / VEGA_HTML embed node & edge data into a Vega specification (matrix view) suitable for visualization (HTML wraps the spec).
+TEXT format outputs a simple adjacency matrix (comma separated rows) and remains fully owned by `PSGraph`.
+
+Visual rendering is no longer provided by `PSGraph`. Use `PSGraphView` and `Export-DSMView` for DSM SVG or Vega output.
 
 ## EXAMPLES
 
@@ -52,17 +53,10 @@ Export-DSM -Dsm $dsm -Format TEXT -Path $env:TEMP/dsm.txt
 ```
 
 ### Example 2
-Export clustered DSM (classic algorithm) to interactive HTML Vega matrix.
+Export clustered DSM to text after sequencing/clustering.
 ```powershell
 $ret = Start-DSMClustering -Dsm $dsm -ClusteringAlgorithm Classic
-Export-DSM -Result $ret -Format VEGA_HTML -Path $env:TEMP/dsmClustered.html
-```
-
-### Example 3
-Export sequenced DSM produced via condensation based loop detection.
-```powershell
-$seq = Start-DSMSequencing -Dsm $dsm -LoopDetectionMethod Condensation
-Export-DSM -SequencedDsm $seq -Format VEGA_JSON > dsmSequenced.json
+Export-DSM -Result $ret -Format TEXT -Path $env:TEMP/dsmClustered.txt
 ```
 
 ## PARAMETERS
@@ -83,13 +77,13 @@ Accept wildcard characters: False
 ```
 
 ### -Format
-Output format: TEXT adjacency matrix, or Vega visualization (JSON spec only or self‑contained HTML).
+Output format: TEXT adjacency matrix.
 
 ```yaml
 Type: DSMExportTypes
 Parameter Sets: (All)
 Aliases:
-Accepted values: TEXT, VEGA_JSON, VEGA_HTML
+Accepted values: TEXT
 
 Required: False
 Position: 2

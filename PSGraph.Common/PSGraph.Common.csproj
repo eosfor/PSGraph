@@ -15,14 +15,8 @@
 
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-    <PackageReference Include="MathNet.Numerics.Data.Text" Version="5.0.0" />
     <PackageReference Include="QuikGraph" Version="2.5.0" />
     <PackageReference Include="QuikGraph.Graphviz" Version="2.5.0" />
-    <PackageReference Include="QuikGraph.MSAGL" Version="2.5.0" />
-    <PackageReference Include="QuikGraph.Serialization" Version="2.5.0" />
-    <PackageReference Include="Svg" Version="3.4.7" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.6" />
-    <PackageReference Include="System.Management.Automation" Version="7.5.1" />
   </ItemGroup>
 
 </Project>

@@ -21,6 +21,10 @@ Creates a new empty PsBidirectionalGraph and populates it by deserializing the s
 file (nodes and directed edges). Vertex labels become PSVertex ids. Edge tags are initialized with
 empty PSEdgeTag instances. Only GraphML is supported; provide a valid path to a .graphml file.
 
+GraphML is treated as the neutral interchange format for `PSGraph`. It remains in this repo even
+though visualization renderers have moved to `PSGraphView`, because GraphML is not considered a
+renderer-specific format.
+
 ## EXAMPLES
 
 ### Example 1

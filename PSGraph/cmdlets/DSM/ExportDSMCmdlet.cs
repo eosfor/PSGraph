@@ -1,114 +1,85 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Management.Automation;
-using System.Text;
-using System.Threading.Tasks;
 using MathNet.Numerics.Data.Text;
 using PSGraph.DesignStructureMatrix;
 using PSGraph.Model;
-using QuikGraph;
-using PSGraph.Vega.Extensions;
-using Newtonsoft.Json.Linq;
-using PSGraph.Vega.Spec;
 
-namespace PSGraph.Cmdlets
+namespace PSGraph.Cmdlets;
+
+[Cmdlet(VerbsData.Export, "DSM", DefaultParameterSetName = PlainDsmParameterSet)]
+public class ExportDSMCmdlet : PSCmdlet
 {
-    [Cmdlet(VerbsData.Export, "DSM", DefaultParameterSetName = "PlainDsm")]
-    public class ExportDSMCmdlet : PSCmdlet
+    private const string PlainDsmParameterSet = "PlainDsm";
+    private const string PartitionedDsmParameterSet = "PartitionedDsm";
+    private const string SequencedDsmParameterSet = "SequencedDsm";
+
+    [Parameter(Position = 0, Mandatory = true, ParameterSetName = PlainDsmParameterSet)]
+    public IDsm Dsm = null!;
+
+    [Parameter(Position = 0, Mandatory = true, ParameterSetName = PartitionedDsmParameterSet)]
+    public PartitioningResult Result = null!;
+
+    [Parameter(Position = 0, Mandatory = true, ParameterSetName = SequencedDsmParameterSet)]
+    public IDsm SequencedDsm = null!;
+
+    [Parameter(Position = 1, Mandatory = false, ParameterSetName = PlainDsmParameterSet)]
+    [Parameter(Position = 1, Mandatory = false, ParameterSetName = PartitionedDsmParameterSet)]
+    [Parameter(Position = 1, Mandatory = false, ParameterSetName = SequencedDsmParameterSet)]
+    [Parameter(Mandatory = false)]
+    public string? Path;
+
+    [Parameter(Position = 2, Mandatory = false, ParameterSetName = PlainDsmParameterSet)]
+    [Parameter(Position = 3, Mandatory = false, ParameterSetName = PartitionedDsmParameterSet)]
+    [Parameter(Position = 2, Mandatory = false, ParameterSetName = SequencedDsmParameterSet)]
+    public DSMExportTypes Format = DSMExportTypes.TEXT;
+
+    protected override void ProcessRecord()
     {
+        var dsm = ResolveDsm();
+        string result;
 
-        [Parameter(Position = 0, Mandatory = true, ParameterSetName = "PlainDsm")]
-        public IDsm Dsm;
-
-        [Parameter(Position = 0, Mandatory = true, ParameterSetName = "PartitionedDsm")]
-        public PartitioningResult Result;
-
-        [Parameter(Position = 0, Mandatory = true, ParameterSetName = "SequencedDsm")]
-        public IDsm SequencedDsm;
-
-        [Parameter(Position = 1, Mandatory = false, ParameterSetName = "PlainDsm")]
-        [Parameter(Position = 1, Mandatory = false, ParameterSetName = "PartitionedDsm")]
-        [Parameter(Position = 1, Mandatory = false, ParameterSetName = "SequencedDsm")]
-        [Parameter(Mandatory = false)]
-        public string? Path;
-
-        [Parameter(Position = 2, Mandatory = false, ParameterSetName = "PlainDsm")]
-        [Parameter(Position = 3, Mandatory = false, ParameterSetName = "PartitionedDsm")]
-        [Parameter(Position = 2, Mandatory = false, ParameterSetName = "SequencedDsm")]
-        public DSMExportTypes Format = DSMExportTypes.TEXT;
-
-        private IDsm? _dsm;
-        private IDsmPartitionAlgorithm? _algo;
-        private IDsmView? _view;
-        protected override void ProcessRecord()
+        switch (Format)
         {
-
-            switch (ParameterSetName)
-            {
-                default:
-                case "PlainDsm":
-                    _dsm = Dsm;
-                    _view = new DsmView(_dsm);
-                    break;
-                case "PartitionedDsm":
-                    _dsm = Result.Dsm;
-                    _algo = Result.Algorithm;
-                    _view = new DsmView(_dsm, _algo.Partitions);
-                    break;
-                case "SequencedDsm":
-                    _dsm = SequencedDsm;
-                    _view = new DsmView(_dsm);
-                    break;
-            }
-
-            string result = string.Empty;
-
-            switch (Format)
-            {
-                // case DSMExportTypes.SVG:
-                //     result = ExportSVG();
-                //     break;
-                case DSMExportTypes.TEXT:
-                    result = ExportText();
-                    break;
-                case DSMExportTypes.VEGA_JSON:
-                    result = ExportVega(VegaExportTypes.JSON);
-                    break;
-                case DSMExportTypes.VEGA_HTML:
-                    result = ExportVega(VegaExportTypes.HTML);
-                    break;
-            }
-
-            if (MyInvocation.BoundParameters.ContainsKey("Path"))
-            {
-                File.WriteAllText(Path, result);
-            }
-            else
-            {
-                WriteObject(result);
-            }
+            case DSMExportTypes.TEXT:
+                result = ExportText(dsm);
+                break;
+            default:
+                ThrowTerminatingError(CreateVisualExportMovedException());
+                return;
         }
 
-        private string ExportText()
+        if (MyInvocation.BoundParameters.ContainsKey(nameof(Path)))
         {
-            return _view.ExportText();
+            File.WriteAllText(Path!, result);
+            return;
         }
 
-        private string ExportSVG()
-        {
-            return _view.ToSvgString();
-        }
+        WriteObject(result);
+    }
 
-        private string ExportVega(VegaExportTypes exportType)
+    private IDsm ResolveDsm()
+    {
+        return ParameterSetName switch
         {
-            var modulePath = MyInvocation.MyCommand.Module?.ModuleBase;
-            var data = _view.ToNodeAndEdgeView();
-            return VegaHelper.InsertData(data: data,
-                                         new string[] { "nodes", "edges" },
-                                         exportType,
-                                         vegaSpecFileName: "vega.dsm.matrix.json",
-                                         modulePath: modulePath);
-        }
+            PlainDsmParameterSet => Dsm,
+            PartitionedDsmParameterSet => Result.Dsm,
+            SequencedDsmParameterSet => SequencedDsm,
+            _ => throw new InvalidOperationException($"Unknown parameter set '{ParameterSetName}'.")
+        };
+    }
+
+    private static string ExportText(IDsm dsm)
+    {
+        using var sw = new StringWriter();
+        DelimitedWriter.Write(sw, dsm.DsmMatrixView, ",");
+        return sw.ToString();
+    }
+
+    private ErrorRecord CreateVisualExportMovedException()
+    {
+        return new ErrorRecord(
+            new NotSupportedException($"Visual DSM export format '{Format}' is no longer provided by PSGraph. Use PSGraphView and Export-DSMView instead."),
+            "DsmVisualExportMovedToPSGraphView",
+            ErrorCategory.NotImplemented,
+            Format);
     }
 }

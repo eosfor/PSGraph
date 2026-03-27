@@ -8,7 +8,7 @@ PSGraph is a PowerShell module with C# implementation that provides:
 
 1. Graph data structures for building and manipulating graphs (vertices and edges)
 2. Graph algorithms for traversal, path finding, and analysis
-3. Visualization capabilities using GraphViz, Vega, and MSAGL 
+3. Textual/interchange graph export via GraphViz DOT and GraphML, with visualization handled in PSGraphView
 4. Design Structure Matrix (DSM) functionality for dependency analysis
 
 ## Project Structure
@@ -16,7 +16,6 @@ PSGraph is a PowerShell module with C# implementation that provides:
 - **PSGraph**: Main PowerShell module with cmdlets and C# implementation
 - **PSGraph.Common**: Core data models and shared functionality
 - **DSM**: Design Structure Matrix implementation
-- **PSGraph.Vega.Extensions**: Vega visualization capabilities
 - **PSGraph.Tests**: C# tests
 - **PsGraph.Pester.Tests**: PowerShell tests
 
@@ -36,7 +35,7 @@ Located in `PSGraph/cmdlets/Graph/*.cs`:
 - `Add-Vertex`: Adds a vertex to a graph
 - `Add-Edge`: Adds an edge between vertices in a graph
 - `Get-GraphPath`: Finds paths between vertices
-- `Export-Graph`: Exports a graph to various formats (GraphViz, Vega, etc.)
+- `Export-Graph`: Exports a graph to GraphViz DOT or GraphML
 - `Get-InOrOutEdges`: Gets edges connected to a vertex
 - `Import-Graph`: Imports a graph from various data sources
 
@@ -51,9 +50,8 @@ Located in `DSM/*.cs`:
 
 ### Visualization
 
-- GraphViz support via QuikGraph
-- Vega visualization via `PSGraph.Vega.Extensions`
-- MSAGL visualization support
+- GraphViz DOT export in `PSGraph`
+- Vega and MSAGL visualization in `PSGraphView`
 
 ## Common Workflows
 
@@ -75,8 +73,9 @@ $path = Get-GraphPath -Graph $graph -From 'A' -To 'D'
 ### Visualizing Graphs
 
 ```powershell
-Export-Graph -Graph $graph -Format Vega_ForceDirected -Path "./graph.html"
 Export-Graph -Graph $graph -Format Graphviz -Path "./graph.dot"
+# Visual rendering lives in PSGraphView:
+# Export-GraphView -Graph $graph -Format Vega_ForceDirected -Path "./graph.html"
 ```
 
 ## Development Conventions

@@ -23,12 +23,12 @@ public class PSVertexTests
     }
 
     [Fact]
-    public void Label_Setter_UpdatesGraphvizVertexLabel()
+    public void Label_Setter_UpdatesNeutralRenderLabel()
     {
         var v = new PSVertex("A");
-        v.GVertexParameters.Label.Should().Be("A");
+        v.RenderProperties["Label"].Should().Be("A");
         v.Label = "B";
-        v.GVertexParameters.Label.Should().Be("B");
+        v.RenderProperties["Label"].Should().Be("B");
         v.ToString().Should().Be("B");
         v.Name.Should().Be("B");
     }
@@ -42,16 +42,19 @@ public class PSVertexTests
     }
 
     [Fact]
-    public void CopyConstructor_ClonesLabelGraphvizAndMetadata()
+    public void CopyConstructor_ClonesRenderPropertiesAndMetadata()
     {
         var original = new PSVertex("Orig");
+        original.RenderProperties["Shape"] = "Box";
         original.Metadata["k1"] = 123;
         original.Metadata["k2"] = "text";
 
         var clone = new PSVertex(original);
         clone.Should().NotBeSameAs(original);
         clone.Label.Should().Be("Orig");
-        clone.GVertexParameters.Label.Should().Be("Orig");
+        clone.RenderProperties.Should().NotBeSameAs(original.RenderProperties);
+        clone.RenderProperties["Label"].Should().Be("Orig");
+        clone.RenderProperties["Shape"].Should().Be("Box");
         clone.Metadata.Should().NotBeSameAs(original.Metadata);
         clone.Metadata.Should().ContainKey("k1").WhoseValue.Should().Be(123);
         clone.Metadata.Should().ContainKey("k2").WhoseValue.Should().Be("text");

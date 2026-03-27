@@ -38,14 +38,13 @@ if ($IsWindows) {
 }
 
 Export-Graph -Graph $g -Format Graphviz -Path $graphFile
-Export-Graph -Graph $g -Format MSAGL_MDS -Path $svgOutFile
+dot -Tsvg $graphFile -o $svgOutFile
 
 # $graphFile
 # $svgOutFile
 
 $d = New-DSM -Graph $g
 # Start-DSMClustering -Dsm $d
-Export-DSM -Dsm $d -Path $Env:TMPDIR/dsm.svg -Format SVG
 Export-DSM -Dsm $d -Path $Env:TMPDIR/dsm.txt -Format TEXT
 
 dot -Tsvg $graphFile -o $env:TMPDIR/srcGraph.svg
