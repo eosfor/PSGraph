@@ -34,7 +34,7 @@ The original goal was to **analyse dependencies** in IaC workloads, but the modu
 | **Idiomatic cmdlets**             | `New-PSGraph`, `Add-PSVertex`, `Add-PSEdge`, `Get-GraphPath`, … |
 | **Ready-made algorithms**         | All algorithms exposed by QuikGraph are one cmdlet away. |
 | **Visualization split** | Keep Graphviz / GraphML export in `PSGraph`; use `PSGraphView` for Vega / MSAGL / DSM rendering. |
-| **Pipeline-friendly**             | Import/Export from CSV, JSON, XML, SQL, REST or live objects. |
+| **Pipeline-friendly**             | Import from CSV, JSON, GraphML; export to Graphviz DOT and GraphML. |
 | **Test-driven**                   | Over 100 Pester tests ensure every cmdlet does what it says. |
 | **Cross-platform**                | Runs anywhere PowerShell 7+ does (Windows, Linux, macOS). |
 
