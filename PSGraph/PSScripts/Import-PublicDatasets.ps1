@@ -109,7 +109,7 @@ if (-not (Test-Path $karateMtx)) {
 }
 
 # The .mtx file uses space-separated edge list with % comments
-$karateGraph = Import-Graph -Path $karateMtx -Format Csv -Delimiter ' ' -NoHeader
+$karateGraph = Import-Graph -Path $karateMtx -Format MatrixMarket
 Write-Host "Karate Club: $($karateGraph.VertexCount) vertices, $($karateGraph.EdgeCount) edges"
 
 # ---------------------------------------------------------------

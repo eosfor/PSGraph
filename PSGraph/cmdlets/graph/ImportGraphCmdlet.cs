@@ -55,6 +55,9 @@ namespace PSGraph.Cmdlets
                 case GraphImportTypes.Json:
                     graph = JsonGraphImporter.Import(resolvedPath);
                     break;
+                case GraphImportTypes.MatrixMarket:
+                    graph = MatrixMarketGraphImporter.Import(resolvedPath);
+                    break;
                 default:
                     ThrowTerminatingError(new ErrorRecord(
                         new NotSupportedException($"Unsupported import format: {Format}"),

@@ -4,6 +4,7 @@ namespace PSGraph
     {
         GraphML,
         Csv,
-        Json
+        Json,
+        MatrixMarket
     }
 }
