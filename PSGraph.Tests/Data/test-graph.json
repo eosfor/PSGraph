@@ -1,0 +1,12 @@
+{
+  "nodes": [
+    { "id": "A", "color": "red" },
+    { "id": "B", "color": "blue" },
+    { "id": "C", "color": "green" }
+  ],
+  "edges": [
+    { "source": "A", "target": "B", "label": "connects", "weight": 1 },
+    { "source": "B", "target": "C", "label": "links", "weight": 2 },
+    { "source": "A", "target": "C", "label": "shortcut", "weight": 3 }
+  ]
+}

@@ -1,0 +1,4 @@
+From,To,Label,Weight
+A,B,connects,1
+B,C,links,2
+A,C,shortcut,3
