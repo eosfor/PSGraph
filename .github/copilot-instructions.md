@@ -74,8 +74,8 @@ $path = Get-GraphPath -Graph $graph -From 'A' -To 'D'
 
 ```powershell
 Export-Graph -Graph $graph -Format Graphviz -Path "./graph.dot"
-# Visual rendering lives in PSGraphView:
-# Export-GraphView -Graph $graph -Format Vega_ForceDirected -Path "./graph.html"
+# Visual rendering lives in the sibling PSGraphView repository.
+# Use PSGraphView.PowerShell cmdlets there for Vega/MSAGL/DSM view export.
 ```
 
 ## Development Conventions
@@ -124,8 +124,10 @@ dotnet test
 
 - **QuikGraph**: Core graph data structures and algorithms
 - **MathNet.Numerics**: Used for matrix operations in DSM
-- **MSAGL**: Microsoft Automatic Graph Layout for visualization
-- **Vega**: For web-based visualization
+- **QuikGraph.Graphviz**: Used for DOT export
+- **QuikGraph.Serialization**: Used for GraphML import/export
+
+Visualization-specific dependencies such as MSAGL and Vega live in the sibling `PSGraphView` repository, not in this repo.
 
 ## Build Process
 

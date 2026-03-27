@@ -1,28 +1,27 @@
 ---
-description: "Use when: splitting visualization from graph core"
+description: "Use when: planning follow-up work for the PSGraph and PSGraphView split"
 name: "Plan Visualization Split"
 argument-hint: "Опиши репозиторий и задачу по выносу visualization layer"
 agent: "plan"
 model: "GPT-5 (copilot)"
 ---
 
-Помоги спроектировать вынос визуализации из текущего репозитория в отдельный проект.
+Помоги спроектировать следующий этап или cleanup после выноса визуализации из текущего репозитория в отдельный проект.
 
 Контекст задачи:
-- Сейчас графовая логика, экспорт и визуализация слишком тесно связаны.
-- Нужно понять, как отделить visualization layer от core без лишних breaking changes.
-- Основной вопрос: что должно быть границей между модулями — графовый объект в памяти или сериализованный экспорт.
+- Основное разделение уже выполнено: `PSGraph` держит graph/DSM core и textual-interchange export, `PSGraphView` держит visual renderer-ы и visualization cmdlet-ы.
+- Нужно планировать только те шаги, которые усиливают или дочищают эту границу без лишних breaking changes.
+- Основной вопрос уже решен: граница между модулями должна оставаться object-based, а не строиться вокруг serialized export.
 
 Цель:
-Подготовь архитектурное решение и пошаговый план миграции для выноса визуализации в отдельный проект, сохранив совместимость с текущим пользовательским API настолько, насколько это разумно.
+Подготовь архитектурное решение и пошаговый план для следующего этапа после разделения визуализации, сохранив текущие границы между `PSGraph` и `PSGraphView`.
 
 Что нужно сделать:
 1. Изучи, как сейчас связаны core, export и visualization.
 2. Определи, какие части должны остаться в core, а какие стоит вынести в отдельный visualization project.
-3. Прими явное решение по контракту между слоями:
-   object-based API или export-based API.
-4. Предложи минимально болезненный путь миграции без резкого переписывания публичных cmdlet-ов.
-5. Отдельно опиши, что делать с GraphML: считать его interchange-форматом или частью visualization/export слоя.
+3. Исходи из уже принятого object-based контракта между слоями и не переоткрывай этот выбор без явного запроса.
+4. Предложи минимально болезненный путь следующих изменений без резкого переписывания публичных cmdlet-ов.
+5. Отдельно проверь, не размывается ли текущая роль GraphML как interchange-формата в `PSGraph`.
 6. Укажи, какие зависимости и типы сегодня создают лишнюю сцепку и должны быть вынесены или переработаны.
 7. Составь фазы реализации так, чтобы ими можно было пользоваться как backlog для внедрения.
 8. Инструкции по реализации должны указывать что в качестве target для нового проекта должен быть использован https://github.com/eosfor/PSGraphView.git
@@ -30,14 +29,15 @@ model: "GPT-5 (copilot)"
 Предпочтительное архитектурное направление:
 - Не использовать сериализованный экспорт как основной внутренний контракт между core и visualization.
 - Считать основной рекомендацией object-based границу: либо передача `PsBidirectionalGraph`, либо нейтрального `GraphView` DTO.
-- Экспорт в `GraphML`, `Vega JSON`, `SVG`, `DOT` оставить внешним API для обмена, публикации и сохранения результатов.
-- Миграцию строить эволюционно: сначала adapters и contracts, потом перенос реализаций, потом возможное разделение на отдельный PowerShell-модуль.
+- `GraphML` и `DOT` считать внешним API `PSGraph`, а визуальные форматы и view-export держать в `PSGraphView`.
+- Любой follow-up план должен сохранять уже достигнутое разделение, а не возвращать compatibility path-ы в `PSGraph`.
 
 На что обратить особое внимание:
 - Не сломать `Export-Graph` без веской причины.
 - Не смешивать redesign алгоритмов графов и DSM с задачей выноса визуализации.
 - Зафиксировать, какие зависимости должны уйти из core-проектов.
 - Проверить, не протекают ли Graphviz/MSAGL/Vega-детали в общие модели.
+- Не предлагать возврат visual format-ов в enum-ы или cmdlet-ы `PSGraph`, если на это нет явного запроса.
 
 Опорные файлы для анализа:
 - [ExportGraphViewCmdLet.cs](/Users/andrei/repo/PSGraph/PSGraph/cmdlets/Graph/ExportGraphViewCmdLet.cs)
@@ -50,7 +50,7 @@ model: "GPT-5 (copilot)"
 - [PSEdge.cs](/Users/andrei/repo/PSGraph/PSGraph.Common/Model/PSEdge.cs)
 - [GraphExportTypes.cs](/Users/andrei/repo/PSGraph/PSGraph.Common/Model/GraphExportTypes.cs)
 - [ExportGraphViewCmdletTests.cs](/Users/andrei/repo/PSGraph/PSGraph.Tests/ExportGraphViewCmdletTests.cs)
-- [VegaDataConverterTests.cs](/Users/andrei/repo/PSGraph/PSGraph.Tests/VegaDataConverterTests.cs)
+- [ExportDSMCmdlet.cs](/Users/andrei/repo/PSGraph/PSGraph/cmdlets/DSM/ExportDSMCmdlet.cs)
 - [README.md](/Users/andrei/repo/PSGraph/README.md)
 
 Ожидаемый формат ответа:

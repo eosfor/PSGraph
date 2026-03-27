@@ -4,6 +4,8 @@ Status: approved canonical plan
 Target visualization repository: https://github.com/eosfor/PSGraphView.git
 Primary architectural decision: use an object-based boundary between graph core and visualization. Do not use serialized export as the main internal contract.
 Local scaffold status: initialized at `/Users/andrei/repo/PSGraphView` with a working `PSGraphView.Vega` seed project covering the force-directed, adjacency-matrix, and tree-layout Vega paths plus the extracted DSM Vega node/edge data builder, a `PSGraphView.Dsm` seed project covering extracted DSM SVG rendering, and a `PSGraphView.Msagl` seed project covering the MSAGL fast-incremental and Sugiyama SVG paths.
+Current end state: `PSGraph` owns graph/DSM core plus Graphviz, GraphML, and DSM `TEXT`; `PSGraphView` owns visualization renderers and visualization-facing PowerShell cmdlets.
+Note: the detailed phase log below is intentionally historical. Intermediate references to removed files, temporary compatibility paths, or transitional package boundaries describe migration steps that already happened and should not be treated as the current architecture.
 
 ## Recommendation
 Split the system along the line of graph domain versus visualization implementations. Keep graph models, graph algorithms, DSM, PowerShell graph operations, and textual/interchange exports in PSGraph. Move visualization-specific services, renderers, adapters, and layout engines to PSGraphView. Treat GraphML as an interchange format owned by PSGraph, not as the required internal transport between PSGraph and PSGraphView.
