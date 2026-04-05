@@ -1,16 +1,22 @@
 ﻿using QuikGraph;
 using QuikGraph.Algorithms;
+using System.Dynamic;
 
 namespace PSGraph.Model
 {
     public class PsBidirectionalGraph : BidirectionalGraph<PSVertex, PSEdge>
     {
+        public IDictionary<string, object?> RenderProperties { get; set; } = new ExpandoObject();
+
         // A: default now disallows parallel edges
         public PsBidirectionalGraph() : this(false) { }
 
         public PsBidirectionalGraph(bool allowParallelEdges = false) : base(allowParallelEdges) { }
 
-        public PsBidirectionalGraph(PsBidirectionalGraph g) : base(g) { }
+        public PsBidirectionalGraph(PsBidirectionalGraph g) : base(g)
+        {
+            RenderProperties = CloneProperties(g.RenderProperties);
+        }
 
         // Strongly-typed clone that preserves the derived type
         public new PsBidirectionalGraph Clone()
@@ -45,6 +51,17 @@ namespace PSGraph.Model
             if (edge is null) return false;
             // Delegate to AddEdge after ensuring canonical vertices
             return AddEdge(edge);
+        }
+
+        private static IDictionary<string, object?> CloneProperties(IDictionary<string, object?> src)
+        {
+            var expando = new ExpandoObject();
+            var dst = (IDictionary<string, object?>)expando;
+            foreach (var kv in src)
+            {
+                dst[kv.Key] = kv.Value is ICloneable c ? c.Clone() : kv.Value;
+            }
+            return dst;
         }
     }
 }

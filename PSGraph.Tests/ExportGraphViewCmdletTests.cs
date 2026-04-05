@@ -75,6 +75,50 @@ public class ExportGraphViewCmdletTests : IDisposable
     }
 
     [Fact]
+    public void ExportGraph_GraphvizFormat_RespectsEdgeRenderProperties()
+    {
+        var graph = CreateSampleGraph();
+        var edge = graph.Edges.First();
+        var filePath = Path.Combine(_tempDirectory, "graph-edge-render.dot");
+
+        edge.RenderProperties["Style"] = GraphvizEdgeStyle.Dashed;
+
+        _powershell.AddCommand("Export-Graph")
+            .AddParameter("Graph", graph)
+            .AddParameter("Format", GraphExportTypes.Graphviz)
+            .AddParameter("Path", filePath);
+
+        _powershell.Invoke();
+        _powershell.Commands.Clear();
+
+        _powershell.HadErrors.Should().BeFalse();
+        File.ReadAllText(filePath).Should().Contain("style=dashed");
+    }
+
+    [Fact]
+    public void ExportGraph_GraphvizFormat_RespectsGraphRenderProperties()
+    {
+        var graph = CreateSampleGraph();
+        var filePath = Path.Combine(_tempDirectory, "graph-graph-render.dot");
+
+        graph.RenderProperties["RankDirection"] = GraphvizRankDirection.LR;
+        graph.RenderProperties["Splines"] = GraphvizSplineType.Line;
+
+        _powershell.AddCommand("Export-Graph")
+            .AddParameter("Graph", graph)
+            .AddParameter("Format", GraphExportTypes.Graphviz)
+            .AddParameter("Path", filePath);
+
+        _powershell.Invoke();
+        _powershell.Commands.Clear();
+
+        _powershell.HadErrors.Should().BeFalse();
+        var dot = File.ReadAllText(filePath);
+        dot.Should().Contain("rankdir=LR");
+        dot.Should().Contain("splines=line");
+    }
+
+    [Fact]
     public void ExportGraph_GraphMLFormat_WritesGraphMlFile()
     {
         var graph = CreateSampleGraph();
