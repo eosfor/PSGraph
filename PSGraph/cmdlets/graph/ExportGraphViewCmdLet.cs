@@ -67,15 +67,27 @@ public partial class ExportGraphViewCmdLet : PSCmdlet
     private string ExportGraphViz()
     {
         var graphviz = new GraphvizAlgorithm<PSVertex, PSEdge>(Graph);
+        ApplyRenderProperties(Graph.RenderProperties, graphviz.GraphFormat);
         graphviz.FormatVertex += Graphviz_FormatVertex;
+        graphviz.FormatEdge += Graphviz_FormatEdge;
         return graphviz.Generate();
     }
 
     private void Graphviz_FormatVertex(object sender, FormatVertexEventArgs<PSVertex> args)
     {
-        foreach (var entry in args.Vertex.RenderProperties)
+        ApplyRenderProperties(args.Vertex.RenderProperties, args.VertexFormat);
+    }
+
+    private void Graphviz_FormatEdge(object sender, FormatEdgeEventArgs<PSVertex, PSEdge> args)
+    {
+        ApplyRenderProperties(args.Edge.RenderProperties, args.EdgeFormat);
+    }
+
+    private static void ApplyRenderProperties(IDictionary<string, object?> properties, object formatTarget)
+    {
+        foreach (var entry in properties)
         {
-            var destProperty = args.VertexFormat.GetType().GetProperty(
+            var destProperty = formatTarget.GetType().GetProperty(
                 entry.Key,
                 BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
 
@@ -86,7 +98,7 @@ public partial class ExportGraphViewCmdLet : PSCmdlet
 
             if (TryConvertRenderPropertyValue(entry.Value, destProperty.PropertyType, out var convertedValue))
             {
-                destProperty.SetValue(args.VertexFormat, convertedValue);
+                destProperty.SetValue(formatTarget, convertedValue);
             }
         }
     }
