@@ -31,10 +31,10 @@ The original goal was to **analyse dependencies** in IaC workloads, but the modu
 
 |                                   | What you get |
 |-----------------------------------|--------------|
-| **Idiomatic cmdlets**             | `New-PSGraph`, `Add-PSVertex`, `Add-PSEdge`, `Get-GraphPath`, … |
+| **Idiomatic cmdlets**             | `New-Graph`, `Add-Vertex`, `Add-Edge`, `Get-GraphPath`, `New-DSM`, … |
 | **Ready-made algorithms**         | All algorithms exposed by QuikGraph are one cmdlet away. |
 | **Visualization split** | Keep Graphviz / GraphML export in `PSGraph`; use `PSGraphView` for Vega / MSAGL / DSM rendering. |
-| **Pipeline-friendly**             | Import from CSV, JSON, GraphML; export to Graphviz DOT and GraphML. |
+| **Pipeline-friendly**             | Import from GraphML, CSV, JSON, Matrix Market; export to Graphviz DOT and GraphML. |
 | **Test-driven**                   | Over 100 Pester tests ensure every cmdlet does what it says. |
 | **Cross-platform**                | Runs anywhere PowerShell 7+ does (Windows, Linux, macOS). |
 
@@ -51,7 +51,7 @@ Install-Module -Name PSQuickGraph -Scope CurrentUser
 Current ownership is intentional:
 
 * `PSGraph` owns graph objects, graph algorithms, DSM algorithms, Graphviz DOT export, GraphML interchange, and textual DSM export.
-* `PSGraphView` owns the visual renderer implementations and visualization-facing cmdlets for Vega, MSAGL, and DSM view output.
+* `PSGraphView` owns the visual renderer implementations and visualization-facing cmdlets such as `Export-GraphView` and `Export-DSMView`.
 * `Export-Graph` and `Export-DSM` in `PSGraph` are no longer the path for visual rendering.
 
 Practical rule of thumb:
@@ -62,12 +62,14 @@ Practical rule of thumb:
 
 **An example of Cartesian layouts for a node-link diagram of hierarchical data.**
 
+These rendering examples assume the sibling `PSGraphView` module is installed.
+
 ```pwsh
 $data = (Invoke-WebRequest -Uri https://raw.githubusercontent.com/vega/vega-datasets/refs/heads/main/data/flare.json).Content | ConvertFrom-Json
 $index = [object[]]::new($data.count + 1)
 $data | % { $index[$_.id] = $_ }
 
-$g = new-graph
+$g = New-Graph
 
 $data | Group-Object -Property parent | % {
     $currentGroup = $_
@@ -124,7 +126,7 @@ You can tune algorithms via a single `-AlgorithmConfig` parameter that accepts:
 ### Quick Example (Hashtable configuration)
 
 ```powershell
-$dsm = New-Dsm -Graph (New-Graph | % { Add-Vertex -Graph $_ -Vertex 'A' }) # minimal placeholder
+$dsm = New-DSM -Graph (New-Graph | % { Add-Vertex -Graph $_ -Vertex 'A' }) # minimal placeholder
 
 # Build a sample dependency graph
 $g = New-Graph
@@ -133,7 +135,7 @@ Add-Edge -From A -To B -Graph $g | Out-Null
 Add-Edge -From B -To C -Graph $g | Out-Null
 Add-Edge -From C -To A -Graph $g | Out-Null # cycle
 Add-Edge -From C -To D -Graph $g | Out-Null
-$dsm = New-Dsm -Graph $g
+$dsm = New-DSM -Graph $g
 
 # Run classic clustering (simulated annealing) with a tuned config
 $cfg = @{ Times = 2; StableLimit = 2; MaxRepeat = 200; PowCc = 1 }
@@ -247,7 +249,7 @@ Jump straight to focused, copy‑paste friendly examples for each major task. Al
 * `New-AdjacencyGraph` – create an adjacency-list backed graph (`docs/New-AdjacencyGraph.md`)
 * `Add-Vertex` – add (or dedupe) vertices (`docs/Add-Vertex.md`)
 * `Add-Edge` – add directed edges with optional tag (`docs/Add-Edge.md`)
-* `Import-Graph` – load GraphML into a new graph; GraphML is treated as the interchange format (`docs/Import-Graph.md`)
+* `Import-Graph` – load GraphML, CSV, JSON, or Matrix Market into a new graph; GraphML remains the neutral interchange format (`docs/Import-Graph.md`)
 * `Export-Graph` – Graphviz / GraphML export (`docs/Export-Graph.md`)
 
 ### Graph Query & Analysis

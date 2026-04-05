@@ -8,7 +8,7 @@ schema: 2.0.0
 # Import-Graph
 
 ## SYNOPSIS
-Import a graph from a GraphML, CSV, or JSON file into a new PsBidirectionalGraph.
+Import a graph from GraphML, CSV, JSON, or Matrix Market into a new PsBidirectionalGraph.
 
 ## SYNTAX
 
@@ -20,57 +20,51 @@ Import-Graph -Path <String> [-Format <GraphImportTypes>] [-FromColumn <String>] 
 Creates a new empty PsBidirectionalGraph and populates it from the specified file.
 Supported formats:
 
-- **GraphML** (default) -- standard GraphML XML interchange format.
-- **Csv** -- edge-list CSV/TSV. First row is a header unless `-NoHeader` is specified;
-  requires columns for source and target vertices (default names `From` and `To`,
-  customizable via `-FromColumn`/`-ToColumn`). In headerless mode the first two columns
-  are used positionally. Optional columns: `Label`, `Weight`. All other columns are
-  stored as edge metadata (RenderProperties). Lines starting with `#` are treated as
-  comments and skipped. Use `-Delimiter` to change the field separator (default `,`).
-- **Json** -- JSON object with `nodes` and/or `edges`/`links` arrays.
-  Each node needs an `id`, `label`, or `name` property; extra properties go to vertex Metadata.
-  Each edge needs `source`/`from` and `target`/`to` (string labels or numeric node-array indices);
-  optional `label` and `weight`; extra properties go to edge RenderProperties.
-  Compatible with D3.js graph datasets (e.g. Les Miserables).
+- **GraphML** (default) - standard GraphML XML interchange format.
+- **Csv** - edge-list CSV/TSV. The first row is treated as a header unless `-NoHeader` is specified.
+  Source and target columns default to `From` and `To`, and can be changed with `-FromColumn` and
+  `-ToColumn`. In headerless mode the first two columns are used positionally. Lines starting with
+  `#` are skipped as comments. Use `-Delimiter` to change the field separator.
+- **Json** - JSON object with `nodes` and `edges` or `links` arrays. Nodes can use `id`, `label`,
+  or `name`. Edges can use `source` or `from`, and `target` or `to`. D3-style numeric node indexes
+  are supported.
+- **MatrixMarket** - Matrix Market coordinate format (`.mtx`) for sparse graph edge lists. Comment
+  lines starting with `%` are ignored.
 
-Vertices are automatically deduplicated by label.
+Vertices are deduplicated by label during import.
+
+GraphML remains the neutral interchange format for `PSGraph`. It stays in this repo even though
+visualization renderers have moved to `PSGraphView`, because GraphML is not renderer-specific.
 
 ## EXAMPLES
 
-### Example 1: Import GraphML
+### Example 1
+Load a previously exported GraphML file.
 ```powershell
 $g = Import-Graph -Path ./graph.graphml
 $g.VertexCount
 $g.EdgeCount
 ```
 
-### Example 2: Import CSV edge list
+### Example 2
+Import a CSV edge list.
 ```powershell
 $g = Import-Graph -Path ./edges.csv -Format Csv
 $g.Vertices | Select-Object Label
 ```
 
-### Example 3: Import CSV with custom column names
-```powershell
-$g = Import-Graph -Path ./data.csv -Format Csv -FromColumn Source -ToColumn Target
-```
-
-### Example 4: Import JSON
+### Example 3
+Import JSON data.
 ```powershell
 $g = Import-Graph -Path ./graph.json -Format Json
 $g.Edges | ForEach-Object { "$($_.Source) -> $($_.Target)" }
 ```
 
-### Example 5: Import SNAP-style TSV (tab-separated, no header, comments)
+### Example 4
+Import a Matrix Market dataset.
 ```powershell
-$g = Import-Graph -Path ./web-Google.txt -Format Csv -Delimiter "`t" -NoHeader
+$g = Import-Graph -Path ./soc-karate.mtx -Format MatrixMarket
 $g.VertexCount
-```
-
-### Example 6: Import D3.js Les Miserables JSON
-```powershell
-$g = Import-Graph -Path ./miserables.json -Format Json
-$g.Vertices | Select-Object Label, @{N='Group'; E={ $_.Metadata['group'] }}
 ```
 
 ## PARAMETERS
@@ -90,8 +84,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -ProgressAction
+Internal PowerShell progress preference.
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Format
-Import format. Valid values: `GraphML` (default), `Csv`, `Json`.
+Import format. Valid values: `GraphML` (default), `Csv`, `Json`, `MatrixMarket`.
 
 ```yaml
 Type: GraphImportTypes
@@ -155,7 +164,7 @@ Accept wildcard characters: False
 
 ### -NoHeader
 When specified, the CSV file is treated as headerless. The first column is used as
-the source vertex and the second column as the target vertex. `-FromColumn`/`-ToColumn`
+the source vertex and the second column as the target vertex. `-FromColumn` and `-ToColumn`
 are ignored. Only used when `-Format Csv`.
 
 ```yaml
@@ -166,21 +175,6 @@ Aliases:
 Required: False
 Position: Named
 Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ProgressAction
-Internal PowerShell progress preference.
-
-```yaml
-Type: ActionPreference
-Parameter Sets: (All)
-Aliases: proga
-
-Required: False
-Position: Named
-Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
