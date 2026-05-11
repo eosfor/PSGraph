@@ -33,27 +33,8 @@ namespace PSGraph.Cmdlets
 
         void ProcessRecordDefault()
         {
-            PSVertex? newFrom = null;
-            PSVertex? newTo = null;
-
-            if (From.ImmediateBaseObject is PSVertex)
-            {
-                newFrom = (PSVertex)From.ImmediateBaseObject;
-            }
-            else
-            {
-                newFrom = new PSVertex(From.ImmediateBaseObject.ToString(), From.ImmediateBaseObject);
-            }
-
-            if (To.ImmediateBaseObject is PSVertex)
-            {
-                newTo = (PSVertex)To.ImmediateBaseObject;
-            }
-            else
-            {
-                newTo = new PSVertex(To.ImmediateBaseObject.ToString(), To.ImmediateBaseObject);
-            }
-
+            var newFrom = PSVertexFactory.FromPSObject(From);
+            var newTo = PSVertexFactory.FromPSObject(To);
 
             var edge = new PSEdge(newFrom, newTo, new PSEdgeTag(Tag?.ToString()));
             var result = Graph.AddVerticesAndEdge(edge);

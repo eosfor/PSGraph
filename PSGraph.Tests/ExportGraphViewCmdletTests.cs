@@ -119,6 +119,132 @@ public class ExportGraphViewCmdletTests : IDisposable
     }
 
     [Fact]
+    public void ExportGraph_GraphvizFormat_AppliesGraphScriptAttributes()
+    {
+        var graph = CreateSampleGraph();
+        var filePath = Path.Combine(_tempDirectory, "graph-script.dot");
+
+        _powershell.AddCommand("Export-Graph")
+            .AddParameter("Graph", graph)
+            .AddParameter("Format", GraphExportTypes.Graphviz)
+            .AddParameter("GraphScript", ScriptBlock.Create("@{ rankdir = 'LR'; label = 'Micrograd' }"))
+            .AddParameter("Path", filePath);
+
+        _powershell.Invoke();
+        _powershell.Commands.Clear();
+
+        _powershell.HadErrors.Should().BeFalse();
+        var dot = File.ReadAllText(filePath);
+        dot.Should().Contain("rankdir=LR");
+        dot.Should().Contain("label=\"Micrograd\"");
+    }
+
+    [Fact]
+    public void ExportGraph_GraphvizFormat_AppliesVertexScriptToOriginalObject()
+    {
+        var filePath = Path.Combine(_tempDirectory, "vertex-script.dot");
+
+        _powershell.Runspace.SessionStateProxy.SetVariable("path", filePath);
+        _powershell.AddScript(
+            """
+            $g = New-Graph
+            $a = [pscustomobject]@{ type = 'value'; Name = 'a'; data = 2.0; grad = 6.0 }
+            $b = [pscustomobject]@{ type = 'operation'; Name = '*' }
+            Add-Edge -Graph $g -From $a -To $b
+            Export-Graph -Graph $g -Format Graphviz -Path $path -VertexScript {
+                $item = $_
+                switch ($item.type) {
+                    'value' {
+                        @{
+                            label = "{ $($item.Name) | data $('{0:F4}' -f $item.data) | grad $('{0:F4}' -f $item.grad) }"
+                            shape = 'record'
+                        }
+                    }
+                    'operation' {
+                        @{
+                            label = $item.Name
+                            shape = 'ellipse'
+                        }
+                    }
+                }
+            }
+            """);
+
+        _powershell.Invoke();
+        _powershell.Commands.Clear();
+
+        _powershell.HadErrors.Should().BeFalse();
+        var dot = File.ReadAllText(filePath);
+        dot.Should().Contain("shape=record");
+        dot.Should().Contain("\"{ a | data 2.0000 | grad 6.0000 }\"");
+        dot.Should().Contain("shape=ellipse");
+        dot.Should().Contain("label=\"*\"");
+    }
+
+    [Fact]
+    public void ExportGraph_GraphvizFormat_AppliesEdgeScriptAttributes()
+    {
+        var graph = CreateSampleGraph();
+        var filePath = Path.Combine(_tempDirectory, "edge-script.dot");
+
+        _powershell.AddCommand("Export-Graph")
+            .AddParameter("Graph", graph)
+            .AddParameter("Format", GraphExportTypes.Graphviz)
+            .AddParameter("EdgeScript", ScriptBlock.Create("@{ label = \"$($Source.Label)-to-$($Target.Label)\"; style = 'dashed' }"))
+            .AddParameter("Path", filePath);
+
+        _powershell.Invoke();
+        _powershell.Commands.Clear();
+
+        _powershell.HadErrors.Should().BeFalse();
+        var dot = File.ReadAllText(filePath);
+        dot.Should().Contain("style=dashed");
+        dot.Should().Contain("label=\"A-to-B\"");
+    }
+
+    [Fact]
+    public void ExportGraph_GraphvizFormat_AcceptsPSCustomObjectScriptOutput()
+    {
+        var graph = CreateSampleGraph();
+        var filePath = Path.Combine(_tempDirectory, "pscustomobject-script.dot");
+
+        _powershell.AddCommand("Export-Graph")
+            .AddParameter("Graph", graph)
+            .AddParameter("Format", GraphExportTypes.Graphviz)
+            .AddParameter("GraphScript", ScriptBlock.Create("[pscustomobject]@{ rankdir = 'LR'; label = 'ObjectOutput' }"))
+            .AddParameter("Path", filePath);
+
+        _powershell.Invoke();
+        _powershell.Commands.Clear();
+
+        _powershell.HadErrors.Should().BeFalse();
+        var dot = File.ReadAllText(filePath);
+        dot.Should().Contain("rankdir=LR");
+        dot.Should().Contain("label=\"ObjectOutput\"");
+    }
+
+    [Fact]
+    public void ExportGraph_GraphvizFormat_IgnoresUnknownScriptAttributes()
+    {
+        var graph = CreateSampleGraph();
+        var filePath = Path.Combine(_tempDirectory, "unknown-script-attribute.dot");
+
+        _powershell.AddCommand("Export-Graph")
+            .AddParameter("Graph", graph)
+            .AddParameter("Format", GraphExportTypes.Graphviz)
+            .AddParameter("GraphScript", ScriptBlock.Create("@{ notARealGraphvizProperty = 'ignored'; rankdir = 'LR' }"))
+            .AddParameter("Path", filePath);
+
+        _powershell.Invoke();
+        _powershell.Commands.Clear();
+
+        _powershell.HadErrors.Should().BeFalse();
+        var dot = File.ReadAllText(filePath);
+        dot.Should().Contain("rankdir=LR");
+        dot.Should().NotContain("notARealGraphvizProperty");
+    }
+
+    [Fact]
     public void ExportGraph_GraphMLFormat_WritesGraphMlFile()
     {
         var graph = CreateSampleGraph();

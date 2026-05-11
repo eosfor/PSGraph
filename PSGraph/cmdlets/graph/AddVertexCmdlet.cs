@@ -20,18 +20,7 @@ namespace PSGraph.Cmdlets
         protected override void ProcessRecord()
         {
 
-            //var v = ((PSObject) Vertex).ImmediateBaseObject;
-
-            PSVertex? newPSVertex = null;
-
-            if (Vertex.ImmediateBaseObject is PSVertex)
-            {
-                newPSVertex = (PSVertex)Vertex.ImmediateBaseObject;
-            }
-            else
-            {
-                newPSVertex = new PSVertex(Vertex.ImmediateBaseObject.ToString(), Vertex.ImmediateBaseObject);
-            }
+            var newPSVertex = PSVertexFactory.FromPSObject(Vertex);
 
             var result = Graph.AddVertex(newPSVertex);
             WriteVerbose(result.ToString());
