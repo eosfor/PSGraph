@@ -167,6 +167,67 @@ namespace PSGraph.Tests
         }
 
         [Fact]
+        public void PassThru_ReturnsExistingVertex_WhenDefaultGraphAlreadyContainsLabel()
+        {
+            _powershell.AddCommand("New-Graph");
+            var graph = _powershell.Invoke()[0].BaseObject as PsBidirectionalGraph;
+            _powershell.Commands.Clear();
+
+            _powershell.AddCommand("Add-Vertex")
+                .AddParameter("Vertex", "+")
+                .AddParameter("Graph", graph)
+                .AddParameter("PassThru");
+            var firstResult = _powershell.Invoke();
+            _powershell.Commands.Clear();
+
+            _powershell.AddCommand("Add-Vertex")
+                .AddParameter("Vertex", "+")
+                .AddParameter("Graph", graph)
+                .AddParameter("PassThru");
+            var secondResult = _powershell.Invoke();
+
+            var first = firstResult[0].BaseObject as PSVertex;
+            var second = secondResult[0].BaseObject as PSVertex;
+            first.Should().NotBeNull();
+            second.Should().NotBeNull();
+            graph.VertexCount.Should().Be(1);
+            ReferenceEquals(first, second).Should().BeTrue();
+            ReferenceEquals(graph.Vertices.Single(), first).Should().BeTrue();
+        }
+
+        [Fact]
+        public void PassThru_ReturnsDistinctVertices_WhenGraphUsesNonUniqueLabels()
+        {
+            _powershell.AddCommand("New-Graph")
+                .AddParameter("UseNonUniqueLabels");
+            var graph = _powershell.Invoke()[0].BaseObject as PsBidirectionalGraph;
+            _powershell.Commands.Clear();
+
+            _powershell.AddCommand("Add-Vertex")
+                .AddParameter("Vertex", "+")
+                .AddParameter("Graph", graph)
+                .AddParameter("PassThru");
+            var firstResult = _powershell.Invoke();
+            _powershell.Commands.Clear();
+
+            _powershell.AddCommand("Add-Vertex")
+                .AddParameter("Vertex", "+")
+                .AddParameter("Graph", graph)
+                .AddParameter("PassThru");
+            var secondResult = _powershell.Invoke();
+
+            var first = firstResult[0].BaseObject as PSVertex;
+            var second = secondResult[0].BaseObject as PSVertex;
+            first.Should().NotBeNull();
+            second.Should().NotBeNull();
+            graph.VertexCount.Should().Be(2);
+            first!.Label.Should().Be("+");
+            second!.Label.Should().Be("+");
+            ReferenceEquals(first, second).Should().BeFalse();
+            first.Id.Should().NotBe(second.Id);
+        }
+
+        [Fact]
         public void AddsMultipleVertices()
         {
             // Arrange

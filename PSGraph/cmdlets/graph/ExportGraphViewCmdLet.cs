@@ -66,11 +66,18 @@ public partial class ExportGraphViewCmdLet : PSCmdlet
 
         Graph.SerializeToGraphML<PSVertex, PSEdge, PsBidirectionalGraph>(
             xmlWriter,
-            vertex => vertex.Label,
-            edge => $"{edge.Source.Label}->{edge.Target.Label}");
+            GetGraphMLVertexId,
+            edge => $"{GetGraphMLVertexId(edge.Source)}->{GetGraphMLVertexId(edge.Target)}");
 
         xmlWriter.Flush();
         return stringWriter.ToString();
+    }
+
+    private string GetGraphMLVertexId(PSVertex vertex)
+    {
+        return Graph.UseNonUniqueLabels && vertex.Id != 0
+            ? $"v{vertex.Id.ToString(CultureInfo.InvariantCulture)}"
+            : vertex.Label;
     }
 
     private string ExportGraphViz()

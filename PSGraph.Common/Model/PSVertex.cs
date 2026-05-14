@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Threading;
 
 namespace PSGraph.Model;
 
 public sealed class PSVertex : IComparable<PSVertex>
 {
-    private readonly Guid id = Guid.NewGuid();
+    private static int nextUniqueId;
+    private int uniqueId;
+    private PSVertexIdentityKind identityKind = PSVertexIdentityKind.Label;
     private string label = string.Empty;
+    public int Id => uniqueId;
     public string Name => Label;
 
     public string Label
@@ -51,6 +55,22 @@ public sealed class PSVertex : IComparable<PSVertex>
 
         // Label через сеттер поддерживает согласованность RenderProperties["Label"].
         Label = other.Label;
+
+        identityKind = other.identityKind;
+        uniqueId = other.uniqueId;
+    }
+
+    internal bool UsesUniqueIdentity => identityKind == PSVertexIdentityKind.Unique;
+
+    internal void EnsureUniqueIdentity()
+    {
+        if (identityKind == PSVertexIdentityKind.Unique)
+        {
+            return;
+        }
+
+        uniqueId = Interlocked.Increment(ref nextUniqueId);
+        identityKind = PSVertexIdentityKind.Unique;
     }
 
     private static IDictionary<string, object?> CloneProperties(IDictionary<string, object?> src)
@@ -71,13 +91,54 @@ public sealed class PSVertex : IComparable<PSVertex>
         => !Equals(left, right);
 
     public int CompareTo(PSVertex? other)
-        => other is null ? 1 : StringComparer.Ordinal.Compare(this.Label, other.Label);
+    {
+        if (other is null)
+        {
+            return 1;
+        }
+
+        var labelComparison = StringComparer.Ordinal.Compare(this.Label, other.Label);
+        if (labelComparison != 0)
+        {
+            return labelComparison;
+        }
+
+        if (identityKind != PSVertexIdentityKind.Unique && other.identityKind != PSVertexIdentityKind.Unique)
+        {
+            return 0;
+        }
+
+        var identityKindComparison = identityKind.CompareTo(other.identityKind);
+        return identityKindComparison != 0
+            ? identityKindComparison
+            : uniqueId.CompareTo(other.uniqueId);
+    }
 
     public override bool Equals(object? obj)
-        => obj is PSVertex v && StringComparer.Ordinal.Equals(this.Label, v.Label);
+    {
+        if (obj is not PSVertex v)
+        {
+            return false;
+        }
+
+        if (identityKind == PSVertexIdentityKind.Unique || v.identityKind == PSVertexIdentityKind.Unique)
+        {
+            return identityKind == v.identityKind && uniqueId == v.uniqueId;
+        }
+
+        return StringComparer.Ordinal.Equals(this.Label, v.Label);
+    }
 
     public override int GetHashCode()
-        => StringComparer.Ordinal.GetHashCode(this.Label);
+        => identityKind == PSVertexIdentityKind.Unique
+            ? HashCode.Combine(identityKind, uniqueId)
+            : StringComparer.Ordinal.GetHashCode(this.Label);
 
     public override string ToString() => Label;
+
+    private enum PSVertexIdentityKind
+    {
+        Label,
+        Unique
+    }
 }

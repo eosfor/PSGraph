@@ -23,6 +23,25 @@ public class PSVertexTests
     }
 
     [Fact]
+    public void NonUniqueLabelGraph_AllowsDistinctVerticesWithSameLabel()
+    {
+        var graph = new PsBidirectionalGraph(useNonUniqueLabels: true);
+        var v1 = new PSVertex("+");
+        var v2 = new PSVertex("+");
+
+        graph.AddVertex(v1).Should().BeTrue();
+        graph.AddVertex(v2).Should().BeTrue();
+
+        graph.VertexCount.Should().Be(2);
+        v1.Label.Should().Be("+");
+        v2.Label.Should().Be("+");
+        v1.Id.Should().NotBe(0);
+        v2.Id.Should().NotBe(0);
+        v1.Id.Should().NotBe(v2.Id);
+        v1.Should().NotBe(v2);
+    }
+
+    [Fact]
     public void Label_Setter_UpdatesNeutralRenderLabel()
     {
         var v = new PSVertex("A");
@@ -76,6 +95,17 @@ public class PSVertexTests
         a.CompareTo(b).Should().BeLessThan(0);
         b.CompareTo(a).Should().BeGreaterThan(0);
         a.CompareTo(new PSVertex("A")).Should().Be(0);
+    }
+
+    [Fact]
+    public void CompareTo_DistinguishesUniqueVerticesWithSameLabel()
+    {
+        var graph = new PsBidirectionalGraph(useNonUniqueLabels: true);
+        var v1 = graph.AddOrGetVertex(new PSVertex("+"));
+        var v2 = graph.AddOrGetVertex(new PSVertex("+"));
+
+        v1.CompareTo(v2).Should().NotBe(0);
+        v2.CompareTo(v1).Should().NotBe(0);
     }
 
     [Fact]

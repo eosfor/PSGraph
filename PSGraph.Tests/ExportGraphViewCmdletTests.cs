@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using PSGraph.Model;
 using QuikGraph.Graphviz.Dot;
@@ -182,6 +183,33 @@ public class ExportGraphViewCmdletTests : IDisposable
     }
 
     [Fact]
+    public void ExportGraph_GraphvizFormat_PreservesDistinctVerticesWithSameLabel()
+    {
+        var graph = new PsBidirectionalGraph(useNonUniqueLabels: true);
+        var plus1 = graph.AddOrGetVertex(new PSVertex("+"));
+        var plus2 = graph.AddOrGetVertex(new PSVertex("+"));
+        var left = graph.AddOrGetVertex(new PSVertex("left"));
+        var right = graph.AddOrGetVertex(new PSVertex("right"));
+        var filePath = Path.Combine(_tempDirectory, "non-unique-labels.dot");
+
+        graph.AddEdge(new PSEdge(left, plus1));
+        graph.AddEdge(new PSEdge(right, plus2));
+
+        _powershell.AddCommand("Export-Graph")
+            .AddParameter("Graph", graph)
+            .AddParameter("Format", GraphExportTypes.Graphviz)
+            .AddParameter("Path", filePath)
+            .AddParameter("VertexScript", ScriptBlock.Create("@{ label = $_.Label }"));
+
+        _powershell.Invoke();
+        _powershell.Commands.Clear();
+
+        _powershell.HadErrors.Should().BeFalse();
+        var dot = File.ReadAllText(filePath);
+        Regex.Matches(dot, "label=\"\\+\"").Count.Should().Be(2);
+    }
+
+    [Fact]
     public void ExportGraph_GraphvizFormat_AppliesEdgeScriptAttributes()
     {
         var graph = CreateSampleGraph();
@@ -260,6 +288,32 @@ public class ExportGraphViewCmdletTests : IDisposable
         _powershell.HadErrors.Should().BeFalse();
         File.Exists(filePath).Should().BeTrue();
         File.ReadAllText(filePath).Should().Contain("<graphml");
+    }
+
+    [Fact]
+    public void ExportGraph_GraphMLFormat_UsesDistinctIdsForNonUniqueLabels()
+    {
+        var graph = new PsBidirectionalGraph(useNonUniqueLabels: true);
+        graph.AddOrGetVertex(new PSVertex("+"));
+        graph.AddOrGetVertex(new PSVertex("+"));
+        var filePath = Path.Combine(_tempDirectory, "non-unique-labels.graphml");
+
+        _powershell.AddCommand("Export-Graph")
+            .AddParameter("Graph", graph)
+            .AddParameter("Format", GraphExportTypes.GraphML)
+            .AddParameter("Path", filePath);
+
+        _powershell.Invoke();
+        _powershell.Commands.Clear();
+
+        _powershell.HadErrors.Should().BeFalse();
+        var graphMl = File.ReadAllText(filePath);
+        var nodeIds = Regex.Matches(graphMl, "<node id=\"([^\"]+)\"")
+            .Select(match => match.Groups[1].Value)
+            .ToList();
+
+        nodeIds.Should().HaveCount(2);
+        nodeIds.Distinct().Should().HaveCount(2);
     }
 
     private static PsBidirectionalGraph CreateSampleGraph()

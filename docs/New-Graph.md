@@ -13,13 +13,17 @@ Create a new directed bidirectional graph suitable for adding vertices and edges
 ## SYNTAX
 
 ```
-New-Graph [-ProgressAction <ActionPreference>] [<CommonParameters>]
+New-Graph [-UseNonUniqueLabels] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 Creates an empty PsBidirectionalGraph (directed) which supports vertex/edge list operations and
 can be exported or transformed into a DSM. Use Add-Vertex / Add-Edge to populate it. All further
 graph algorithms/cmdlets accept this graph type.
+
+By default, vertices with the same label are treated as the same graph vertex. Use
+`-UseNonUniqueLabels` when multiple distinct vertices may have the same display label, such as
+operator nodes in expression graphs.
 
 ## EXAMPLES
 
@@ -32,7 +36,33 @@ $g.VertexCount  # 2
 $g.EdgeCount    # 1
 ```
 
+### Example 2
+Create a graph where labels do not have to be unique.
+```powershell
+$g = New-Graph -UseNonUniqueLabels
+$plus1 = Add-Vertex -Vertex '+' -Graph $g -PassThru
+$plus2 = Add-Vertex -Vertex '+' -Graph $g -PassThru
+$g.VertexCount  # 2
+```
+
 ## PARAMETERS
+
+### -UseNonUniqueLabels
+Allow multiple distinct vertices to have the same Label. In this mode, pass PSVertex objects
+returned by `Add-Vertex -PassThru` to `Add-Edge` when you need to target a specific existing
+vertex.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -ProgressAction
 Internal PowerShell progress preference.

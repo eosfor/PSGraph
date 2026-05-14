@@ -41,6 +41,24 @@ namespace PSGraph.Tests
             graph.Should().NotBeNull();
             graph.VertexCount.Should().Be(0);
             graph.EdgeCount.Should().Be(0);
+            graph.UseNonUniqueLabels.Should().BeFalse();
+        }
+
+        [Fact]
+        public void NewGraph_WithUseNonUniqueLabels_CreatesGraphWithNonUniqueLabelMode()
+        {
+            // Arrange
+            _powershell.AddCommand("New-Graph")
+                .AddParameter("UseNonUniqueLabels");
+
+            // Act
+            var results = _powershell.Invoke();
+
+            // Assert
+            results.Should().NotBeNullOrEmpty();
+            var graph = results[0].BaseObject as PsBidirectionalGraph;
+            graph.Should().NotBeNull();
+            graph.UseNonUniqueLabels.Should().BeTrue();
         }
 
         [Fact]

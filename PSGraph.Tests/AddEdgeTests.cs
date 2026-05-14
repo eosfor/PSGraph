@@ -81,6 +81,63 @@ namespace PSGraph.Tests
         }
 
         [Fact]
+        public void AddsEdge_WithStringsInNonUniqueLabelGraph_CreatesNewVerticesForRepeatedLabels()
+        {
+            _powershell.AddCommand("New-Graph")
+                .AddParameter("UseNonUniqueLabels");
+            var graph = _powershell.Invoke()[0].BaseObject as PsBidirectionalGraph;
+            _powershell.Commands.Clear();
+
+            _powershell.AddCommand("Add-Edge")
+                .AddParameter("From", "+")
+                .AddParameter("To", "x")
+                .AddParameter("Graph", graph);
+            _powershell.Invoke();
+            _powershell.Commands.Clear();
+
+            _powershell.AddCommand("Add-Edge")
+                .AddParameter("From", "+")
+                .AddParameter("To", "y")
+                .AddParameter("Graph", graph);
+            _powershell.Invoke();
+
+            graph!.Vertices.Count(v => v.Label == "+").Should().Be(2);
+            graph.Vertices.Count(v => v.Label == "x").Should().Be(1);
+            graph.Vertices.Count(v => v.Label == "y").Should().Be(1);
+            graph.EdgeCount.Should().Be(2);
+        }
+
+        [Fact]
+        public void AddsEdge_WithVertexObjectsInNonUniqueLabelGraph_UsesThoseVertices()
+        {
+            _powershell.AddCommand("New-Graph")
+                .AddParameter("UseNonUniqueLabels");
+            var graph = _powershell.Invoke()[0].BaseObject as PsBidirectionalGraph;
+            _powershell.Commands.Clear();
+
+            var plus1 = graph!.AddOrGetVertex(new PSVertex("+"));
+            var plus2 = graph.AddOrGetVertex(new PSVertex("+"));
+            var value = graph.AddOrGetVertex(new PSVertex("value"));
+
+            _powershell.AddCommand("Add-Edge")
+                .AddParameter("From", plus1)
+                .AddParameter("To", value)
+                .AddParameter("Graph", graph);
+            _powershell.Invoke();
+            _powershell.Commands.Clear();
+
+            _powershell.AddCommand("Add-Edge")
+                .AddParameter("From", plus2)
+                .AddParameter("To", value)
+                .AddParameter("Graph", graph);
+            _powershell.Invoke();
+
+            graph.Vertices.Count(v => v.Label == "+").Should().Be(2);
+            graph.Edges.Should().Contain(e => ReferenceEquals(e.Source, plus1) && ReferenceEquals(e.Target, value));
+            graph.Edges.Should().Contain(e => ReferenceEquals(e.Source, plus2) && ReferenceEquals(e.Target, value));
+        }
+
+        [Fact]
         public void AddsEdgeWithTag()
         {
             // Arrange

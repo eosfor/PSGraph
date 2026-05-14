@@ -25,6 +25,10 @@ If the vertices already exist (label equality) the existing instances are reused
 Tag value is stored on the created PSEdge (converted to string when present). The cmdlet does not
 emit a value; use the graph object to inspect results.
 
+When the graph was created with `New-Graph -UseNonUniqueLabels`, string or object values passed to
+`-From` and `-To` create distinct vertices instead of finding an existing vertex by Label. To connect
+specific existing vertices in that mode, pass PSVertex objects returned by `Add-Vertex -PassThru`.
+
 ## EXAMPLES
 
 ### Example 1
@@ -41,6 +45,18 @@ Attach a tag to an edge.
 $g = New-Graph
 Add-Edge -From A -To B -Graph $g -Tag Dependency
 ($g.Edges | Select-Object -First 1).Tag.Value  # "Dependency"
+```
+
+### Example 3
+Connect specific vertices in a graph with non-unique labels.
+```powershell
+$g = New-Graph -UseNonUniqueLabels
+$a = Add-Vertex -Vertex 'a' -Graph $g -PassThru
+$b = Add-Vertex -Vertex 'b' -Graph $g -PassThru
+$plus = Add-Vertex -Vertex '+' -Graph $g -PassThru
+
+Add-Edge -From $a -To $plus -Graph $g
+Add-Edge -From $b -To $plus -Graph $g
 ```
 
 ## PARAMETERS
