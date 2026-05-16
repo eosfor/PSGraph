@@ -256,6 +256,7 @@ Jump straight to focused, copy‑paste friendly examples for each major task. Al
 * `Get-GraphPath` – shortest path (Dijkstra) between two vertices (`docs/Get-GraphPath.md`)
 * `Test-GraphPath` – fast reachability boolean (`docs/Test-GraphPath.md`)
 * `Get-InEdge` / `Get-OutEdge` – incoming / outgoing edge enumeration (`docs/Get-InEdge.md`, `docs/Get-OutEdge.md`)
+* `Get-GraphTopologicalSort` – DAG dependency ordering (`docs/Get-GraphTopologicalSort.md`)
 * `Get-GraphDistanceVector` – root-based distance levels (`docs/Get-GraphDistanceVector.md`)
 
 ### Design Structure Matrix (DSM)
@@ -266,6 +267,7 @@ Jump straight to focused, copy‑paste friendly examples for each major task. Al
 
 ### Typical End-to-End Flows
 * Build → Query: New-Graph → Add-Vertex / Add-Edge → Get-GraphPath / Get-InEdge
+* DAG → Execution Order: New-Graph → Add-Edge → Get-GraphTopologicalSort
 * Import → Analyse → Export: Import-Graph → Get-GraphDistanceVector → Export-Graph
 * Graph → DSM Insight: New-Graph → Add-* → New-DSM → Start-DSMClustering / Start-DSMSequencing → Export-DSM
 

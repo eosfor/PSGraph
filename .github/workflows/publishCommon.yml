@@ -8,9 +8,9 @@ on:
         required: true
         default: '2.5.0'
       prerelease:
-        description: 'Optional prerelease label, e.g. beta3'
+        description: 'Optional prerelease label, e.g. beta5'
         required: false
-        default: 'beta3'
+        default: 'beta5'
 
 jobs:
   build-and-publish:
