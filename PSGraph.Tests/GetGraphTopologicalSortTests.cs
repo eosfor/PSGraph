@@ -114,6 +114,88 @@ namespace PSGraph.Tests
             AssertTopologicalOrder(graph, vertices!);
         }
 
+        [Fact]
+        public void GetGraphTopologicalSort_StartVertex_ReturnsReachableVerticesInTopologicalOrder()
+        {
+            var graph = CreateDiamondGraph();
+            var x = new PSVertex("X");
+            var y = new PSVertex("Y");
+            graph.AddVerticesAndEdge(new PSEdge(x, y));
+
+            var startVertex = graph.Vertices.Single(vertex => vertex.Label == "B");
+
+            _powershell.AddCommand("Get-GraphTopologicalSort")
+                .AddParameter("Graph", graph)
+                .AddParameter("StartVertex", startVertex);
+
+            var results = _powershell.Invoke();
+
+            var vertices = results.Select(result => result.BaseObject as PSVertex).ToList();
+            vertices.Should().Equal(
+                startVertex,
+                graph.Vertices.Single(vertex => vertex.Label == "D"));
+            AssertTopologicalOrder(graph, vertices!);
+        }
+
+        [Fact]
+        public void GetGraphTopologicalSort_StartVertexReverse_ReturnsReachableVerticesInReverseTopologicalOrder()
+        {
+            var graph = CreateDiamondGraph();
+            var startVertex = graph.Vertices.Single(vertex => vertex.Label == "A");
+
+            _powershell.AddCommand("Get-GraphTopologicalSort")
+                .AddParameter("Graph", graph)
+                .AddParameter("StartVertex", startVertex)
+                .AddParameter("Reverse");
+
+            var results = _powershell.Invoke();
+
+            var vertices = results.Select(result => result.BaseObject as PSVertex).ToList();
+            vertices.Should().HaveCount(4);
+            vertices.Last().Should().Be(startVertex);
+            AssertReverseTopologicalOrder(graph, vertices!);
+        }
+
+        [Fact]
+        public void GetGraphTopologicalSort_StartVertex_ThrowsWhenVertexIsNotInGraph()
+        {
+            var graph = CreateDiamondGraph();
+            var startVertex = new PSVertex("X");
+
+            _powershell.AddCommand("Get-GraphTopologicalSort")
+                .AddParameter("Graph", graph)
+                .AddParameter("StartVertex", startVertex);
+
+            Action act = () => _powershell.Invoke();
+
+            act.Should().Throw<CmdletInvocationException>()
+                .WithMessage("*The graph does not contain the provided start vertex*");
+        }
+
+        [Fact]
+        public void GetGraphTopologicalSort_StartVertex_IgnoresUnreachableCycle()
+        {
+            var graph = CreateDiamondGraph();
+            var x = new PSVertex("X");
+            var y = new PSVertex("Y");
+            graph.AddVerticesAndEdge(new PSEdge(x, y));
+            graph.AddVerticesAndEdge(new PSEdge(y, x));
+
+            var startVertex = graph.Vertices.Single(vertex => vertex.Label == "A");
+
+            _powershell.AddCommand("Get-GraphTopologicalSort")
+                .AddParameter("Graph", graph)
+                .AddParameter("StartVertex", startVertex);
+
+            var results = _powershell.Invoke();
+
+            var vertices = results.Select(result => result.BaseObject as PSVertex).ToList();
+            vertices.Should().HaveCount(4);
+            vertices.Should().NotContain(vertex => vertex!.Label == "X");
+            vertices.Should().NotContain(vertex => vertex!.Label == "Y");
+            AssertTopologicalOrder(graph, vertices!);
+        }
+
         private static PsBidirectionalGraph CreateDiamondGraph()
         {
             var graph = new PsBidirectionalGraph();
@@ -137,6 +219,11 @@ namespace PSGraph.Tests
 
             foreach (var edge in graph.Edges)
             {
+                if (!index.ContainsKey(edge.Source) || !index.ContainsKey(edge.Target))
+                {
+                    continue;
+                }
+
                 index[edge.Source].Should().BeLessThan(index[edge.Target]);
             }
         }
@@ -148,6 +235,11 @@ namespace PSGraph.Tests
 
             foreach (var edge in graph.Edges)
             {
+                if (!index.ContainsKey(edge.Source) || !index.ContainsKey(edge.Target))
+                {
+                    continue;
+                }
+
                 index[edge.Target].Should().BeLessThan(index[edge.Source]);
             }
         }

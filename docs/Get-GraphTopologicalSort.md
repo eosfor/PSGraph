@@ -13,7 +13,7 @@ Return vertices from a directed acyclic graph in topological order.
 ## SYNTAX
 
 ```
-Get-GraphTopologicalSort -Graph <PsBidirectionalGraph> [-Reverse] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Get-GraphTopologicalSort -Graph <PsBidirectionalGraph> [-Reverse] [-StartVertex <PSVertex>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -26,6 +26,9 @@ positions as long as every edge preserves the source-before-target constraint.
 
 If the graph contains a cycle, the cmdlet writes a terminating error. Use DSM sequencing or
 condensation algorithms when cyclic components need to be grouped before ordering.
+
+When `-StartVertex` is specified, the cmdlet sorts only the vertices reachable from that vertex
+by outgoing edges. Cycles outside the reachable subgraph do not affect the result.
 
 ## EXAMPLES
 
@@ -56,6 +59,24 @@ Get-GraphTopologicalSort -Graph $g -Reverse | ForEach-Object Name
 ```
 
 ### Example 3
+Sort only the reachable subgraph from a start vertex.
+
+```powershell
+$g = New-Graph
+$a = Add-Vertex -Vertex A -Graph $g
+$b = Add-Vertex -Vertex B -Graph $g
+$c = Add-Vertex -Vertex C -Graph $g
+$x = Add-Vertex -Vertex X -Graph $g
+
+Add-Edge -From $a -To $b -Graph $g | Out-Null
+Add-Edge -From $b -To $c -Graph $g | Out-Null
+
+Get-GraphTopologicalSort -Graph $g -StartVertex $b | ForEach-Object Name
+```
+
+The command returns `B`, then `C`. The independent vertex `X` is not emitted.
+
+### Example 4
 Cycles are rejected.
 
 ```powershell
@@ -79,6 +100,21 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -StartVertex
+Optional vertex that limits the sort to the subgraph reachable from that vertex by outgoing edges.
+
+```yaml
+Type: PSVertex
+Parameter Sets: (All)
+Aliases:
+
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
