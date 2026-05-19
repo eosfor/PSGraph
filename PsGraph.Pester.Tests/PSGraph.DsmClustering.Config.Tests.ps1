@@ -1,5 +1,6 @@
 BeforeAll {
-    Import-Module "./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1" -Verbose
+    . "$PSScriptRoot/PSGraph.TestBootstrap.ps1"
+    Import-PSGraphTestModule
 }
 
 Describe 'Start-DSMClustering AlgorithmConfig coercion' {

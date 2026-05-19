@@ -38,6 +38,15 @@ The original goal was to **analyse dependencies** in IaC workloads, but the modu
 | **Test-driven**                   | Over 100 Pester tests ensure every cmdlet does what it says. |
 | **Cross-platform**                | Runs anywhere PowerShell 7+ does (Windows, Linux, macOS). |
 
+## Release validation
+
+`PSGraph` has two validation contours:
+
+* Source-built validation runs .NET and Pester tests from the repository build output.
+* Gallery-installed validation installs `PSQuickGraph` from `PSGallery` on Linux, Windows, and macOS, imports the installed module, runs smoke checks, and then runs the Pester suite against the installed package.
+
+The gallery-installed contour is defined in `.github/workflows/gallery-installed-e2e.yml` and is intended to catch packaging, import, and cross-platform issues that source-built tests can miss.
+
 ---
 
 ## Quick install

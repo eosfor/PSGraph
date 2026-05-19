@@ -1,5 +1,6 @@
 BeforeAll {
-    Import-Module "./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1"
+    . "$PSScriptRoot/PSGraph.TestBootstrap.ps1"
+    Import-PSGraphTestModule
 }
 
 Describe 'Get-InEdge' {
@@ -72,4 +73,3 @@ Describe 'Get-OutEdge' {
         $outEdges | Should -BeNullOrEmpty
     }
 }
-

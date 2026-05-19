@@ -1,5 +1,6 @@
 BeforeAll {
-    Import-Module "./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1" -Force
+    . "$PSScriptRoot/PSGraph.TestBootstrap.ps1"
+    Import-PSGraphTestModule
 }
 
 Describe 'Import-Graph CSV' {

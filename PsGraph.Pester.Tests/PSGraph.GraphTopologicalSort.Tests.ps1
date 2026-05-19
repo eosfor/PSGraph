@@ -1,9 +1,22 @@
 BeforeAll {
-    Import-Module "./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1"
+    . "$PSScriptRoot/PSGraph.TestBootstrap.ps1"
+    Import-PSGraphTestModule
+
+    function Skip-IfGraphTopologicalSortUnavailable {
+        $allowMissingTopologicalSort = $env:PSGRAPH_ALLOW_MISSING_TOPOLOGICAL_SORT -eq '1'
+        if ($allowMissingTopologicalSort -and -not (Get-Command -Name Get-GraphTopologicalSort -ErrorAction SilentlyContinue)) {
+            Set-ItResult -Skipped -Because 'Get-GraphTopologicalSort is not exported by this installed PSQuickGraph version.'
+            return $true
+        }
+
+        return $false
+    }
 }
 
 Describe 'Get-GraphTopologicalSort' {
     It 'Should return source vertices before dependent vertices' {
+        if (Skip-IfGraphTopologicalSortUnavailable) { return }
+
         $graph = New-Graph
         Add-Edge -From A -To B -Graph $graph | Out-Null
         Add-Edge -From A -To C -Graph $graph | Out-Null
@@ -21,6 +34,8 @@ Describe 'Get-GraphTopologicalSort' {
     }
 
     It 'Should return targets before sources when reversed' {
+        if (Skip-IfGraphTopologicalSortUnavailable) { return }
+
         $graph = New-Graph
         Add-Edge -From A -To B -Graph $graph | Out-Null
         Add-Edge -From B -To C -Graph $graph | Out-Null
@@ -31,6 +46,8 @@ Describe 'Get-GraphTopologicalSort' {
     }
 
     It 'Should throw for cyclic graphs' {
+        if (Skip-IfGraphTopologicalSortUnavailable) { return }
+
         $graph = New-Graph
         Add-Edge -From A -To B -Graph $graph | Out-Null
         Add-Edge -From B -To A -Graph $graph | Out-Null

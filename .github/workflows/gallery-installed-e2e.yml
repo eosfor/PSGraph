@@ -1,0 +1,169 @@
+name: psgraph-gallery-installed-e2e
+
+on:
+  push:
+    paths:
+      - '.github/workflows/gallery-installed-e2e.yml'
+      - 'eng/Test-GalleryInstalledPSQuickGraph.ps1'
+
+  workflow_dispatch:
+    inputs:
+      module_version:
+        description: 'Optional exact PSGallery module version to validate, e.g. 2.5.0-beta5. Empty uses latest visible version.'
+        required: false
+        default: ''
+
+  release:
+    types: [published]
+
+jobs:
+  gallery-installed:
+    name: ${{ matrix.os }} / ${{ matrix.rid }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            rid: linux-x64
+          - os: windows-2022
+            rid: win-x64
+          - os: macos-14
+            rid: osx-arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PowerShell
+        uses: PSModule/install-powershell@v1
+        with:
+          Version: latest
+
+      - name: Verify PowerShell version
+        shell: pwsh
+        run: |
+          $PSVersionTable.PSVersion.ToString() | Write-Host
+
+      - name: Resolve module version
+        id: module
+        shell: pwsh
+        run: |
+          if ('${{ github.event_name }}' -eq 'release') {
+            $tag = '${{ github.ref }}' -replace '^refs/tags/', ''
+            $tag = $tag -replace '^v', ''
+            if ($tag -notmatch '^[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9\-]+)?$') {
+              throw 'Bad tag format. Expected vX.Y.Z or vX.Y.Z-label.'
+            }
+
+            $moduleVersion = $tag
+          }
+          elseif (-not [string]::IsNullOrWhiteSpace('${{ github.event.inputs.module_version }}')) {
+            $moduleVersion = '${{ github.event.inputs.module_version }}'
+            if ($moduleVersion -notmatch '^[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9\-]+)?$') {
+              throw 'Manual module_version must look like X.Y.Z or X.Y.Z-label.'
+            }
+          }
+          else {
+            $module = Find-Module -Name PSQuickGraph -Repository PSGallery -AllowPrerelease -ErrorAction Stop | Select-Object -First 1
+            if ($null -eq $module) {
+              throw 'PSQuickGraph was not found in PSGallery.'
+            }
+
+            $moduleVersion = $module.Version.ToString()
+          }
+
+          $allowPrerelease = $moduleVersion.Contains('-')
+          "module_version=$moduleVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "allow_prerelease=$allowPrerelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Install PSQuickGraph from PSGallery
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+
+          $moduleVersion = '${{ steps.module.outputs.module_version }}'
+          $allowPrerelease = '${{ steps.module.outputs.allow_prerelease }}' -eq 'True'
+
+          $installParameters = @{
+            Name = 'PSQuickGraph'
+            Repository = 'PSGallery'
+            RequiredVersion = $moduleVersion
+            Scope = 'CurrentUser'
+            Force = $true
+            ErrorAction = 'Stop'
+          }
+
+          if ($allowPrerelease) {
+            $installParameters.AllowPrerelease = $true
+          }
+
+          $maxAttempts = 12
+          for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+            try {
+              Install-Module @installParameters
+              break
+            }
+            catch {
+              if ($attempt -eq $maxAttempts) {
+                throw
+              }
+
+              Write-Warning "Install-Module failed on attempt $attempt/$maxAttempts. Waiting for PSGallery propagation before retrying. $($_.Exception.Message)"
+              Start-Sleep -Seconds 30
+            }
+          }
+
+          $installedParameters = @{
+            Name = 'PSQuickGraph'
+            RequiredVersion = $moduleVersion
+            ErrorAction = 'Stop'
+          }
+
+          if ($allowPrerelease) {
+            $installedParameters.AllowPrerelease = $true
+          }
+
+          $installed = Get-InstalledModule @installedParameters
+          if ($null -eq $installed) {
+            throw "PSQuickGraph $moduleVersion was not found after Install-Module."
+          }
+
+      - name: Run gallery-installed smoke suite
+        shell: pwsh
+        run: |
+          $outputDirectory = Join-Path $PWD 'artifacts/gallery-installed-e2e/${{ matrix.rid }}'
+          pwsh -NoLogo -NoProfile -File ./eng/Test-GalleryInstalledPSQuickGraph.ps1 `
+            -ModuleName PSQuickGraph `
+            -RequiredVersion '${{ steps.module.outputs.module_version }}' `
+            -OutputDirectory $outputDirectory
+
+      - name: Ensure Pester is available
+        shell: pwsh
+        run: |
+          $pester = Get-Module -ListAvailable -Name Pester |
+            Where-Object { $_.Version -ge [version]'5.0.0' } |
+            Sort-Object Version -Descending |
+            Select-Object -First 1
+
+          if ($null -eq $pester) {
+            Install-Module -Name Pester -Repository PSGallery -Scope CurrentUser -Force -SkipPublisherCheck -ErrorAction Stop
+          }
+
+      - name: Run gallery-installed Pester suite
+        shell: pwsh
+        env:
+          PSGRAPH_TEST_MODULE_NAME: PSQuickGraph
+          PSGRAPH_TEST_MODULE_VERSION: ${{ steps.module.outputs.module_version }}
+        run: |
+          Invoke-Pester -Path ./PsGraph.Pester.Tests -CI
+
+      - name: Upload gallery-installed artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallery-installed-e2e-${{ matrix.rid }}
+          path: artifacts/gallery-installed-e2e/${{ matrix.rid }}
+          if-no-files-found: warn
