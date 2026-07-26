@@ -49,7 +49,7 @@ function Import-PSGraphTestModule {
         return
     }
 
-    $defaultManifestPath = Join-Path $PSScriptRoot '../PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1'
+    $defaultManifestPath = Join-Path $PSScriptRoot '../PSGraph.Tests/bin/Debug/net8.0/PSQuickGraph.psd1'
     if (Test-Path -LiteralPath $defaultManifestPath) {
         Import-Module -Name (Resolve-Path -LiteralPath $defaultManifestPath).Path -Force -ErrorAction Stop
         return

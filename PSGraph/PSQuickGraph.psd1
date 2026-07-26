@@ -12,10 +12,10 @@
 RootModule = "PSGraph.dll"
 
 # Version number of this module.
-ModuleVersion = '2.5.0'
+ModuleVersion = '2.6.0'
 
 # Supported PSEditions
-# CompatiblePSEditions = @()
+CompatiblePSEditions = @('Core')
 
 # ID used to uniquely identify this module
 GUID = '4bd5a906-8e03-497e-80eb-209e71caae45'
@@ -33,7 +33,7 @@ Copyright = '(c) 2017 Andrei. All rights reserved.'
 Description = 'This module is a wrapper for QuickGraph library.'
 
 # Minimum version of the Windows PowerShell engine required by this module
-# PowerShellVersion = ''
+PowerShellVersion = '7.4'
 
 # Name of the Windows PowerShell host required by this module
 # PowerShellHostName = ''
@@ -94,6 +94,7 @@ AliasesToExport = @()
 PrivateData = @{
 
     PSData = @{
+        Prerelease = 'beta1'
         # Tags applied to this module. These help with module discovery in online galleries.
         # Tags = @()
 

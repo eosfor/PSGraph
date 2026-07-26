@@ -11,7 +11,7 @@ param(
     [string]$OutputDir = (Join-Path ([System.IO.Path]::GetTempPath()) 'PSGraph-datasets')
 )
 
-Import-Module "./PSGraph.Tests/bin/Debug/net9.0/PSQuickGraph.psd1" -Force
+Import-Module "./PSGraph.Tests/bin/Debug/net8.0/PSQuickGraph.psd1" -Force
 
 if (-not (Test-Path $OutputDir)) {
     New-Item -ItemType Directory -Path $OutputDir | Out-Null

@@ -36,17 +36,17 @@ jobs:
           fi
 
       - name: Install dependencies
-        run: dotnet restore
+        run: dotnet restore PSGraph.sln
       - name: Build PowerShell module
         run: |
           if [ "${{ github.event.release.prerelease }}" = "true" ]; then
-            dotnet build -c Debug
+            dotnet build PSGraph.sln -c Debug --no-restore
           else
-            dotnet build -c Release
+            dotnet build PSGraph.sln -c Release --no-restore
           fi
 
       - name: Run .NET tests
-        run: dotnet test --verbosity normal
+        run: dotnet test PSGraph.sln --no-build --verbosity normal
       - name: Run Pester tests
         shell: pwsh
         run: |
@@ -55,9 +55,9 @@ jobs:
       - name: dotnet publish PowerShell module
         run: |
           if [ "${{ github.event.release.prerelease }}" = "true" ]; then
-            dotnet publish -c Debug -o "./PSQuickGraph"
+            dotnet publish PSGraph/PSGraph.csproj -c Debug -f net8.0 --no-build -o "./PSQuickGraph"
           else
-            dotnet publish -c Release -o "./PSQuickGraph"
+            dotnet publish PSGraph/PSGraph.csproj -c Release -f net8.0 --no-build -o "./PSQuickGraph"
           fi
 
       # --- Manual Version Reminder / Guard ---

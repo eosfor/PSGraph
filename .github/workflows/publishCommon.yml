@@ -6,11 +6,11 @@ on:
       version:
         description: 'Package version without prerelease suffix, e.g. 2.5.0'
         required: true
-        default: '2.5.0'
+        default: '2.6.0'
       prerelease:
         description: 'Optional prerelease label, e.g. beta5'
         required: false
-        default: 'beta5'
+        default: 'beta1'
 
 jobs:
   build-and-publish:

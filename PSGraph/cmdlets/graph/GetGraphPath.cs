@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Management.Automation;
 using System.Reflection;
-using Microsoft.PowerShell;
 using QuikGraph.Algorithms;
 using PSGraph.Model;
 
